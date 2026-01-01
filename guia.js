@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 Iniciando generación de guía...');
     cargarDatosEnvio();
 });
+
 // ============================================
 // FUNCIÓN PRINCIPAL - CARGAR DATOS DEL ENVÍO
 // ============================================
@@ -311,8 +312,8 @@ function calcularZonaYMensajero(barrio) {
         zona = "SUR";
         mensajero = "JUAN";
     } else if (barrioUpper.includes("KENNEDY") || barrioUpper.includes("USAQUÉN")) {
-        zona = "OCCIDENTE";
-        mensajero = "PEDRO";
+        zona = "";
+        mensajero = "";
     } else if (barrioUpper.includes("CHAPINERO")) {
         zona = "ORIENTE";
         mensajero = "ANDRÉS";
@@ -355,4 +356,3 @@ setTimeout(() => {
     }
 }, 1000);
 */
-
