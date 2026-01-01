@@ -284,7 +284,7 @@ function generarGuia(datos) {
     // Información logística
     actualizarElemento('zona', datos["LOCALIDAD"] || datos.localidad || 'N/A');
     actualizarElemento('mensajero', datos["MENSAJERO"] || datos.mensajero || 'Por asignar');
-    actualizarElemento('observaciones', datos["OBS"] || datos.observaciones || 'Ninguna');
+    actualizarElemento('observaciones', datos["OBS"] || datos.observaciones || '');
     
     console.log('✅ Interfaz de guía actualizada');
 }
@@ -295,7 +295,7 @@ function generarGuia(datos) {
 function actualizarElemento(id, valor) {
     const elemento = document.getElementById(id);
     if (elemento) {
-        elemento.textContent = valor || 'N/A';
+        elemento.textContent = valor || '';
     } else {
         console.warn(`⚠️ Elemento no encontrado: ${id}`);
     }
