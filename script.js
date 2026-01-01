@@ -28,9 +28,7 @@ function initApp() {
     loadBarriosData();
     loadRemitentesData();
     
-    // Configurar event listeners
-    setupEventListeners();
-    
+       
     // Inicializar UI
     initializeUI();
     
