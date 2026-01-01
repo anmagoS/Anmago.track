@@ -49,15 +49,31 @@
         }
     }
 </style>
+<!-- EN EL HEAD DE guia.html -->
+<script>
+    // VERIFICACIÓN DE AUTENTICACIÓN
+    (function() {
+        const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+        
+        if (!usuario) {
+            console.log("❌ No autorizado para ver guías");
+            window.location.replace("login.html");
+            return;
+        }
+        
+        console.log("✅ Usuario autorizado para guías:", usuario.USUARIO);
+    })();
+</script>
 </head>
 <body>
     <!-- Controles solo para pantalla -->
     <div class="no-print screen-controls">
-        <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
+        <button onclick="window.print()" class="btn-print">🖨️ Imprimir Guía</button>
         <button onclick="window.close()" class="btn-close">✖️ Cerrar</button>
         <div class="print-instructions">
             <p><strong></strong></p>
-                 </div>
+            <p></p>
+        </div>
     </div>
 
     <!-- CONTENEDOR PRINCIPAL DE LA GUÍA -->
@@ -170,8 +186,8 @@
                     <span class="value" id="mensajero">Cargando...</span>
                 </div>
                 <div class="logistica-item full-width">
-                    <span class="label">OBSERVACIONES:</span>
-                    <span class="value" id="observaciones">Cargando...</span>
+                    <span class="label">OBS:</span>
+                    <span class="value" id="observaciones"></span>
                 </div>
             </div>
         </section>
@@ -189,6 +205,6 @@
 
     <!-- Nuestro JavaScript -->
     <script src="guia.js"></script>
+    <script src="check-auth.js"></script>
 </body>
-
 </html>
