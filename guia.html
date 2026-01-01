@@ -25,8 +25,8 @@
         .guia-container {
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             border: 2px dashed #ccc;
-            height: auto; /* Cambiado a auto para ajustarse al contenido */
-            min-height: 145mm; /* Reducido porque eliminamos secciones */
+            height: auto;
+            min-height: 145mm;
         }
         
         .no-print {
@@ -69,13 +69,11 @@
         white-space: pre-wrap;
     }
     
-    /* Ajustar altura del contenedor */
     .guia-container {
         height: 155mm;
         position: relative;
     }
 </style>
-<!-- EN EL HEAD DE guia.html -->
 <script>
     // VERIFICACIÓN DE AUTENTICACIÓN
     (function() {
@@ -96,9 +94,10 @@
     <div class="no-print screen-controls">
         <button onclick="window.print()" class="btn-print">🖨️ Imprimir Guía</button>
         <button onclick="window.close()" class="btn-close">✖️ Cerrar</button>
+        <button onclick="debugGuia()" class="btn-debug">🐛 Debug</button>
         <div class="print-instructions">
             <p><strong>Configuración de impresión:</strong> Tamaño 8x15 cm, sin márgenes</p>
-            <p>Las secciones de Zona y Mensajero han sido eliminadas. El campo OBS está en blanco para anotaciones manuales.</p>
+            <p>Campo OBS en blanco para anotaciones manuales</p>
         </div>
     </div>
 
@@ -209,10 +208,10 @@
         <!-- LÍNEA DIVISORIA -->
         <div class="divider"></div>
 
-        <!-- SECCIÓN OBSERVACIONES (REEMPLAZA LOGÍSTICA) -->
+        <!-- SECCIÓN OBSERVACIONES -->
         <section class="seccion observaciones">
             <h2 class="seccion-title">📝 OBSERVACIONES</h2>
-            <div class="observaciones-content" id="observaciones">
+            <div class="observaciones-content">
                 <!-- Campo en blanco para anotaciones manuales -->
                 <div style="height: 25px; border-bottom: 1px dotted #ccc;"></div>
                 <div style="height: 25px; border-bottom: 1px dotted #ccc;"></div>
@@ -232,93 +231,7 @@
         </footer>
     </div>
 
-    <!-- Nuestro JavaScript -->
+    <!-- SOLO este script -->
     <script src="guia.js"></script>
-    <script>
-        // Modificamos el guia.js para que no cargue zona y mensajero
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tu código existente para cargar datos...
-            
-            // Obtener ID de la guía de la URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const guiaId = urlParams.get('id');
-            
-            if (guiaId) {
-                cargarGuia(guiaId);
-            } else {
-                console.error('No se proporcionó ID de guía');
-                document.getElementById('guiaId').textContent = 'ERROR: Sin ID';
-            }
-        });
-
-        function cargarGuia(guiaId) {
-            // Simulación de carga de datos
-            // En tu código real, esto vendría de una API
-            
-            // Ejemplo de datos
-            const datosGuia = {
-                id: guiaId,
-                fecha: new Date().toLocaleDateString('es-ES'),
-                formaPago: "CONTRAENTREGA",
-                remitente: {
-                    nombre: "ALMACEN EL BUEN PRECIO",
-                    telefono: "3101234567",
-                    ciudad: "BOGOTÁ D.C."
-                },
-                destinatario: {
-                    nombre: "MARÍA GARCÍA",
-                    telefono: "3209876543",
-                    direccion: "CRA 45 # 26-85",
-                    barrio: "CHAPINERO",
-                    ciudad: "BOGOTÁ D.C.",
-                    complemento: "APT 302 - PORTERÍA"
-                },
-                pago: {
-                    valorRecaudar: "$150.000"
-                }
-                // Nota: No incluimos zona ni mensajero
-            };
-
-            // Llenar los datos en la guía
-            document.getElementById('guiaId').textContent = datosGuia.id;
-            document.getElementById('numeroGuiaBarras').textContent = datosGuia.id;
-            document.getElementById('fecha').textContent = datosGuia.fecha;
-            document.getElementById('formaPago').textContent = datosGuia.formaPago;
-            
-            // Remitente
-            document.getElementById('remitenteNombre').textContent = datosGuia.remitente.nombre;
-            document.getElementById('remitenteTelefono').textContent = datosGuia.remitente.telefono;
-            document.getElementById('remitenteCiudad').textContent = datosGuia.remitente.ciudad;
-            
-            // Destinatario
-            document.getElementById('destinatarioNombre').textContent = datosGuia.destinatario.nombre;
-            document.getElementById('destinatarioTelefono').textContent = datosGuia.destinatario.telefono;
-            document.getElementById('destinatarioDireccion').textContent = datosGuia.destinatario.direccion;
-            document.getElementById('destinatarioBarrio').textContent = datosGuia.destinatario.barrio;
-            document.getElementById('destinatarioCiudad').textContent = datosGuia.destinatario.ciudad;
-            document.getElementById('complemento').textContent = datosGuia.destinatario.complemento;
-            
-            // Pago
-            document.getElementById('valorRecaudar').textContent = datosGuia.pago.valorRecaudar;
-            
-            // Fecha de generación
-            document.getElementById('fechaGeneracion').textContent = new Date().toLocaleString('es-ES');
-            
-            // Generar código de barras
-            if (typeof JsBarcode !== 'undefined') {
-                JsBarcode("#codigoBarras", datosGuia.id, {
-                    format: "CODE128",
-                    width: 1.5,
-                    height: 40,
-                    displayValue: false
-                });
-            }
-            
-            console.log("✅ Guía cargada sin zona/mensajero. Campo OBS en blanco para anotaciones manuales.");
-        }
-    </script>
-    
-    <!-- Si aún necesitas check-auth.js, asegúrate de que exista -->
-    <!-- <script src="check-auth.js"></script> -->
 </body>
 </html>
