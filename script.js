@@ -3,14 +3,24 @@
 // ============================================
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
 const REMITENTES_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec?action=getRemitentes";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
 
 // Variables globales
 let barriosData = [];
 let remitentesData = [];
+let usuariosDisponibles = [];
 let currentFocus = -1;
 let filteredBarrios = [];
 let closeBarrioDropdownTimeout = null;
 let dropdownJustClicked = false;
+let timeoutBusqueda = null;
+let formularioEnviandose = false;
+
+// Variables para precios por ciudad
+const PRECIOS_CIUDAD = {
+    "Bogotá D.C.": 10000,
+    "Soacha": 12000
+};
 
 // Elementos del DOM
 let formaPagoInput, valorRecaudarInput, autoRecaudoLabel, valorRecaudarHelp;
@@ -30,9 +40,11 @@ function initApp() {
     
     loadBarriosData().then(() => {
         loadRemitentesData();
-        setupEventListeners();
-        initializeUI();
-        console.log('✅ Aplicación inicializada');
+        loadUsuariosParaAutocomplete().then(() => {
+            setupEventListeners();
+            initializeUI();
+            console.log('✅ Aplicación inicializada');
+        });
     }).catch(error => {
         console.error('❌ Error inicializando:', error);
         loadRemitentesData();
@@ -99,16 +111,226 @@ function loadBarriosData() {
 function loadRemitentesData() {
     console.log('📂 Cargando datos de remitentes...');
     
-    fetch(REMITENTES_URL)
+    return fetch(REMITENTES_URL)
         .then(response => response.json())
         .then(data => {
             remitentesData = data;
             console.log(`✅ Cargados ${remitentesData.length} remitentes`);
+            return data;
         })
         .catch(error => {
             console.error('❌ Error cargando remitentes:', error);
             remitentesData = [];
+            return [];
         });
+}
+
+async function loadUsuariosParaAutocomplete() {
+    try {
+        const response = await fetch("usuarios.json?v=" + Date.now());
+        const usuarios = await response.json();
+        
+        // Filtrar solo clientes activos
+        usuariosDisponibles = usuarios.filter(u => 
+            u.ESTADO === "ACTIVO" && 
+            u.ROL === "CLIENTE" &&
+            u["NOMBRE REMITENTE"]
+        );
+        
+        console.log("Usuarios para autocomplete cargados:", usuariosDisponibles.length);
+        
+    } catch (error) {
+        console.error("Error cargando usuarios para autocomplete:", error);
+        usuariosDisponibles = [];
+    }
+}
+
+// ============================================
+// VERIFICACIÓN DE AUTENTICACIÓN Y SESIÓN
+// ============================================
+
+function verificarSesionYConfigurarUI() {
+    console.log("🔐 Verificando autenticación...");
+    
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainContent = document.getElementById('mainContent');
+    
+    if (!usuario) {
+        setTimeout(() => {
+            alert("Debes iniciar sesión para acceder a esta página");
+            window.location.href = "login.html";
+        }, 1000);
+        return false;
+    }
+    
+    // Verificar que el usuario esté activo
+    if (usuario.ESTADO !== "ACTIVO") {
+        console.log("⚠️ Usuario inactivo, cerrando sesión...");
+        localStorage.removeItem("usuarioLogueado");
+        window.location.replace("login.html");
+        return false;
+    }
+    
+    // Si hay usuario, mostrar contenido principal
+    setTimeout(() => {
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (mainContent) mainContent.classList.remove('hidden');
+        
+        // Actualizar información del usuario en la interfaz
+        const nombreUsuario = document.getElementById('nombreUsuario');
+        const rolUsuario = document.getElementById('rolUsuario');
+        
+        if (nombreUsuario) {
+            nombreUsuario.textContent = usuario["NOMBRE COMPLETO"] || usuario["NOMBRE"] || "Usuario";
+        }
+        
+        if (rolUsuario) {
+            rolUsuario.textContent = usuario.ROL === "CLIENTE" ? "Cliente" : 
+                                   usuario.ROL === "ADMIN" ? "Administrador" : 
+                                   usuario.ROL === "OPERADOR" ? "Operador Logístico" : 
+                                   "Usuario";
+        }
+        
+        // Configurar campos ocultos para TODOS los usuarios
+        const correoRemitente = document.getElementById('correoRemitente');
+        const usuarioIdField = document.getElementById('usuarioId');
+        
+        if (usuario) {
+            // Siempre enviar correo y usuario ID
+            if (correoRemitente) {
+                correoRemitente.value = usuario["CORREO ELECTRONICO"] || usuario["CORREO"] || "";
+            }
+            
+            if (usuarioIdField) {
+                usuarioIdField.value = usuario["USUARIO"] || usuario["ID"] || "";
+            }
+        }
+        
+        // Configurar campos según rol de usuario
+        configurarCamposSegunRol(usuario);
+        
+        // Inicializar temporizador de inactividad
+        configurarTemporizadorInactividad();
+        
+    }, 1000);
+    
+    return true;
+}
+
+function configurarCamposSegunRol(usuario) {
+    // Si es cliente, prellenar campos del remitente y hacerlos de solo lectura
+    if (usuario.ROL === "CLIENTE") {
+        const remitente = document.getElementById('remitente');
+        const direccionRemitente = document.getElementById('direccionRemitente');
+        const telefonoRemitente = document.getElementById('telefonoRemitente');
+        const iconRemitente = document.getElementById('iconRemitente');
+        const iconTelefonoRemitente = document.getElementById('iconTelefonoRemitente');
+        const iconDireccionRemitente = document.getElementById('iconDireccionRemitente');
+        
+        if (remitente) {
+            remitente.value = usuario["NOMBRE REMITENTE"] || usuario["NOMBRE COMPLETO"] || "";
+            remitente.setAttribute('readonly', 'true');
+            remitente.classList.add('cliente-readonly');
+            if (iconRemitente) iconRemitente.textContent = 'lock';
+        }
+        
+        if (direccionRemitente) {
+            direccionRemitente.value = usuario["DIRECCION REMITENTE"] || "";
+            direccionRemitente.setAttribute('readonly', 'true');
+            direccionRemitente.classList.add('cliente-readonly');
+            if (iconDireccionRemitente) iconDireccionRemitente.textContent = 'lock';
+        }
+        
+        if (telefonoRemitente) {
+            telefonoRemitente.value = usuario["TELEFONO REMITENTE"] || usuario["TELEFONO"] || "";
+            telefonoRemitente.setAttribute('readonly', 'true');
+            telefonoRemitente.classList.add('cliente-readonly');
+            if (iconTelefonoRemitente) iconTelefonoRemitente.textContent = 'lock';
+        }
+        
+        // Añadir indicadores visuales de que son campos fijos
+        const labelRemitente = document.getElementById('labelRemitente');
+        const labelTelefonoRemitente = document.getElementById('labelTelefonoRemitente');
+        const labelDireccionRemitente = document.getElementById('labelDireccionRemitente');
+        
+        if (labelRemitente) {
+            labelRemitente.classList.add('campo-cliente-fijo');
+            labelRemitente.innerHTML = 'Nombre Completo / Empresa <span class="text-xs text-gray-500">(Fijo para cliente)</span>';
+        }
+        if (labelTelefonoRemitente) {
+            labelTelefonoRemitente.classList.add('campo-cliente-fijo');
+            labelTelefonoRemitente.innerHTML = 'Teléfono de Contacto <span class="text-xs text-gray-500">(Fijo para cliente)</span>';
+        }
+        if (labelDireccionRemitente) {
+            labelDireccionRemitente.classList.add('campo-cliente-fijo');
+            labelDireccionRemitente.innerHTML = 'Dirección de Recogida <span class="text-xs text-gray-500">(Fijo para cliente)</span>';
+        }
+        
+        // Ocultar el autocomplete para clientes
+        const dropdown = document.getElementById('remitenteAutocomplete');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+    }
+    
+    // Si NO es cliente (ADMIN u OPERADOR), los campos son editables
+    else {
+        const remitente = document.getElementById('remitente');
+        const direccionRemitente = document.getElementById('direccionRemitente');
+        const telefonoRemitente = document.getElementById('telefonoRemitente');
+        const iconRemitente = document.getElementById('iconRemitente');
+        const iconTelefonoRemitente = document.getElementById('iconTelefonoRemitente');
+        const iconDireccionRemitente = document.getElementById('iconDireccionRemitente');
+        
+        if (remitente) {
+            remitente.removeAttribute('readonly');
+            remitente.classList.remove('cliente-readonly');
+            remitente.placeholder = "Ej. Distribuidora Central S.A.";
+            if (iconRemitente) iconRemitente.textContent = 'search';
+            
+            // Inicializar autocomplete para remitente solo para ADMIN/OPERADOR
+            inicializarAutocompleteRemitente();
+        }
+        
+        if (direccionRemitente) {
+            direccionRemitente.removeAttribute('readonly');
+            direccionRemitente.classList.remove('cliente-readonly');
+            direccionRemitente.placeholder = "Calle 123 # 45 - 67, Oficina 202";
+            if (iconDireccionRemitente) iconDireccionRemitente.textContent = 'my_location';
+        }
+        
+        if (telefonoRemitente) {
+            telefonoRemitente.removeAttribute('readonly');
+            telefonoRemitente.classList.remove('cliente-readonly');
+            telefonoRemitente.placeholder = "+57 300 123 4567";
+            if (iconTelefonoRemitente) iconTelefonoRemitente.textContent = 'phone';
+        }
+    }
+}
+
+function configurarTemporizadorInactividad() {
+    let tiempoInactividad = 30 * 60 * 1000; // 30 minutos
+    
+    function reiniciarTemporizador() {
+        if (window.tiempoInactivo) {
+            clearTimeout(window.tiempoInactivo);
+        }
+        
+        window.tiempoInactivo = setTimeout(() => {
+            alert("Sesión expirada por inactividad");
+            localStorage.removeItem("usuarioLogueado");
+            window.location.replace("login.html");
+        }, tiempoInactividad);
+    }
+    
+    // Reiniciar temporizador en eventos de usuario
+    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evento => {
+        document.addEventListener(evento, reiniciarTemporizador);
+    });
+    
+    // Iniciar temporizador
+    reiniciarTemporizador();
 }
 
 // ============================================
@@ -117,16 +339,16 @@ function loadRemitentesData() {
 
 function handleBarrioInput() {
     const searchText = this.value.trim();
-    console.log(`🔍 Buscando: "${searchText}"`);
+    console.log(`🔍 Buscando barrio: "${searchText}"`);
     
     if (searchText === '') {
-        barrioIdInput.value = '';
+        if (barrioIdInput) barrioIdInput.value = '';
         hideDropdown();
         return;
     }
     
     // MOSTRAR DROPDOWN INMEDIATAMENTE AL ESCRIBIR
-    if (searchText.length >= 1) {  // Cambié de 2 a 1
+    if (searchText.length >= 1) {
         filteredBarrios = filterBarrios(searchText);
         console.log(`✅ ${filteredBarrios.length} resultados`);
         
@@ -220,7 +442,7 @@ function showAutocomplete(results) {
                 setTimeout(() => {
                     console.log(`✅ Seleccionado: ${barrio.nombre}`);
                     barrioInput.value = barrio.nombre || '';
-                    barrioIdInput.value = barrio.id || '';
+                    if (barrioIdInput) barrioIdInput.value = barrio.id || '';
                     hideDropdown();
                     
                     setTimeout(() => {
@@ -438,71 +660,303 @@ function setupDropdownCloseBehavior() {
     console.log('✅ Comportamiento mejorado configurado');
 }
 
-// SOBREESCRIBIR LA FUNCIÓN hideDropdown PARA EVITAR CIERRES INDEBIDOS
-const originalHideDropdown = hideDropdown;
-hideDropdown = function() {
-    // Verificar si deberíamos realmente cerrar
-    if (window._escribiendo === true || window._ignoreBlur === true) {
-        console.log('🛑 Evitando cierre - usuario está escribiendo');
-        return;
-    }
-    
-    console.log('✅ Cerrando dropdown (autorizado)');
-    originalHideDropdown();
-};
-
 // ============================================
 // FUNCIONES PARA AUTOCOMPLETE DE REMITENTES
 // ============================================
 
-function handleRemitenteInput() {
-    const searchText = this.value.trim();
-    if (searchText.length < 2) {
-        if (remitenteDropdown) remitenteDropdown.style.display = 'none';
-        return;
-    }
+function inicializarAutocompleteRemitente() {
+    const inputRemitente = document.getElementById('remitente');
+    const dropdown = document.getElementById('remitenteAutocomplete');
     
-    const filtered = remitentesData.filter(r => 
-        r.nombre && r.nombre.toUpperCase().includes(searchText.toUpperCase())
-    ).slice(0, 8);
+    if (!inputRemitente || !dropdown) return;
     
-    showRemitenteAutocomplete(filtered);
-}
-
-function showRemitenteAutocomplete(results) {
-    if (!remitenteDropdown) return;
+    // Limpiar timeout anterior
+    clearTimeout(timeoutBusqueda);
     
-    remitenteDropdown.innerHTML = '';
-    
-    if (results.length === 0) {
-        const item = document.createElement('div');
-        item.className = 'autocomplete-item';
-        item.textContent = 'No se encontraron remitentes';
-        remitenteDropdown.appendChild(item);
-    } else {
-        results.forEach(remitente => {
-            const item = document.createElement('div');
-            item.className = 'autocomplete-item';
-            item.innerHTML = `
-                <div class="flex flex-col">
-                    <div class="font-medium">${remitente.nombre || ''}</div>
-                    <div class="text-xs text-gray-500">
-                        ${remitente.telefono ? '📱 ' + remitente.telefono : ''}
-                    </div>
-                </div>
-            `;
+    // Función para buscar remitentes
+    function buscarRemitentes(texto) {
+        if (!texto || texto.length < 2) return [];
+        
+        const busqueda = texto.toLowerCase().trim();
+        return usuariosDisponibles.filter(usuario => {
+            const nombre = (usuario["NOMBRE REMITENTE"] || "").toLowerCase();
+            const nombreCompleto = (usuario["NOMBRE COMPLETO"] || "").toLowerCase();
+            const telefono = (usuario["TELEFONO REMITENTE"] || usuario["TELEFONO"] || "").toLowerCase();
             
-            item.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                remitenteInput.value = remitente.nombre || '';
-                remitenteDropdown.style.display = 'none';
-            });
-            
-            remitenteDropdown.appendChild(item);
+            return nombre.includes(busqueda) || 
+                   nombreCompleto.includes(busqueda) ||
+                   telefono.includes(busqueda);
         });
     }
     
-    remitenteDropdown.style.display = 'block';
+    // Función para mostrar sugerencias
+    function mostrarSugerencias(usuarios) {
+        dropdown.innerHTML = '';
+        
+        if (usuarios.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        // Limitar a 5 sugerencias
+        const usuariosMostrar = usuarios.slice(0, 5);
+        
+        usuariosMostrar.forEach(usuario => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.innerHTML = `
+                <div class="barrio-id">${usuario.USUARIO}</div>
+                <div class="barrio-nombre">
+                    <div class="font-medium">${usuario["NOMBRE REMITENTE"]}</div>
+                    <div class="text-xs text-gray-500">${usuario["TELEFONO REMITENTE"] || usuario["TELEFONO"] || ""}</div>
+                </div>
+            `;
+            
+            item.addEventListener('click', function() {
+                // Rellenar todos los campos del remitente
+                document.getElementById('remitente').value = usuario["NOMBRE REMITENTE"] || "";
+                document.getElementById('telefonoRemitente').value = usuario["TELEFONO REMITENTE"] || usuario["TELEFONO"] || "";
+                document.getElementById('direccionRemitente').value = usuario["DIRECCION REMITENTE"] || "";
+                
+                // Ocultar dropdown
+                dropdown.style.display = 'none';
+                
+                // Enfocar el siguiente campo
+                document.getElementById('telefonoRemitente').focus();
+            });
+            
+            dropdown.appendChild(item);
+        });
+        
+        dropdown.style.display = 'block';
+    }
+    
+    // Función para ocultar sugerencias
+    function ocultarSugerencias() {
+        dropdown.style.display = 'none';
+    }
+    
+    // Evento de input con debounce
+    inputRemitente.addEventListener('input', function() {
+        clearTimeout(timeoutBusqueda);
+        
+        timeoutBusqueda = setTimeout(() => {
+            const resultados = buscarRemitentes(this.value);
+            mostrarSugerencias(resultados);
+        }, 300);
+    });
+    
+    // Evento de focus
+    inputRemitente.addEventListener('focus', function() {
+        if (this.value.length >= 2) {
+            const resultados = buscarRemitentes(this.value);
+            mostrarSugerencias(resultados);
+        }
+    });
+    
+    // Evento de click fuera para ocultar
+    document.addEventListener('click', function(e) {
+        if (!inputRemitente.contains(e.target) && !dropdown.contains(e.target)) {
+            ocultarSugerencias();
+        }
+    });
+    
+    // Evento de tecla Escape
+    inputRemitente.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            ocultarSugerencias();
+        }
+    });
+    
+    console.log("Autocomplete de remitente inicializado");
+}
+
+// ============================================
+// FUNCIONES PARA EL FORMULARIO
+// ============================================
+
+function inicializarFormulario() {
+    console.log("📝 Inicializando formulario...");
+    
+    // Configurar opciones de pago
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    const formaPagoInput = document.getElementById('formaPago');
+    
+    paymentOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remover clase selected de todas las opciones
+            paymentOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Agregar clase selected a la opción clickeada
+            this.classList.add('selected');
+            
+            // Actualizar valor del input hidden
+            const selectedValue = this.getAttribute('data-value');
+            formaPagoInput.value = selectedValue;
+            
+            // Actualizar resumen
+            actualizarResumen();
+            
+            // Manejar campo de valor a recaudar
+            manejarValorRecaudar(selectedValue);
+        });
+    });
+
+    // Seleccionar "Contado" por defecto
+    if (paymentOptions[0]) {
+        paymentOptions[0].click();
+    }
+    
+    // Configurar botón cancelar
+    document.getElementById('cancelButton').addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que deseas cancelar este envío? Se perderán todos los datos ingresados.')) {
+            resetearFormulario();
+        }
+    });
+    
+    // Configurar logout
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+            if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                localStorage.removeItem("usuarioLogueado");
+                window.location.href = "login.html";
+            }
+        });
+    }
+    
+    // Configurar historial
+    const historialButton = document.getElementById('historialButton');
+    if (historialButton) {
+        historialButton.addEventListener('click', function() {
+            const user = JSON.parse(localStorage.getItem("usuarioLogueado"));
+            if (user && user.USUARIO) {
+                const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
+                window.open(`historial.html?usuario=${encodeURIComponent(user.USUARIO)}`, '_blank');
+            } else {
+                alert('No se pudo identificar el usuario');
+            }
+        });
+    }
+    
+    // Manejar envío del formulario
+    document.getElementById('deliveryForm').addEventListener('submit', manejarEnvioFormulario);
+    
+    console.log("✅ Formulario inicializado correctamente");
+}
+
+function manejarValorRecaudar(formaPago) {
+    const valorRecaudarInput = document.getElementById('valorRecaudar');
+    const valorRecaudarHelp = document.getElementById('valorRecaudarHelp');
+    const autoRecaudoLabel = document.getElementById('autoRecaudoLabel');
+    const ciudadDestino = document.getElementById('ciudadDestino').value;
+    
+    if (formaPago === 'contraentrega' || formaPago === 'contraentrega_recaudo') {
+        // Habilitar campo
+        valorRecaudarInput.disabled = false;
+        valorRecaudarInput.placeholder = "Ej. 50,000";
+        valorRecaudarHelp.textContent = "Ingrese el valor a recaudar al destinatario";
+        
+        // Si es "Contraentrega" (no "Con Recaudo"), establecer valor automático
+        if (formaPago === 'contraentrega') {
+            // Establecer valor según ciudad
+            let valorAuto = 0;
+            if (ciudadDestino.includes("Bogotá")) {
+                valorAuto = 10000;
+            } else if (ciudadDestino.includes("Soacha")) {
+                valorAuto = 12000;
+            }
+            
+            valorRecaudarInput.value = valorAuto;
+            valorRecaudarInput.disabled = true; // Hacerlo de solo lectura
+            autoRecaudoLabel.classList.remove('hidden');
+            autoRecaudoLabel.textContent = 'AUTO';
+            valorRecaudarHelp.textContent = `Valor automático para ${ciudadDestino}`;
+            
+            // Estilos para indicar que es automático
+            valorRecaudarInput.classList.remove('bg-input-light', 'dark:bg-input-dark');
+            valorRecaudarInput.classList.add('bg-gray-100', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
+        } else {
+            // Para "Contraentrega con Recaudo": campo editable
+            valorRecaudarInput.value = "";
+            autoRecaudoLabel.classList.add('hidden');
+            valorRecaudarHelp.textContent = "Ingrese el valor a recaudar al destinatario";
+            
+            // Estilos para indicar que es editable
+            valorRecaudarInput.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+            valorRecaudarInput.classList.add('bg-input-light', 'dark:bg-input-dark', 'text-[#0d121b]', 'dark:text-white');
+        }
+        
+        // Agregar validación
+        valorRecaudarInput.addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor > 0) {
+                this.classList.remove('invalid');
+            } else {
+                this.classList.add('invalid');
+            }
+            actualizarResumen();
+        });
+        
+    } else if (formaPago === 'contado') {
+        // Deshabilitar campo y poner valor automático
+        valorRecaudarInput.disabled = true;
+        valorRecaudarInput.value = "";
+        valorRecaudarHelp.textContent = "No aplica para pagos de contado";
+        autoRecaudoLabel.classList.add('hidden');
+        
+        // Estilos para indicar que es deshabilitado
+        valorRecaudarInput.classList.remove('bg-input-light', 'dark:bg-input-dark', 'text-[#0d121b]', 'dark:text-white');
+        valorRecaudarInput.classList.add('bg-gray-100', 'dark:bg-gray-800', 'text-gray-500', 'dark:text-gray-400');
+        
+        // Remover validación
+        valorRecaudarInput.classList.remove('invalid');
+    }
+    
+    // Actualizar resumen siempre
+    actualizarResumen();
+}
+
+function calcularValorARecaudar() {
+    const ciudadDestino = document.getElementById('ciudadDestino').value;
+    let valorRecaudar = 0;
+    
+    if (ciudadDestino.includes("Bogotá")) {
+        valorRecaudar = 10000;
+    } else if (ciudadDestino.includes("Soacha")) {
+        valorRecaudar = 12000;
+    }
+    
+    // Actualizar el campo de valor a recaudar
+    const valorRecaudarInput = document.getElementById('valorRecaudar');
+    const formaPago = document.getElementById('formaPago').value;
+    
+    // Solo actualizar si es contraentrega (en contado no se muestra)
+    if (formaPago === 'contraentrega' || formaPago === 'contraentrega_recaudo') {
+        valorRecaudarInput.value = valorRecaudar;
+        valorRecaudarInput.classList.remove('invalid');
+    }
+    
+    return valorRecaudar;
+}
+
+function calcularTotalAPagar() {
+    const formaPago = document.getElementById('formaPago').value;
+    const valorRecaudar = parseFloat(document.getElementById('valorRecaudar').value) || 0;
+    const ciudadDestino = document.getElementById('ciudadDestino').value;
+    let totalAPagar = 0;
+    
+    if (formaPago === 'contraentrega_recaudo') {
+        // Para contraentrega con recaudo: valorRecaudar - tarifa de la ciudad
+        if (ciudadDestino.includes("Bogotá")) {
+            totalAPagar = Math.max(0, valorRecaudar - 10000);
+        } else if (ciudadDestino.includes("Soacha")) {
+            totalAPagar = Math.max(0, valorRecaudar - 12000);
+        }
+    }
+    // Para contado y contraentrega normal: total a pagar = 0
+    
+    return totalAPagar;
 }
 
 // ============================================
@@ -511,6 +965,38 @@ function showRemitenteAutocomplete(results) {
 
 function setupEventListeners() {
     console.log('🔗 Configurando event listeners...');
+    
+    // Configurar cambio de ciudad destino
+    const ciudadDestinoSelect = document.getElementById('ciudadDestino');
+    if (ciudadDestinoSelect) {
+        ciudadDestinoSelect.addEventListener('change', function() {
+            const ciudad = this.value;
+            const formaPago = document.getElementById('formaPago').value;
+            
+            // Si la forma de pago es "Contraentrega", actualizar el valor automáticamente
+            if (formaPago === 'contraentrega') {
+                let valorAuto = 0;
+                if (ciudad.includes("Bogotá")) {
+                    valorAuto = 10000;
+                } else if (ciudad.includes("Soacha")) {
+                    valorAuto = 12000;
+                }
+                
+                document.getElementById('valorRecaudar').value = valorAuto;
+            }
+            
+            // Calcular y actualizar valor a recaudar
+            const valorRecaudar = calcularValorARecaudar();
+            
+            // Actualizar resumen
+            actualizarResumen();
+            
+            // Mostrar notificación del precio
+            if (ciudad && valorRecaudar > 0) {
+                console.log(`Ciudad: ${ciudad}, Valor a recaudar: $${valorRecaudar.toLocaleString()}`);
+            }
+        });
+    }
     
     if (paymentOptions.length) {
         paymentOptions.forEach(option => {
@@ -537,10 +1023,6 @@ function setupEventListeners() {
         });
     }
     
-    if (remitenteInput) {
-        remitenteInput.addEventListener('input', handleRemitenteInput);
-    }
-    
     if (valorRecaudarInput) {
         valorRecaudarInput.addEventListener('input', updateSummary);
     }
@@ -548,7 +1030,7 @@ function setupEventListeners() {
     setupDropdownCloseBehavior();
     
     const form = document.getElementById('deliveryForm');
-    if (form) form.addEventListener('submit', handleFormSubmit);
+    if (form) form.addEventListener('submit', manejarEnvioFormulario);
     
     const cancelBtn = document.getElementById('cancelButton');
     if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
@@ -561,17 +1043,13 @@ function setupEventListeners() {
 // ============================================
 
 function initializeUI() {
-    const envioIdField = document.getElementById('envioId');
-    if (envioIdField) {
-        envioIdField.value = generateShippingId();
-    }
-    
     const ciudadOrigenField = document.getElementById('ciudadOrigen');
     if (ciudadOrigenField) {
         ciudadOrigenField.value = 'Bogotá D.C.';
     }
     
     updatePaymentUI('contado');
+    inicializarFormulario();
 }
 
 function updatePaymentUI(selectedPayment) {
@@ -639,6 +1117,459 @@ function updateSummary() {
     }
 }
 
+function actualizarResumen() {
+    const formaPago = document.getElementById('formaPago').value;
+    const ciudadDestino = document.getElementById('ciudadDestino').value;
+    const valorRecaudar = document.getElementById('valorRecaudar').value;
+    
+    // Actualizar texto de forma de pago
+    const formasPagoTexto = {
+        'contado': 'Contado',
+        'contraentrega': 'Contraentrega',
+        'contraentrega_recaudo': 'Con Recaudo'
+    };
+    document.getElementById('resumenFormaPago').textContent = formasPagoTexto[formaPago];
+    
+    // Actualizar valor a recaudar en resumen
+    let valorRecaudarTexto = 'No aplica';
+    if (formaPago !== 'contado' && valorRecaudar) {
+        const valorFormateado = new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0
+        }).format(parseFloat(valorRecaudar));
+        valorRecaudarTexto = valorFormateado;
+    }
+    document.getElementById('resumenValorRecaudar').textContent = valorRecaudarTexto;
+    
+    // Calcular total a pagar
+    const totalAPagar = calcularTotalAPagar();
+    let totalTexto = 'No aplica';
+    let estadoTexto = 'Por confirmar';
+    let estadoColor = 'text-yellow-600 dark:text-yellow-400';
+    
+    if (ciudadDestino) {
+        // Mostrar tarifa según ciudad
+        let tarifaCiudad = 0;
+        if (ciudadDestino.includes("Bogotá")) {
+            tarifaCiudad = 10000;
+        } else if (ciudadDestino.includes("Soacha")) {
+            tarifaCiudad = 12000;
+        }
+        
+        // Actualizar estado según forma de pago
+        if (formaPago === 'contado') {
+            estadoTexto = 'Pendiente de pago';
+            estadoColor = 'text-yellow-600 dark:text-yellow-400';
+            totalTexto = '$0'; // No le pagas nada al cliente
+        } else if (formaPago === 'contraentrega') {
+            estadoTexto = 'A recaudar';
+            estadoColor = 'text-blue-600 dark:text-blue-400';
+            totalTexto = '$0'; // No le pagas nada al cliente
+        } else if (formaPago === 'contraentrega_recaudo') {
+            estadoTexto = 'Con recaudo';
+            estadoColor = 'text-orange-600 dark:text-orange-400';
+            const totalFormateado = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(totalAPagar);
+            totalTexto = totalFormateado;
+        }
+    }
+    
+    // Actualizar elemento de estado
+    let estadoElement = document.getElementById('resumenEstado');
+    if (!estadoElement) {
+        estadoElement = document.createElement('span');
+        estadoElement.id = 'resumenEstado';
+        estadoElement.className = 'font-semibold';
+        const resumenContainer = document.querySelector('.bg-blue-50');
+        if (resumenContainer) {
+            const estadoDiv = resumenContainer.querySelector('div:last-child');
+            if (estadoDiv) {
+                estadoDiv.innerHTML = '<span class="text-sm text-gray-600 dark:text-gray-400">Estado:</span><br>';
+                estadoDiv.appendChild(estadoElement);
+            }
+        }
+    }
+    
+    estadoElement.textContent = estadoTexto;
+    estadoElement.className = `font-semibold ${estadoColor}`;
+    
+    // Mostrar total a pagar en el resumen
+    let totalElement = document.getElementById('resumenTotalPagar');
+    if (!totalElement) {
+        totalElement = document.createElement('span');
+        totalElement.id = 'resumenTotalPagar';
+        totalElement.className = 'font-bold text-lg text-green-600 dark:text-green-400';
+        const resumenGrid = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-3.gap-4');
+        if (resumenGrid) {
+            const totalDiv = document.createElement('div');
+            totalDiv.className = 'flex flex-col';
+            totalDiv.innerHTML = '<span class="text-sm text-gray-600 dark:text-gray-400">Total a Pagar al Cliente:</span>';
+            totalDiv.appendChild(totalElement);
+            resumenGrid.appendChild(totalDiv);
+        }
+    }
+    
+    totalElement.textContent = totalTexto;
+}
+
+// ============================================
+// FUNCIÓN PARA MANEJAR EL ENVÍO DEL FORMULARIO
+// ============================================
+
+async function manejarEnvioFormulario(e) {
+    e.preventDefault();
+    
+    // Prevenir envíos múltiples
+    if (formularioEnviandose) {
+        console.log('⚠️ Formulario ya enviándose, ignorando clic...');
+        return;
+    }
+    
+    console.log('📤 Iniciando envío de formulario...');
+    
+    // Validar formulario
+    if (!validarFormulario()) {
+        alert('Por favor complete todos los campos requeridos correctamente');
+        return;
+    }
+    
+    // Deshabilitar botón de envío y mostrar loading
+    const submitButton = document.getElementById('submitButton');
+    const submitText = document.getElementById('submitText');
+    const submitIcon = document.getElementById('submitIcon');
+    
+    submitButton.disabled = true;
+    formularioEnviandose = true;
+    submitButton.classList.add('opacity-70', 'cursor-not-allowed');
+    submitText.textContent = 'Procesando...';
+    submitIcon.textContent = 'hourglass_top';
+    
+    try {
+        // Calcular valores
+        const formaPago = document.getElementById('formaPago').value;
+        const ciudadDestino = document.getElementById('ciudadDestino').value;
+        
+        // IMPORTANTE: Forzar el cálculo del valor a recaudar según ciudad
+        let valorRecaudar;
+        
+        if (formaPago === 'contraentrega') {
+            // Para "Contraentrega": valor fijo según ciudad
+            if (ciudadDestino.includes("Bogotá")) {
+                valorRecaudar = 10000;
+            } else if (ciudadDestino.includes("Soacha")) {
+                valorRecaudar = 12000;
+            }
+            // Actualizar el campo visualmente
+            document.getElementById('valorRecaudar').value = valorRecaudar;
+        } else if (formaPago === 'contraentrega_recaudo') {
+            // Para "Contraentrega con Recaudo": usar el valor del campo
+            valorRecaudar = parseFloat(document.getElementById('valorRecaudar').value) || 0;
+        } else {
+            valorRecaudar = 0;
+        }
+        
+        const totalAPagar = calcularTotalAPagar();
+        const usuarioActual = JSON.parse(localStorage.getItem("usuarioLogueado"));
+        
+        // ============================================
+        // PASO 1: GENERAR UN ÚNICO ID AL PRINCIPIO
+        // ============================================
+        const idLocal = generarIDLocal();
+        console.log("🆔 ID ÚNICO generado para TODO:", idLocal);
+        
+        // ============================================
+        // DATOS ENVIADOS A GOOGLE SHEETS (CON EL MISMO ID)
+        // ============================================
+        const datosEnvio = {
+            // Columna A: ENVIO ID - ¡USAR EL MISMO ID LOCAL!
+            "ENVIO ID": idLocal,  // ← ¡IMPORTANTE! EL MISMO ID PARA TODO
+            
+            // Columna B: FORMA DE PAGO
+            "FORMA DE PAGO": formaPago,
+            
+            // Columna C: REMITE
+            "REMITE": document.getElementById('remitente').value,
+            
+            // Columna D: TELEFONO
+            "TELEFONO": document.getElementById('telefonoRemitente').value,
+            
+            // Columna E: DIRECCION
+            "DIRECCION": document.getElementById('direccionRemitente').value,
+            
+            // Columna F: CIUDAD
+            "CIUDAD": document.getElementById('ciudadOrigen').value,
+            
+            // Columna G: DESTINO
+            "DESTINO": document.getElementById('destinatario').value,
+            
+            // Columna H: DIRECCION DESTINO
+            "DIRECCION DESTINO": document.getElementById('direccionDestino').value,
+            
+            // Columna I: BARRIO
+            "BARRIO": document.getElementById('barrioLocalidad').value,
+            
+            // Columna J: TELEFONOCLIENTE
+            "TELEFONOCLIENTE": document.getElementById('telefonoCliente').value,
+            
+            // Columna K: COMPLEMENTO DE DIR
+            "COMPLEMENTO DE DIR": document.getElementById('complementoDireccion').value || "",
+            
+            // Columna L: CIUDAD DESTINO
+            "CIUDAD DESTINO": ciudadDestino,
+            
+            // Columna M: VALOR A RECAUDAR
+            "VALOR A RECAUDAR": valorRecaudar.toString(),
+            
+            // Columna N: TOTAL A PAGAR
+            "TOTAL A PAGAR": totalAPagar.toString(),
+            
+            // Columna O: PAGADO A REMITENTE - ¡IMPORTANTE! Debe ser "false" o "true"
+            "PAGADO A REMITENTE": "false", // ← CORRECCIÓN CRÍTICA: string "false"
+            
+            // Columna P: FECHA PAGO (vacío)
+            "FECHA PAGO": "",
+            
+            // Columna Q: FIRMA (vacío)
+            "FIRMA": "",
+            
+            // Columna R: OBS (vacío)
+            "OBS": "",
+            
+            // Columna S: LOCALIDAD (se llenará después)
+            "LOCALIDAD": "",
+            
+            // Columna T: MENSAJERO (se llenará después)
+            "MENSAJERO": "",
+            
+            // Columna U: CORREO REMITENTE
+            "CORREO REMITENTE": document.getElementById('correoRemitente').value || "",
+            
+            // Columna V: USUARIO ID
+            "USUARIO ID": usuarioActual ? usuarioActual.USUARIO : ""
+        };
+        
+        console.log('📝 Datos a enviar a Google Sheets (con ID único):', datosEnvio);
+        
+        // Verificar que TODOS los campos requeridos estén presentes
+        const camposRequeridos = [
+            "ENVIO ID", "FORMA DE PAGO", "REMITE", "TELEFONO", "DIRECCION", 
+            "CIUDAD", "DESTINO", "DIRECCION DESTINO", "BARRIO",
+            "TELEFONOCLIENTE", "CIUDAD DESTINO", "VALOR A RECAUDAR",
+            "TOTAL A PAGAR", "PAGADO A REMITENTE", "USUARIO ID"
+        ];
+        
+        let faltanCampos = [];
+        camposRequeridos.forEach(campo => {
+            if (!datosEnvio[campo] && datosEnvio[campo] !== "") {
+                faltanCampos.push(campo);
+            }
+        });
+        
+        if (faltanCampos.length > 0) {
+            console.error('❌ Campos faltantes:', faltanCampos);
+            throw new Error(`Campos faltantes: ${faltanCampos.join(', ')}`);
+        }
+        
+        // MOSTRAR CONFIRMACIÓN
+        const confirmMessage = `¿Confirmar registro de envío?\n\n📍 Destino: ${datosEnvio["CIUDAD DESTINO"]}\n👤 Cliente: ${datosEnvio["DESTINO"]}\n💰 Valor a recaudar: $${parseInt(datosEnvio["VALOR A RECAUDAR"]).toLocaleString()}`;
+        
+        if (!confirm(confirmMessage)) {
+            // Si el usuario cancela, re-habilitar el botón
+            submitButton.disabled = false;
+            formularioEnviandose = false;
+            submitButton.classList.remove('opacity-70', 'cursor-not-allowed');
+            submitText.textContent = 'Registrar Envío';
+            submitIcon.textContent = 'send';
+            return;
+        }
+        
+        console.log('📡 Enviando datos a Google Apps Script...');
+        
+        // ========== ESTRATEGIA PARA ENVÍO DE DATOS ==========
+        try {
+            // Crear FormData con los nombres EXACTOS que espera GAS
+            const formData = new FormData();
+            
+            // IMPORTANTE: Usar los nombres EXACTOS del array fila en GAS
+            formData.append("envioId", datosEnvio["ENVIO ID"]);  // ← EL MISMO ID
+            formData.append("formaPago", datosEnvio["FORMA DE PAGO"]);
+            formData.append("remite", datosEnvio["REMITE"]);
+            formData.append("telefono", datosEnvio["TELEFONO"]);
+            formData.append("direccion", datosEnvio["DIRECCION"]);
+            formData.append("ciudad", datosEnvio["CIUDAD"]);
+            formData.append("destino", datosEnvio["DESTINO"]);
+            formData.append("direccionDestino", datosEnvio["DIRECCION DESTINO"]);
+            formData.append("barrio", datosEnvio["BARRIO"]);
+            formData.append("telefonoCliente", datosEnvio["TELEFONOCLIENTE"]);
+            formData.append("complementoDir", datosEnvio["COMPLEMENTO DE DIR"]);
+            formData.append("ciudadDestino", datosEnvio["CIUDAD DESTINO"]);
+            formData.append("valorRecaudar", datosEnvio["VALOR A RECAUDAR"]);
+            formData.append("totalAPagar", datosEnvio["TOTAL A PAGAR"]);
+            formData.append("pagadoRemitente", datosEnvio["PAGADO A REMITENTE"]); // ← "false"
+            formData.append("correoRemitente", datosEnvio["CORREO REMITENTE"]);
+            formData.append("usuarioId", datosEnvio["USUARIO ID"]);
+            
+            // Debug: Ver qué estamos enviando
+            console.log('📤 Enviando FormData (con ID único):');
+            for (let pair of formData.entries()) {
+                console.log(`  ${pair[0]}: ${pair[1]}`);
+            }
+            
+            // Enviar con fetch
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Cambiar a 'no-cors' si hay problemas de CORS
+                body: formData
+            });
+            
+            console.log('📨 Respuesta recibida:', response);
+            
+            // ============================================
+            // PASO 3: GUARDAR DATOS PARA LA GUÍA (CON EL MISMO ID)
+            // ============================================
+            const datosCompletosParaGuia = {
+                ...datosEnvio,
+                "ENVIO ID": idLocal,  // MISMO ID
+                envioId: idLocal,     // MISMO ID
+                // Guardar también los campos que usa guia.js
+                formaPago: datosEnvio["FORMA DE PAGO"],
+                remite: datosEnvio["REMITE"],
+                telefono: datosEnvio["TELEFONO"],
+                ciudad: datosEnvio["CIUDAD"],
+                destino: datosEnvio["DESTINO"],
+                telefonoCliente: datosEnvio["TELEFONOCLIENTE"],
+                direccionDestino: datosEnvio["DIRECCION DESTINO"],
+                barrio: datosEnvio["BARRIO"],
+                complementoDir: datosEnvio["COMPLEMENTO DE DIR"],
+                ciudadDestino: datosEnvio["CIUDAD DESTINO"],
+                valorRecaudar: datosEnvio["VALOR A RECAUDAR"],
+                totalAPagar: datosEnvio["TOTAL A PAGAR"]
+            };
+
+            // Guardar en localStorage para que guia.js lo encuentre
+            localStorage.setItem('ultimoEnvioCompleto', JSON.stringify(datosCompletosParaGuia));
+            
+            // También guardar como respaldo
+            guardarEnvioEnLocalStorage(datosEnvio);
+            
+            // MOSTRAR ÉXITO Y REDIRIGIR A GUÍA
+            setTimeout(() => {
+                mostrarResultadoExitoso(datosEnvio, idLocal);
+            }, 500);
+            
+            // Toast breve informativo
+            const successMessage = document.createElement('div');
+            successMessage.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50';
+            successMessage.innerHTML = `
+                <div class="flex items-center">
+                    <span class="material-icons mr-2">check_circle</span>
+                    <span class="font-semibold">¡Envío registrado exitosamente!</span>
+                </div>
+                <div class="mt-2 text-sm">
+                    ✅ Datos enviados al sistema con ID: ${idLocal}<br>
+                    <span class="font-mono">Redirigiendo a la guía...</span>
+                </div>
+            `;
+            document.body.appendChild(successMessage);
+            
+            // Ocultar mensaje después de 5 segundos
+            setTimeout(() => {
+                successMessage.remove();
+            }, 5000);
+            
+            // Resetear formulario después de 3 segundos
+            setTimeout(() => {
+                resetearFormulario();
+                formularioEnviandose = false;
+            }, 3000);
+            
+        } catch (fetchError) {
+            console.error('❌ Error en el envío:', fetchError);
+            
+            // AUN ASÍ GUARDAR LOCALMENTE Y REDIRIGIR
+            const datosCompletosParaGuia = {
+                ...datosEnvio,
+                "ENVIO ID": idLocal,
+                envioId: idLocal
+            };
+
+            localStorage.setItem('ultimoEnvioCompleto', JSON.stringify(datosCompletosParaGuia));
+            guardarEnvioEnLocalStorage(datosEnvio);
+            
+            setTimeout(() => {
+                mostrarResultadoExitoso(datosEnvio, idLocal);
+            }, 500);
+            
+            // Mostrar mensaje de error amigable
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'fixed top-4 right-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg shadow-lg z-50';
+            errorMessage.innerHTML = `
+                <div class="flex items-center">
+                    <span class="material-icons mr-2">warning</span>
+                    <span class="font-semibold">Envío guardado localmente</span>
+                </div>
+                <div class="mt-2 text-sm">
+                    ⚠️ Problema de conexión con el servidor.<br>
+                    <span class="font-mono">Los datos se guardaron con ID: ${idLocal}</span>
+                </div>
+            `;
+            document.body.appendChild(errorMessage);
+            
+            // Ocultar mensaje después de 5 segundos
+            setTimeout(() => {
+                errorMessage.remove();
+            }, 5000);
+            
+            // Rehabilitar botón
+            submitButton.disabled = false;
+            formularioEnviandose = false;
+            submitButton.classList.remove('opacity-70', 'cursor-not-allowed');
+            submitText.textContent = 'Registrar Envío';
+            submitIcon.textContent = 'send';
+            
+            // Resetear formulario después de 3 segundos
+            setTimeout(() => {
+                resetearFormulario();
+            }, 3000);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error crítico en el envío:', error);
+        
+        // Mostrar mensaje de error
+        alert(`Error: ${error.message}\n\nPor favor intenta nuevamente.`);
+        
+        // Rehabilitar botón
+        submitButton.disabled = false;
+        formularioEnviandose = false;
+        submitButton.classList.remove('opacity-70', 'cursor-not-allowed');
+        submitText.textContent = 'Registrar Envío';
+        submitIcon.textContent = 'send';
+    }
+}
+
+function guardarEnvioEnLocalStorage(datosEnvio) {
+    try {
+        // Guardar en localStorage como respaldo
+        const enviosGuardados = JSON.parse(localStorage.getItem('enviosPendientes')) || [];
+        enviosGuardados.push({
+            ...datosEnvio,
+            fechaGuardado: new Date().toISOString(),
+            sincronizado: false
+        });
+        
+        localStorage.setItem('enviosPendientes', JSON.stringify(enviosGuardados));
+        console.log('💾 Envío guardado en localStorage:', datosEnvio["ENVIO ID"]);
+        
+    } catch (error) {
+        console.error('Error guardando en localStorage:', error);
+    }
+}
+
 // ============================================
 // FUNCIONES AUXILIARES
 // ============================================
@@ -653,37 +1584,158 @@ function getDefaultBarrios() {
     ];
 }
 
-function generateShippingId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-// ============================================
-// FUNCIONES DE FORMULARIO
-// ============================================
-
-function validateForm() {
-    let isValid = true;
+function validarFormulario() {
+    let valido = true;
     
-    document.querySelectorAll('[required]').forEach(field => {
-        if (!field.value.trim()) {
-            isValid = false;
-            field.classList.add('invalid');
-        } else {
-            field.classList.remove('invalid');
+    // Lista de campos requeridos
+    const camposRequeridos = [
+        'remitente',
+        'telefonoRemitente',
+        'direccionRemitente',
+        'destinatario',
+        'direccionDestino',
+        'telefonoCliente',
+        'barrioLocalidad',
+        'ciudadDestino'
+    ];
+    
+    // Validar cada campo
+    camposRequeridos.forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo && !campo.value.trim()) {
+            campo.classList.add('invalid');
+            valido = false;
+        } else if (campo) {
+            campo.classList.remove('invalid');
         }
     });
     
-    if (barrioInput && (!barrioInput.value.trim() || !barrioIdInput.value)) {
-        isValid = false;
-        barrioInput.classList.add('invalid');
+    // Validar valor a recaudar si es contraentrega
+    const formaPago = document.getElementById('formaPago').value;
+    const valorRecaudar = document.getElementById('valorRecaudar');
+    
+    if ((formaPago === 'contraentrega' || formaPago === 'contraentrega_recaudo') && 
+        (!valorRecaudar.value || parseFloat(valorRecaudar.value) <= 0)) {
+        valorRecaudar.classList.add('invalid');
+        valido = false;
     }
     
-    return isValid;
+    return valido;
+}
+
+function resetearFormulario() {
+    // Resetear campos del formulario
+    const deliveryForm = document.getElementById('deliveryForm');
+    if (deliveryForm) deliveryForm.reset();
+    
+    // Resetear campos ocultos
+    if (barrioIdInput) barrioIdInput.value = '';
+    
+    // Resetear selección de pago
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    paymentOptions.forEach(opt => opt.classList.remove('selected'));
+    if (paymentOptions[0]) {
+        paymentOptions[0].click();
+    }
+    
+    // Resetear estilos de validación
+    document.querySelectorAll('.invalid').forEach(el => {
+        el.classList.remove('invalid');
+    });
+    
+    // IMPORTANTE: Restaurar estado de envío
+    formularioEnviandose = false;
+    
+    // Restaurar información del usuario si es cliente
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+    if (usuario && usuario.ROL === "CLIENTE") {
+        const remitente = document.getElementById('remitente');
+        const direccionRemitente = document.getElementById('direccionRemitente');
+        const telefonoRemitente = document.getElementById('telefonoRemitente');
+        
+        if (remitente) remitente.value = usuario["NOMBRE REMITENTE"] || usuario["NOMBRE COMPLETO"] || "";
+        if (direccionRemitente) direccionRemitente.value = usuario["DIRECCION REMITENTE"] || "";
+        if (telefonoRemitente) telefonoRemitente.value = usuario["TELEFONO REMITENTE"] || usuario["TELEFONO"] || "";
+    }
+    
+    // Restaurar botón de envío
+    const submitButton = document.getElementById('submitButton');
+    const submitText = document.getElementById('submitText');
+    const submitIcon = document.getElementById('submitIcon');
+    
+    if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-70', 'cursor-not-allowed');
+    }
+    if (submitText) submitText.textContent = 'Registrar Envío';
+    if (submitIcon) submitIcon.textContent = 'send';
+    
+    // Actualizar resumen
+    actualizarResumen();
+    
+    // Enfocar primer campo editable
+    const primerCampo = usuario && usuario.ROL === "CLIENTE" 
+        ? document.getElementById('destinatario') 
+        : document.getElementById('remitente');
+    
+    if (primerCampo) primerCampo.focus();
+}
+
+function handleCancel() {
+    if (confirm('¿Cancelar? Se perderán los datos.')) {
+        resetForm();
+    }
+}
+
+function resetForm() {
+    resetearFormulario();
+}
+
+function showToast(type, title, message) {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-100 text-green-800' :
+        type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+    } border-l-4 max-w-sm`;
+    
+    toast.innerHTML = `
+        <div class="flex items-center">
+            <span class="material-symbols-outlined mr-2">${type === 'success' ? 'check_circle' : 'error'}</span>
+            <div class="flex-1">
+                <strong class="font-semibold">${title}</strong>
+                <p class="text-sm mt-1">${message}</p>
+            </div>
+            <button class="ml-4 text-gray-500" onclick="this.parentElement.parentElement.remove()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+    }, 5000);
+}
+
+function showLoading(loading) {
+    if (!submitButton || !submitText || !submitIcon) return;
+    
+    if (loading) {
+        submitText.textContent = 'Procesando...';
+        submitIcon.innerHTML = 'refresh';
+        submitIcon.classList.add('spinner');
+        submitButton.disabled = true;
+    } else {
+        submitText.textContent = 'Registrar Envío';
+        submitIcon.innerHTML = 'arrow_forward';
+        submitIcon.classList.remove('spinner');
+        submitButton.disabled = false;
+    }
+}
+
+function validateForm() {
+    return validarFormulario();
 }
 
 function getFormData() {
@@ -730,85 +1782,7 @@ function getFormData() {
 }
 
 async function handleFormSubmit(e) { 
-    e.preventDefault();
-    
-    if (!validateForm()) {
-        showToast('error', 'Error de validación', 'Complete todos los campos requeridos.');
-        return;
-    }
-    
-    const formData = getFormData();
-    const confirmMessage = `¿Confirmar registro de envío?\n\n📋 ID: ${formData.envioId}\n📍 Destino: ${formData.ciudadDestino}\n👤 Cliente: ${formData.destino}`;
-    
-    if (!confirm(confirmMessage)) return;
-    
-    try {
-        showLoading(true);
-        
-        const params = new URLSearchParams();
-        Object.keys(formData).forEach(key => params.append(key, formData[key]));
-        
-        await fetch(WEBAPP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params
-        });
-        
-        const datosGuia = {
-            id: formData.envioId,
-            guiaId: formData.envioId,
-            formaPago: formData.formaPago,
-            remitenteNombre: formData.remite,
-            remitenteTelefono: formData.telefono,
-            remitenteDireccion: formData.direccion,
-            remitenteCiudad: formData.ciudad,
-            destinatarioNombre: formData.destino,
-            destinatarioTelefono: formData.telefonoCliente,
-            destinatarioCiudad: formData.ciudadDestino,
-            destinatarioDireccion: formData.direccionDestino,
-            complemento: formData.complementoDir,
-            barrioLocalidad: formData.barrio,
-            barrioId: formData.barrioId,
-            valorRecaudar: formData.valorRecaudar,
-            fecha: new Date().toLocaleDateString('es-CO'),
-            fechaCompleta: new Date().toLocaleString('es-CO'),
-            zona: formData.zona,
-            mensajero: formData.mensajero,
-            observaciones: formData.observaciones,
-            usuarioId: formData.usuario_id
-        };
-        
-        const envios = JSON.parse(localStorage.getItem('envios')) || [];
-        envios.push(datosGuia);
-        localStorage.setItem('envios', JSON.stringify(envios));
-        localStorage.setItem('ultimoEnvio', JSON.stringify(datosGuia));
-        localStorage.setItem('envioParaGuia', formData.envioId);
-        
-        mostrarResultado(datosGuia);
-        
-    } catch (error) {
-        console.error('❌ Error:', error);
-        showToast('error', 'Error de conexión', 'Intente nuevamente.');
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showLoading(loading) {
-    if (!submitButton || !submitText || !submitIcon) return;
-    
-    if (loading) {
-        submitText.textContent = 'Procesando...';
-        submitIcon.innerHTML = 'refresh';
-        submitIcon.classList.add('spinner');
-        submitButton.disabled = true;
-    } else {
-        submitText.textContent = 'Registrar Envío';
-        submitIcon.innerHTML = 'arrow_forward';
-        submitIcon.classList.remove('spinner');
-        submitButton.disabled = false;
-    }
+    return manejarEnvioFormulario(e);
 }
 
 function mostrarResultado(envio) {
@@ -831,55 +1805,153 @@ function mostrarResultado(envio) {
     }
 }
 
-function resetForm() {
-    const form = document.getElementById('deliveryForm');
-    if (form) form.reset();
-    
-    const envioIdField = document.getElementById('envioId');
-    if (envioIdField) envioIdField.value = generateShippingId();
-    
-    if (barrioIdInput) barrioIdInput.value = '';
-    hideDropdown();
-    
-    document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
-    updatePaymentUI('contado');
-}
+// ============================================
+// FUNCIONES PARA RESULTADO Y GUÍA
+// ============================================
 
-function handleCancel() {
-    if (confirm('¿Cancelar? Se perderán los datos.')) {
-        resetForm();
+function mostrarResultadoExitoso(datosEnvio, idGenerado) {
+    console.log('🎉 Mostrando resultado exitoso con ID:', idGenerado);
+    
+    // Ocultar formulario
+    const deliveryForm = document.getElementById('deliveryForm');
+    if (deliveryForm) {
+        deliveryForm.style.display = 'none';
+    }
+    
+    // Mostrar sección de resultado
+    const resultSection = document.getElementById('resultSection');
+    if (resultSection) {
+        resultSection.classList.remove('hidden');
+        
+        // Actualizar datos en la sección de resultado
+        const resultGuideNumber = document.getElementById('resultGuideNumber');
+        const resultDestinatario = document.getElementById('resultDestinatario');
+        const resultValor = document.getElementById('resultValor');
+        const resultMessage = document.getElementById('resultMessage');
+        
+        if (resultGuideNumber) {
+            resultGuideNumber.textContent = idGenerado;
+        }
+        
+        if (resultDestinatario) {
+            resultDestinatario.textContent = datosEnvio["DESTINO"] || "No especificado";
+        }
+        
+        if (resultValor) {
+            const valor = parseFloat(datosEnvio["VALOR A RECAUDAR"]) || 0;
+            resultValor.textContent = `$${valor.toLocaleString()}`;
+        }
+        
+        if (resultMessage) {
+            resultMessage.textContent = `Guía ${idGenerado} generada exitosamente. Puedes imprimir la guía para el mensajero.`;
+        }
+        
+        // ============================================
+        // CAMBIO IMPORTANTE: Auto-redirección después de 2 segundos
+        // ============================================
+        setTimeout(() => {
+            abrirGuiaAutomatically(idGenerado, datosEnvio);
+        }, 2000);
+        
+        // Configurar botón "Imprimir Guía"
+        const printGuideBtn = document.getElementById('printGuideBtn');
+        if (printGuideBtn) {
+            printGuideBtn.replaceWith(printGuideBtn.cloneNode(true));
+            const newPrintGuideBtn = document.getElementById('printGuideBtn');
+            newPrintGuideBtn.addEventListener('click', function() {
+                // Usar la misma función para consistencia
+                abrirGuiaAutomatically(idGenerado, datosEnvio);
+            });
+        }
+        
+        // Configurar botón "Nuevo Envío"
+        const newDeliveryBtn = document.getElementById('newDeliveryBtn');
+        if (newDeliveryBtn) {
+            // Remover cualquier listener anterior
+            newDeliveryBtn.replaceWith(newDeliveryBtn.cloneNode(true));
+            
+            // Obtener el nuevo elemento
+            const newNewDeliveryBtn = document.getElementById('newDeliveryBtn');
+            newNewDeliveryBtn.addEventListener('click', function() {
+                // Ocultar resultado y mostrar formulario
+                resultSection.classList.add('hidden');
+                if (deliveryForm) {
+                    deliveryForm.style.display = 'block';
+                    resetearFormulario();
+                }
+            });
+        }
+        
+        // Guardar el ID para imprimir la guía
+        localStorage.setItem('envioParaGuia', idGenerado);
     }
 }
 
-function showToast(type, title, message) {
-    const toast = document.createElement('div');
-    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
-        type === 'success' ? 'bg-green-100 text-green-800' :
-        type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
-    } border-l-4 max-w-sm`;
+// ============================================
+// FUNCIÓN PARA ABRIR GUIA AUTOMÁTICAMENTE
+// ============================================
+function abrirGuiaAutomatically(idGenerado, datosEnvio) {
+    console.log('📄 Abriendo guía automáticamente:', idGenerado);
     
-    toast.innerHTML = `
-        <div class="flex items-center">
-            <span class="material-symbols-outlined mr-2">${type === 'success' ? 'check_circle' : 'error'}</span>
-            <div class="flex-1">
-                <strong class="font-semibold">${title}</strong>
-                <p class="text-sm mt-1">${message}</p>
-            </div>
-            <button class="ml-4 text-gray-500" onclick="this.parentElement.parentElement.remove()">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-    `;
+    // Guardar el ID con el nombre CORRECTO que espera guia.js
+    localStorage.setItem('envioParaGuia', idGenerado);
     
-    document.body.appendChild(toast);
+    // También guardar los datos completos por si acaso
+    localStorage.setItem('guiaDatosCompletos', JSON.stringify({
+        datos: datosEnvio,
+        timestamp: new Date().getTime()
+    }));
     
-    setTimeout(() => {
-        if (toast.parentElement) toast.remove();
-    }, 5000);
+    // Limpiar la clave anterior para evitar confusiones
+    localStorage.removeItem('ultimoEnvioId');
+    
+    // Abrir guia.html en una nueva pestaña
+    const nuevaVentana = window.open('guia.html', '_blank');
+    
+    if (!nuevaVentana) {
+        // Si el navegador bloquea ventanas emergentes, mostrar instrucciones
+        alert('Por favor, haz clic en "Imprimir Guía" para ver la guía de envío.');
+    }
 }
 
 // ============================================
-// INICIALIZACIÓN
+// FUNCIÓN PARA GENERAR ID LOCAL (MEJORADA)
+// ============================================
+function generarIDLocal() {
+    const ahora = new Date();
+    const año = ahora.getFullYear().toString().slice(-2);
+    const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
+    const dia = ahora.getDate().toString().padStart(2, '0');
+    const hora = ahora.getHours().toString().padStart(2, '0');
+    const minutos = ahora.getMinutes().toString().padStart(2, '0');
+    const segundos = ahora.getSeconds().toString().padStart(2, '0');
+    
+    // Usar solo 4 dígitos para milisegundos (en lugar de 3)
+    // Esto reduce la posibilidad de que cambie entre generaciones
+    const milisegundos = ahora.getMilliseconds().toString().padStart(4, '0').slice(0, 4);
+    
+    return `ENV${año}${mes}${dia}${hora}${minutos}${segundos}${milisegundos}`;
+}
+
+// ============================================
+// INICIALIZACIÓN PRINCIPAL
 // ============================================
 
-document.addEventListener('DOMContentLoaded', initApp);
+// Ocultar la intro rápidamente
+setTimeout(() => {
+    const intro = document.getElementById('intro');
+    if (intro) intro.style.display = 'none';
+}, 1500);
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Primero verificar sesión
+    const sesionValida = verificarSesionYConfigurarUI();
+    
+    if (sesionValida) {
+        // Luego inicializar la app
+        setTimeout(() => {
+            initApp();
+        }, 100);
+    }
+});
