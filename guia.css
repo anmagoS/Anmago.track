@@ -544,3 +544,37 @@ body {
     break-inside: avoid;
   }
 }
+/* Agrega esto al final de guia.css */
+
+/* Estilos para código de barras */
+.codigo-barras-section {
+    text-align: center;
+    padding: 3px 0;
+    margin: 2px 0;
+    background-color: white;
+}
+
+.codigo-barras {
+    width: 100%;
+    height: 28px;
+    margin: 0 auto;
+    display: block;
+}
+
+.numero-guia-barras {
+    font-family: 'Courier New', monospace;
+    font-size: 7.5px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-top: 1px;
+    color: #000;
+    background-color: white;
+    padding: 1px;
+}
+
+/* Línea divisoria más delgada para separar código de barras */
+.divider.thin {
+    height: 1px;
+    margin: 1px 0;
+}
