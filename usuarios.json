@@ -1,6 +1,6 @@
 [
   {
-    "ID": "kayser",
+    "ID": "1",
     "NOMBRE COMPLETO": "Anmago Store",
     "USUARIO": "kayser",
     "CONTRASEÑA": "2321",
@@ -15,7 +15,7 @@
     "ULTIMO LOGIN": ""
   },
   {
-    "ID": "kayser",
+    "ID": "2",
     "NOMBRE COMPLETO": "alex",
     "USUARIO": "alex",
     "CONTRASEÑA": "12345",
@@ -30,7 +30,7 @@
     "ULTIMO LOGIN": ""
   },
   {
-    "ID": "kayser",
+    "ID": "3",
     "NOMBRE COMPLETO": "ANGELA MARIA",
     "USUARIO": "MARIANITA",
     "CONTRASEÑA": "232142",
@@ -38,7 +38,7 @@
     "ESTADO": "ACTIVO",
     "CORREO ELECTRONICO": "ANGELAARIA24@HOTMAIL.COM",
     "TELEFONO": 3115046741,
-    "NOMBRE REMITENTE": "FAMILIA COMPRARS Y MAS SAS\"",
+    "NOMBRE REMITENTE": "FAMILIA COMPRARS Y MAS SAS",
     "DIRECCION REMITENTE": "CARRERA DE LOCOS",
     "TELEFONO REMITENTE": 3115046741,
     "FECHA": "2026-01-01T05:00:00.000Z",
