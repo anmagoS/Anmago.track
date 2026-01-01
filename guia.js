@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 Iniciando generación de guía...');
     cargarDatosEnvio();
 });
-
 // ============================================
 // FUNCIÓN PRINCIPAL - CARGAR DATOS DEL ENVÍO
 // ============================================
@@ -356,3 +355,4 @@ setTimeout(() => {
     }
 }, 1000);
 */
+
