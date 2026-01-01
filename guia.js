@@ -185,56 +185,69 @@ function crearDatosEjemplo(envioId) {
 }
 
 // ============================================
-// PROCESAR DATOS - CORREGIDO PARA DIRECCIÓN
+// PROCESAR DATOS - CORREGIDO PARA DIRECCIÓN Y FECHA ORIGINAL
 // ============================================
 function procesarDatos(datos) {
     console.log('🔧 Procesando datos recibidos:');
     
-    // DEPURACIÓN COMPLETA: Mostrar todos los campos disponibles
-    console.log('📋 TODOS LOS CAMPOS DISPONIBLES:');
+    // DEPURACIÓN: Mostrar todos los campos
+    console.log('📋 CAMPOS DISPONIBLES:');
     Object.keys(datos).forEach(key => {
-        const valor = datos[key];
-        console.log(`  "${key}": "${valor}" (tipo: ${typeof valor})`);
+        console.log(`  "${key}": "${datos[key]}"`);
     });
     
-    // BUSCAR DIRECCIÓN ESPECÍFICAMENTE (tu campo es "direccionDestino")
+    // ============================================
+    // 1. BUSCAR FECHA DE CREACIÓN ORIGINAL
+    // ============================================
+    let fechaOriginal = datos["FECHA DE CREACION"] || 
+                       datos["FECHA CREACION"] || 
+                       datos["Fecha de Creacion"] || 
+                       datos.fechaCreacion || 
+                       datos.fecha || 
+                       datos.timestamp || 
+                       datos["FECHA ENVIO"] || 
+                       datos.fechaEnvio || 
+                       new Date().toISOString();
+    
+    console.log('📅 FECHA ORIGINAL ENCONTRADA:', fechaOriginal);
+    
+    // ============================================
+    // 2. BUSCAR DIRECCIÓN DESTINO
+    // ============================================
     let direccionEncontrada = null;
     
-    // Lista priorizada de campos a buscar
+    // Lista priorizada de campos a buscar (con el campo real de Google Sheets primero)
     const camposDireccion = [
-        // Tu campo exacto y variaciones
-        "direccionDestino",           // Tu campo original (camelCase)
-        "direccionDestino",           // Minúsculas
-        "DireccionDestino",           // PascalCase
-        "DIRECCIONDESTINO",           // Mayúsculas
+        // Campo real de Google Sheets
+        "DIRECCION DESTINO",           // TU CAMPO REAL en la columna H
         
         // Campos del formulario HTML
-        "Dirección de Entrega",       // Nombre mostrado en label
-        "dirección de entrega",       // Minúsculas con acento
-        "Direccion de Entrega",       // Sin acento
-        "DIRECCION DE ENTREGA",       // Mayúsculas sin acento
+        "direccionDestino",            // Campo original (camelCase)
+        "Dirección de Entrega",        // Nombre mostrado en label
+        "Direccion de Entrega",        // Sin acento
+        "DIRECCION DE ENTREGA",        // Mayúsculas sin acento
         
-        // Campos comunes
-        "DIRECCION DESTINO",
+        // Variaciones del campo real
         "Direccion Destino",
         "direccion_destino",
-        "direccion",
-        "Direccion",
+        "DireccionDestino",
+        "DIRECCIONDESTINO",
+        
+        // Campos alternativos
         "DIRECCION",
+        "Direccion",
+        "direccion",
         "ubicacion",
         "Ubicacion",
         "UBICACION",
         "address",
         "Address",
-        "ADDRESS",
-        "domicilio",
-        "Domicilio",
-        "DOMICILIO"
+        "ADDRESS"
     ];
     
     // Buscar en los campos específicos
     for (const campo of camposDireccion) {
-        if (datos[campo] && datos[campo].toString().trim() !== "") {
+        if (datos[campo] && datos[campo].toString().trim() !== "" && datos[campo].toString().trim() !== "N/A") {
             direccionEncontrada = datos[campo];
             console.log(`✅ Dirección encontrada en campo "${campo}": ${direccionEncontrada}`);
             break;
@@ -251,55 +264,57 @@ function procesarDatos(datos) {
         );
         
         for (const campo of camposConDireccion) {
-            if (datos[campo] && datos[campo].toString().trim() !== "") {
-                direccionEncontrada = datos[campo];
+            const valor = datos[campo];
+            if (valor && valor.toString().trim() !== "" && valor.toString().trim() !== "N/A") {
+                direccionEncontrada = valor;
                 console.log(`📍 Dirección encontrada indirectamente en "${campo}": ${direccionEncontrada}`);
                 break;
             }
         }
     }
     
-    // SI TODAVÍA NO SE ENCUENTRA, usar "N/A" pero registrar advertencia
+    // Si todavía no se encuentra, usar "N/A"
     if (!direccionEncontrada) {
-        console.warn('⚠️ No se encontró campo de dirección. Campos disponibles:');
-        console.warn(Object.keys(datos));
+        console.warn('⚠️ No se encontró campo de dirección.');
         direccionEncontrada = "N/A";
     }
     
-    // Normalizar nombres de campos
+    // ============================================
+    // 3. NORMALIZAR NOMBRES DE CAMPOS
+    // ============================================
     const datosNormalizados = {
         // ID
-        "ENVIO ID": datos["ENVIO ID"] || datos.envioId || datos.id || datos.ID || datos["envioId"] || datos["ID ENVIO"] || "N/A",
+        "ENVIO ID": datos["ENVIO ID"] || datos.envioId || datos.id || datos.ID || "N/A",
         
         // Remitente
-        "REMITE": datos["REMITE"] || datos.remite || datos.REMITE || datos["remitente"] || datos["Remitente"] || datos["nombreRemitente"] || "N/A",
-        "TELEFONO": datos["TELEFONO"] || datos.telefono || datos.TELEFONO || datos["telefonoRemitente"] || datos["telRemitente"] || "N/A",
-        "CIUDAD": datos["CIUDAD"] || datos.ciudad || datos.CIUDAD || datos["ciudadRemitente"] || datos["ciudadOrigen"] || "Bogotá D.C.",
+        "REMITE": datos["REMITE"] || datos.remite || datos["Remitente"] || "N/A",
+        "TELEFONO": datos["TELEFONO"] || datos.telefono || "N/A",
+        "CIUDAD": datos["CIUDAD"] || datos.ciudad || "Bogotá D.C.",
         
-        // Destinatario - ¡ESTO ES CLAVE!
-        "DESTINO": datos["DESTINO"] || datos.destino || datos.DESTINO || datos["destinatario"] || datos["Destinatario"] || datos["nombreDestinatario"] || datos["cliente"] || "N/A",
-        "TELEFONOCLIENTE": datos["TELEFONOCLIENTE"] || datos.telefonoCliente || datos.TELEFONOCLIENTE || datos["telefonoDestinatario"] || datos["telDestinatario"] || datos["telefonoCliente"] || "N/A",
-        "DIRECCION DESTINO": direccionEncontrada, // <-- AQUÍ USAMOS LA DIRECCIÓN ENCONTRADA
-        "BARRIO": datos["BARRIO"] || datos.barrio || datos.BARRIO || datos["barrioDestino"] || datos["barrioEntrega"] || "N/A",
-        "COMPLEMENTO DE DIR": datos["COMPLEMENTO DE DIR"] || datos.complementoDir || datos["COMPLEMENTO DE DIR"] || datos["complementoDireccion"] || datos["Complemento"] || datos["complemento"] || "Ninguno",
-        "CIUDAD DESTINO": datos["CIUDAD DESTINO"] || datos.ciudadDestino || datos["CIUDAD DESTINO"] || datos["ciudadDestinatario"] || datos["ciudadEntrega"] || datos["ciudadDestino"] || "Bogotá D.C.",
+        // Destinatario
+        "DESTINO": datos["DESTINO"] || datos.destino || "N/A",
+        "TELEFONOCLIENTE": datos["TELEFONOCLIENTE"] || datos.telefonoCliente || "N/A",
+        "DIRECCION DESTINO": direccionEncontrada,
+        "BARRIO": datos["BARRIO"] || datos.barrio || "N/A",
+        "COMPLEMENTO DE DIR": datos["COMPLEMENTO DE DIR"] || datos.complementoDir || "Ninguno",
+        "CIUDAD DESTINO": datos["CIUDAD DESTINO"] || datos.ciudadDestino || "Bogotá D.C.",
         
         // Pago
-        "FORMA DE PAGO": datos["FORMA DE PAGO"] || datos.formaPago || datos["FORMA DE PAGO"] || datos["formaDePago"] || datos["FormaPago"] || "Contraentrega",
-        "VALOR A RECAUDAR": datos["VALOR A RECAUDAR"] || datos.valorRecaudar || datos["VALOR A RECAUDAR"] || datos["valor"] || datos["valorRecaudo"] || datos["monto"] || "0",
+        "FORMA DE PAGO": datos["FORMA DE PAGO"] || datos.formaPago || "Contraentrega",
+        "VALOR A RECAUDAR": datos["VALOR A RECAUDAR"] || datos.valorRecaudar || "0",
         
         // Observaciones
-        "OBS": datos["OBS"] || datos.observaciones || datos.OBS || datos["observaciones"] || datos["obs"] || datos["notas"] || "",
+        "OBS": datos["OBS"] || datos.observaciones || "",
         
-        // Fecha
-        fecha: datos.fecha || datos.fechaCreacion || datos["fechaEnvio"] || datos["fecha"] || new Date().toISOString()
+        // FECHA ORIGINAL - ¡ESTO ES CLAVE PARA EL FOOTER!
+        "FECHA DE CREACION": fechaOriginal,
+        fecha: fechaOriginal,
+        fechaCreacion: fechaOriginal
     };
     
-    // DEPURACIÓN FINAL: Mostrar datos normalizados
-    console.log('📊 DATOS NORMALIZADOS PARA LA GUÍA:');
-    console.table(datosNormalizados);
-    
-    // Formatear valor a recaudar
+    // ============================================
+    // 4. PROCESAR VALOR A RECAUDAR
+    // ============================================
     if (datosNormalizados["VALOR A RECAUDAR"]) {
         try {
             const valor = parseFloat(datosNormalizados["VALOR A RECAUDAR"].toString().replace(/[^0-9.-]+/g, ""));
@@ -317,11 +332,14 @@ function procesarDatos(datos) {
         datosNormalizados.valorFormateado = "$0";
     }
     
-    // Formatear fecha
+    // ============================================
+    // 5. PROCESAR FECHA PARA MOSTRAR EN GUÍA
+    // ============================================
     try {
-        const fecha = new Date(datosNormalizados.fecha);
-        if (!isNaN(fecha.getTime())) {
-            datosNormalizados.fechaFormateada = fecha.toLocaleDateString('es-CO', {
+        // Fecha para mostrar en encabezado (fecha normal)
+        const fechaNormal = new Date(fechaOriginal);
+        if (!isNaN(fechaNormal.getTime())) {
+            datosNormalizados.fechaFormateada = fechaNormal.toLocaleDateString('es-CO', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
@@ -329,15 +347,143 @@ function procesarDatos(datos) {
         } else {
             datosNormalizados.fechaFormateada = new Date().toLocaleDateString('es-CO');
         }
+        
+        // Fecha para el FOOTER (fecha original completa)
+        const fechaParaFooter = new Date(fechaOriginal);
+        if (!isNaN(fechaParaFooter.getTime())) {
+            datosNormalizados.fechaFooterFormateada = fechaParaFooter.toLocaleString('es-CO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else {
+            datosNormalizados.fechaFooterFormateada = new Date().toLocaleString('es-CO');
+        }
+        
+        console.log(`📅 Fecha encabezado: ${datosNormalizados.fechaFormateada}`);
+        console.log(`📅 Fecha footer (original): ${datosNormalizados.fechaFooterFormateada}`);
+        
     } catch (e) {
         console.error('Error formateando fecha:', e);
-        datosNormalizados.fechaFormateada = new Date().toLocaleDateString('es-CO');
+        const fechaActual = new Date();
+        datosNormalizados.fechaFormateada = fechaActual.toLocaleDateString('es-CO');
+        datosNormalizados.fechaFooterFormateada = fechaActual.toLocaleString('es-CO');
     }
     
     console.log('✅ Datos procesados correctamente');
     return datosNormalizados;
 }
 
+// ============================================
+// GENERAR GUÍA - ACTUALIZADA PARA FECHA ORIGINAL
+// ============================================
+function generarGuia(datos) {
+    console.log('🎨 Generando interfaz de guía...');
+    
+    // Actualizar elementos de la guía
+    actualizarElemento('guiaId', datos["ENVIO ID"]);
+    actualizarElemento('fecha', datos.fechaFormateada);
+    
+    // ¡IMPORTANTE! Usar fecha original para el footer
+    actualizarElemento('fechaGeneracion', datos.fechaFooterFormateada || datos.fechaFormateada);
+    
+    // Forma de pago
+    const formaPago = datos["FORMA DE PAGO"] || '';
+    let formaPagoTexto = '';
+    switch(formaPago.toLowerCase()) {
+        case 'contado': formaPagoTexto = 'Contado'; break;
+        case 'contraentrega': formaPagoTexto = 'Contraentrega'; break;
+        case 'contraentrega_recaudo': 
+        case 'con recaudo':
+            formaPagoTexto = 'Con Recaudo'; 
+            break;
+        default: formaPagoTexto = formaPago || 'N/A';
+    }
+    actualizarElemento('formaPago', formaPagoTexto);
+    
+    // Remitente
+    actualizarElemento('remitenteNombre', datos["REMITE"]);
+    actualizarElemento('remitenteTelefono', datos["TELEFONO"]);
+    actualizarElemento('remitenteCiudad', datos["CIUDAD"]);
+    
+    // Destinatario
+    actualizarElemento('destinatarioNombre', datos["DESTINO"]);
+    actualizarElemento('destinatarioTelefono', datos["TELEFONOCLIENTE"]);
+    actualizarElemento('destinatarioDireccion', datos["DIRECCION DESTINO"]);
+    actualizarElemento('destinatarioBarrio', datos["BARRIO"]);
+    actualizarElemento('destinatarioCiudad', datos["CIUDAD DESTINO"]);
+    actualizarElemento('complemento', datos["COMPLEMENTO DE DIR"]);
+    
+    // Información de pago
+    actualizarElemento('valorRecaudar', datos.valorFormateado || `$${parseInt(datos["VALOR A RECAUDAR"] || 0).toLocaleString('es-CO')}`);
+    
+    console.log('✅ Interfaz de guía actualizada');
+    console.log(`📅 Fecha en footer: ${document.getElementById('fechaGeneracion').textContent}`);
+}
+// ============================================
+// FUNCIÓN CARGAR DATOS - CON MEJOR BÚSQUEDA DE FECHA
+// ============================================
+async function cargarDatos(envioId) {
+    console.log('📡 Cargando datos para ID:', envioId);
+    
+    // 1. Intentar desde localStorage (datos completos recientes)
+    const datosCompletos = localStorage.getItem('ultimoEnvioCompleto');
+    if (datosCompletos) {
+        try {
+            const datos = JSON.parse(datosCompletos);
+            if (datos.envioId === envioId || datos["ENVIO ID"] === envioId || datos.id === envioId) {
+                console.log('✅ Datos cargados desde localStorage (recientes)');
+                console.log('📅 Fecha en localStorage:', datos["FECHA DE CREACION"] || datos.fechaCreacion || datos.fecha);
+                return procesarDatos(datos);
+            }
+        } catch (e) {
+            console.error('Error parseando datos locales:', e);
+        }
+    }
+    
+    // 2. Intentar desde historial en localStorage
+    try {
+        const historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
+        console.log(`🔍 Buscando ${envioId} en historial de ${historial.length} envíos`);
+        
+        // Buscar envío en el historial
+        const envio = historial.find(e => 
+            e["ENVIO ID"] === envioId || 
+            e.id === envioId || 
+            e.envioId === envioId ||
+            (e.ID && e.ID.toString() === envioId.toString())
+        );
+        
+        if (envio) {
+            console.log('✅ Datos cargados desde historial local');
+            console.log('📅 Fecha en historial:', envio["FECHA DE CREACION"] || envio.fechaCreacion || envio.fecha);
+            return procesarDatos(envio);
+        }
+    } catch (e) {
+        console.error('Error buscando en historial:', e);
+    }
+    
+    // 3. Intentar desde Web App
+    try {
+        console.log('🌐 Intentando cargar desde Web App...');
+        const response = await fetch(`${WEB_APP_URL}?action=obtenerGuia&id=${encodeURIComponent(envioId)}`);
+        
+        if (response.ok) {
+            const datos = await response.json();
+            console.log('✅ Datos cargados desde Web App');
+            console.log('📅 Fecha desde Web App:', datos["FECHA DE CREACION"] || datos.fechaCreacion || datos.fecha);
+            return procesarDatos(datos);
+        }
+    } catch (error) {
+        console.log('⚠️ No se pudo cargar desde Web App:', error.message);
+    }
+    
+    // 4. Crear datos de ejemplo si todo falla
+    console.log('⚠️ Usando datos de ejemplo');
+    return crearDatosEjemplo(envioId);
+}
 // ============================================
 // GENERAR CÓDIGO DE BARRAS
 // ============================================
@@ -402,7 +548,10 @@ function generarGuia(datos) {
     // Actualizar elementos de la guía
     actualizarElemento('guiaId', datos["ENVIO ID"]);
     actualizarElemento('fecha', datos.fechaFormateada);
-    actualizarElemento('fechaGeneracion', new Date().toLocaleString('es-CO'));
+   // Usar fecha del envío en lugar de fecha actual
+const fechaGuia = datos.fecha || datos.fechaCreacion || datos["FECHA ENVIO"] || datos["FECHA REGISTRO"] || new Date().toISOString();
+const fechaParaFooter = new Date(fechaGuia);
+actualizarElemento('fechaGeneracion', fechaParaFooter.toLocaleString('es-CO'));
     
     // Forma de pago
     const formaPago = datos["FORMA DE PAGO"] || '';
