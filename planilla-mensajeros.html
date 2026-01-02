@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilla de Mensajeros - Administrador</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%233B82F6%22/><path d=%22M30 40 L70 40 L80 60 L20 60 Z%22 fill=%22white%22/><circle cx=%2250%22 cy=%2275%22 r=%228%22 fill=%22white%22/></svg>">
+    
+    <style>
+        /* Estilos optimizados para impresión */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                font-size: 10px !important;
+                margin: 0;
+                padding: 5px;
+                line-height: 1.2;
+            }
+            
+            .print-optimized {
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9px !important;
+            }
+            
+            th, td {
+                padding: 2px 3px !important;
+                border: 1px solid #000;
+                height: 18px;
+            }
+            
+            .guia-checkbox {
+                width: 15px;
+                height: 15px;
+                border: 1px solid #000;
+                margin: 0 auto;
+            }
+            
+            .header-impresion {
+                margin-bottom: 10px;
+            }
+            
+            .page-break {
+                page-break-after: always;
+            }
+            
+            /* Reducir márgenes para aprovechar espacio */
+            @page {
+                margin: 0.5cm;
+            }
+        }
+        
+        /* Estilos para pantalla */
+        .firma-line {
+            border-top: 1px solid #000;
+            margin-top: 20px;
+            padding-top: 3px;
+            font-size: 9px;
+        }
+    </style>
+    
+    <script>
+        // VERIFICACIÓN DE AUTENTICACIÓN Y ROL ADMIN
+        (function() {
+            const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+            
+            if (!usuario) {
+                console.log("❌ No autorizado");
+                window.location.replace("login.html");
+                return;
+            }
+            
+            if (usuario.ROL !== "ADMIN") {
+                console.log("❌ No tiene permisos de administrador");
+                alert("Solo usuarios ADMIN pueden acceder a esta página");
+                window.location.replace("historial.html");
+                return;
+            }
+            
+            console.log("✅ Admin autorizado:", usuario.USUARIO);
+        })();
+    </script>
+</head>
+<body class="bg-gray-100">
+    
+    <!-- Header de navegación -->
+    <nav class="bg-white shadow-md p-4 no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a href="historial.html" class="text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-history"></i> Historial
+                </a>
+            </div>
+            <div class="text-right">
+                <h1 class="text-xl font-bold text-gray-800">📋 Planilla de Mensajeros</h1>
+                <p class="text-sm text-gray-600">Vista exclusiva para Administradores</p>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Controles de filtros -->
+    <div class="container mx-auto p-4 no-print">
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h2 class="text-lg font-bold mb-4">Filtros de Planilla</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                    <input type="date" id="fechaFiltro" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="mensajeFecha" class="text-xs text-gray-600 mt-1 italic"></div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mensajero</label>
+                    <select id="mensajeroFiltro" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todos los mensajeros</option>
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                    <select id="estadoFiltro" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="entregado">Entregados</option>
+                        <option value="devuelto">Devueltos</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex space-x-2">
+                <button id="btnCargarHoy" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    <i class="fas fa-calendar-day mr-2"></i>Hoy
+                </button>
+                <button id="btnCargarEnvíos" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                    <i class="fas fa-sync-alt mr-2"></i>Cargar Envíos
+                </button>
+                <button id="btnGenerarPlanilla" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                    <i class="fas fa-print mr-2"></i>Generar Planilla
+                </button>
+                <button id="btnLimpiarFiltros" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+                    <i class="fas fa-broom mr-2"></i>Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="container mx-auto px-4 mb-4 no-print">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Total Envíos</p>
+                    <p class="text-2xl font-bold" id="totalEnvios">0</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Valor a Recaudar</p>
+                    <p class="text-2xl font-bold text-green-600" id="totalRecaudar">$0</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Mensajeros Activos</p>
+                    <p class="text-2xl font-bold text-blue-600" id="totalMensajeros">0</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Envíos Pendientes</p>
+                    <p class="text-2xl font-bold text-orange-600" id="totalPendientes">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vista previa en pantalla -->
+    <div class="container mx-auto px-4 no-print">
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h3 class="text-lg font-bold mb-4">Vista previa de planilla</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border text-sm" id="tablaPreview">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="py-1 px-2 border">✓</th>
+                            <th class="py-1 px-2 border">ID</th>
+                            <th class="py-1 px-2 border">Destinatario</th>
+                            <th class="py-1 px-2 border">Teléfono</th>
+                            <th class="py-1 px-2 border">Valor</th>
+                            <th class="py-1 px-2 border">Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPreviewBody">
+                        <!-- Se llena dinámicamente -->
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-gray-500">
+                                <i class="fas fa-box-open text-4xl mb-2"></i>
+                                <p>No hay envíos para mostrar</p>
+                                <p class="text-sm">Usa los filtros para cargar envíos</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Plantilla para impresión (oculta en pantalla) -->
+    <div id="plantillaImpresion" class="hidden">
+        <!-- Se genera dinámicamente -->
+    </div>
+    
+    <script>
+        // Configuración
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
+        
+        // Variables globales
+        let todosEnvios = [];
+        let enviosFiltrados = [];
+        let mensajerosLista = [];
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarPlanilla();
+        });
+        
+        function inicializarPlanilla() {
+            // Configurar fecha actual
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaFiltro').value = hoy;
+            
+            // Configurar eventos
+            configurarEventos();
+            
+            // Cargar mensajeros
+            cargarMensajeros();
+            
+            // Cargar envíos del día actual
+            cargarEnviosDelDia();
+        }
+        
+        function configurarEventos() {
+            // Botones
+            document.getElementById('btnCargarHoy').addEventListener('click', cargarEnviosDelDia);
+            document.getElementById('btnCargarEnvíos').addEventListener('click', cargarEnviosPorFechaDesdeAPI);
+            document.getElementById('btnGenerarPlanilla').addEventListener('click', generarPlanillaImpresion);
+            document.getElementById('btnLimpiarFiltros').addEventListener('click', limpiarFiltros);
+            
+            // Filtros
+            document.getElementById('fechaFiltro').addEventListener('change', aplicarFiltros);
+            document.getElementById('mensajeroFiltro').addEventListener('change', aplicarFiltros);
+            document.getElementById('estadoFiltro').addEventListener('change', aplicarFiltros);
+        }
+        
+        async function cargarMensajeros() {
+            try {
+                // Usar endpoint específico para mensajeros
+                const response = await fetch(`${WEB_APP_URL}?action=getMensajeros`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && Array.isArray(data.mensajeros)) {
+                        mensajerosLista = data.mensajeros.sort();
+                        actualizarSelectMensajeros();
+                        console.log('✅ Mensajeros cargados desde API:', mensajerosLista.length);
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ No se pudieron cargar mensajeros:', error);
+                // Intentar extraer de localStorage como respaldo
+                let historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
+                if (historial.length > 0) {
+                    const mensajerosSet = new Set();
+                    historial.forEach(envio => {
+                        const mensajero = envio["MENSAJERO"] || envio.mensajero;
+                        if (mensajero && mensajero !== 'Por asignar' && mensajero !== 'N/A') {
+                            mensajerosSet.add(mensajero);
+                        }
+                    });
+                    mensajerosLista = Array.from(mensajerosSet).sort();
+                    actualizarSelectMensajeros();
+                    console.log('✅ Mensajeros extraídos de historial:', mensajerosLista.length);
+                }
+            }
+        }
+        
+        async function cargarEnviosDelDia() {
+            const ahora = new Date();
+            const horaActual = ahora.getHours();
+            
+            // Determinar qué fecha mostrar
+            let fechaParaCargar;
+            
+            if (horaActual < 12) {
+                // Si es antes del mediodía, cargar envíos de ayer
+                const ayer = new Date();
+                ayer.setDate(ayer.getDate() - 1);
+                fechaParaCargar = ayer.toISOString().split('T')[0];
+                console.log('🕐 Es temprano, cargando envíos de ayer:', fechaParaCargar);
+            } else {
+                // Si es después del mediodía, cargar envíos de hoy
+                fechaParaCargar = ahora.toISOString().split('T')[0];
+                console.log('🕐 Es tarde, cargando envíos de hoy:', fechaParaCargar);
+            }
+            
+            document.getElementById('fechaFiltro').value = fechaParaCargar;
+            
+            // Mostrar mensaje informativo
+            actualizarMensajeFecha(horaActual);
+            
+            await cargarEnviosPorFechaDesdeAPI();
+        }
+        
+        function actualizarMensajeFecha(horaActual) {
+            const mensajeExistente = document.getElementById('mensajeFecha');
+            if (mensajeExistente) {
+                mensajeExistente.innerHTML = horaActual < 12 
+                    ? 'Mostrando envíos del día anterior (se generará planilla para entrega hoy)'
+                    : 'Mostrando envíos del día actual';
+            }
+        }
+        
+        async function cargarTodosEnvios() {
+            await cargarEnviosPorFechaDesdeAPI();
+        }
+        
+        async function cargarEnviosPorFechaDesdeAPI() {
+            try {
+                mostrarLoading(true);
+                
+                const fecha = document.getElementById('fechaFiltro').value;
+                console.log('📅 Cargando envíos para fecha desde API:', fecha);
+                
+                // Usar el endpoint getAllEnvios que tiene tu Apps Script
+                const url = `${WEB_APP_URL}?action=getAllEnvios&fecha=${encodeURIComponent(fecha)}`;
+                console.log('🔗 URL de consulta:', url);
+                
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    console.log('📊 Respuesta de API getAllEnvios:', data);
+                    
+                    if (data.success && Array.isArray(data.data)) {
+                        todosEnvios = data.data;
+                        console.log(`✅ ${todosEnvios.length} envíos cargados desde API para ${fecha}`);
+                        
+                        // DEBUG: Mostrar primeros envíos para verificar
+                        if (todosEnvios.length > 0) {
+                            console.log('🔍 Primer envío cargado:', {
+                                id: todosEnvios[0]["ENVIO ID"],
+                                fecha: todosEnvios[0]["FECHA DE CREACION"],
+                                destinatario: todosEnvios[0]["DESTINO"],
+                                mensajero: todosEnvios[0]["MENSAJERO"]
+                            });
+                        }
+                    } else {
+                        console.log('⚠️ Respuesta API no exitosa:', data);
+                        todosEnvios = [];
+                    }
+                } else {
+                    console.error('❌ Error en respuesta HTTP:', response.status);
+                    todosEnvios = [];
+                }
+                
+                // Si no hay datos, mostrar mensaje
+                if (todosEnvios.length === 0) {
+                    console.log('⚠️ No hay envíos para la fecha seleccionada');
+                    mostrarError('No se encontraron envíos para la fecha seleccionada');
+                    
+                    // Intentar cargar desde localStorage como respaldo
+                    let historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
+                    if (historial.length > 0) {
+                        console.log('🔄 Intentando cargar desde localStorage...');
+                        todosEnvios = filtrarEnviosPorFechaLocal(historial, fecha);
+                        console.log(`🔄 ${todosEnvios.length} envíos cargados desde localStorage`);
+                    }
+                }
+                
+                // Extraer mensajeros de los envíos cargados
+                extraerMensajerosDeEnvios();
+                
+                // Aplicar filtros iniciales
+                aplicarFiltros();
+                
+            } catch (error) {
+                console.error('❌ Error cargando envíos:', error);
+                mostrarError('Error al cargar envíos: ' + error.message);
+                
+                // Intentar desde localStorage como último recurso
+                try {
+                    let historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
+                    const fecha = document.getElementById('fechaFiltro').value;
+                    todosEnvios = filtrarEnviosPorFechaLocal(historial, fecha);
+                    console.log(`🔄 ${todosEnvios.length} envíos cargados desde localStorage después de error`);
+                    
+                    extraerMensajerosDeEnvios();
+                    aplicarFiltros();
+                } catch (localError) {
+                    console.error('❌ Error también en localStorage:', localError);
+                }
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+        
+        function filtrarEnviosPorFechaLocal(envios, fecha) {
+            // Formatear fecha para comparación (YYYY-MM-DD)
+            const fechaFormateada = new Date(fecha).toISOString().split('T')[0];
+            
+            return envios.filter(envio => {
+                try {
+                    // Intentar varios campos de fecha
+                    const fechaEnvio = envio["FECHA DE CREACION"] || envio.fechaCreacion || envio.fecha || envio.timestamp;
+                    
+                    if (!fechaEnvio) return false;
+                    
+                    // Convertir a Date
+                    const fechaObj = new Date(fechaEnvio);
+                    if (isNaN(fechaObj.getTime())) return false;
+                    
+                    // Formatear a YYYY-MM-DD
+                    const fechaEnvioStr = fechaObj.toISOString().split('T')[0];
+                    
+                    return fechaEnvioStr === fechaFormateada;
+                } catch (e) {
+                    console.log('Error filtrando fecha:', e);
+                    return false;
+                }
+            });
+        }
+        
+        function extraerMensajerosDeEnvios() {
+            if (todosEnvios.length > 0) {
+                const mensajerosSet = new Set();
+                todosEnvios.forEach(envio => {
+                    const mensajero = envio["MENSAJERO"] || envio.mensajero;
+                    if (mensajero && mensajero.trim() !== '' && mensajero !== 'Por asignar') {
+                        mensajerosSet.add(mensajero.trim());
+                    }
+                });
+                
+                const nuevosMensajeros = Array.from(mensajerosSet).sort();
+                
+                // Actualizar lista si hay nuevos mensajeros
+                if (nuevosMensajeros.length > 0) {
+                    // Combinar con lista existente sin duplicados
+                    const todosMensajeros = [...new Set([...mensajerosLista, ...nuevosMensajeros])].sort();
+                    if (todosMensajeros.length !== mensajerosLista.length) {
+                        mensajerosLista = todosMensajeros;
+                        actualizarSelectMensajeros();
+                        console.log('✅ Mensajeros actualizados:', mensajerosLista.length);
+                    }
+                }
+            }
+        }
+        
+        function aplicarFiltros() {
+            const mensajero = document.getElementById('mensajeroFiltro').value;
+            const estado = document.getElementById('estadoFiltro').value;
+            
+            // Filtrar envíos
+            enviosFiltrados = todosEnvios.filter(envio => {
+                let cumple = true;
+                
+                // Filtrar por mensajero
+                if (mensajero && mensajero !== '') {
+                    const mensajeroEnvio = (envio["MENSAJERO"] || envio.mensajero || '').toUpperCase();
+                    cumple = cumple && (mensajeroEnvio === mensajero.toUpperCase());
+                }
+                
+                // Filtrar por estado
+                if (estado && estado !== '') {
+                    const estadoEnvio = (envio["ESTADO"] || envio.estado || 'pendiente').toLowerCase();
+                    cumple = cumple && (estadoEnvio === estado);
+                }
+                
+                return cumple;
+            });
+            
+            // Actualizar estadísticas
+            actualizarEstadisticas();
+            
+            // Actualizar vista previa
+            actualizarVistaPrevia();
+            
+            console.log(`✅ ${enviosFiltrados.length} envíos después de filtrar`);
+        }
+        
+        function actualizarEstadisticas() {
+            // Totales
+            document.getElementById('totalEnvios').textContent = enviosFiltrados.length;
+            
+            // Calcular valor a recaudar
+            let totalRecaudar = 0;
+            enviosFiltrados.forEach(envio => {
+                const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
+                if (!isNaN(valor)) totalRecaudar += valor;
+            });
+            document.getElementById('totalRecaudar').textContent = `$${totalRecaudar.toLocaleString('es-CO')}`;
+            
+            // Contar mensajeros únicos
+            const mensajerosUnicos = new Set();
+            enviosFiltrados.forEach(envio => {
+                const mensajero = envio["MENSAJERO"] || envio.mensajero;
+                if (mensajero && mensajero !== 'Por asignar') {
+                    mensajerosUnicos.add(mensajero);
+                }
+            });
+            document.getElementById('totalMensajeros').textContent = mensajerosUnicos.size;
+            
+            // Contar pendientes
+            const pendientes = enviosFiltrados.filter(envio => {
+                const estado = (envio["ESTADO"] || envio.estado || 'pendiente').toLowerCase();
+                return estado === 'pendiente';
+            });
+            document.getElementById('totalPendientes').textContent = pendientes.length;
+        }
+        
+        function actualizarVistaPrevia() {
+            const tbody = document.getElementById('tablaPreviewBody');
+            
+            if (enviosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-500">
+                            <i class="fas fa-box-open text-4xl mb-2"></i>
+                            <p>No hay envíos para mostrar</p>
+                            <p class="text-sm">Usa los filtros para cargar envíos</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            enviosFiltrados.forEach((envio, index) => {
+                const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
+                
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-1 px-2 border text-center">
+                            <input type="checkbox" class="envio-checkbox" data-index="${index}" checked>
+                        </td>
+                        <td class="py-1 px-2 border font-mono text-xs">
+                            ${envio["ENVIO ID"] || envio.id || 'N/A'}
+                        </td>
+                        <td class="py-1 px-2 border">
+                            ${envio["DESTINO"] || envio.destino || 'N/A'}
+                        </td>
+                        <td class="py-1 px-2 border font-mono">
+                            ${envio["TELEFONOCLIENTE"] || envio.telefonoCliente || 'N/A'}
+                        </td>
+                        <td class="py-1 px-2 border font-bold">
+                            $${valor.toLocaleString('es-CO')}
+                        </td>
+                        <td class="py-1 px-2 border">
+                            <input type="text" class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs" 
+                                   placeholder="Observaciones" 
+                                   data-index="${index}">
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            
+            // Añadir eventos a los checkboxes
+            document.querySelectorAll('.envio-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    console.log('Checkbox cambiado:', this.checked, 'índice:', this.dataset.index);
+                });
+            });
+            
+            // Añadir eventos a los inputs de observaciones
+            document.querySelectorAll('input[placeholder="Observaciones"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    const index = this.dataset.index;
+                    console.log('Observación para envío', index, ':', this.value);
+                });
+            });
+        }
+        
+        function generarPlanillaImpresion() {
+            if (enviosFiltrados.length === 0) {
+                alert('No hay envíos para generar planilla');
+                return;
+            }
+            
+            // Obtener envíos seleccionados (o todos si no hay selección)
+            const enviosSeleccionados = [];
+            const checkboxes = document.querySelectorAll('.envio-checkbox');
+            
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked && index < enviosFiltrados.length) {
+                    // Obtener observación si existe
+                    const observacionInput = document.querySelector(`input[data-index="${index}"][placeholder="Observaciones"]`);
+                    const observacion = observacionInput ? observacionInput.value : '';
+                    
+                    const envioConObservacion = {
+                        ...enviosFiltrados[index],
+                        OBS_IMPRESION: observacion
+                    };
+                    
+                    enviosSeleccionados.push(envioConObservacion);
+                }
+            });
+            
+            const enviosAImprimir = enviosSeleccionados.length > 0 ? enviosSeleccionados : enviosFiltrados;
+            
+            // Agrupar por mensajero
+            const enviosPorMensajero = {};
+            enviosAImprimir.forEach(envio => {
+                const mensajero = envio["MENSAJERO"] || envio.mensajero || 'Sin asignar';
+                if (!enviosPorMensajero[mensajero]) {
+                    enviosPorMensajero[mensajero] = [];
+                }
+                enviosPorMensajero[mensajero].push(envio);
+            });
+            
+            // OBTENER FECHA CORRECTA PARA LA PLANILLA
+            const fechaSeleccionada = document.getElementById('fechaFiltro').value;
+            console.log('📅 Fecha seleccionada en filtro:', fechaSeleccionada);
+            
+            const fechaParaPlanilla = new Date(fechaSeleccionada);
+            const ahora = new Date();
+            const horaActual = ahora.getHours();
+            
+            // Verificar si estamos trabajando con fecha de hoy
+            const hoyISO = new Date().toISOString().split('T')[0];
+            const fechaSeleccionadaISO = new Date(fechaSeleccionada).toISOString().split('T')[0];
+            
+            let fechaFinalParaPlanilla = fechaParaPlanilla;
+            
+            // Solo ajustar si estamos trabajando con "hoy" y es temprano
+            if (fechaSeleccionadaISO === hoyISO && horaActual < 12) {
+                // Para la mañana antes del mediodía, la planilla es del día anterior
+                fechaFinalParaPlanilla.setDate(fechaFinalParaPlanilla.getDate() - 1);
+                console.log('🕐 Es antes del mediodía, ajustando a fecha de ayer:', 
+                           fechaFinalParaPlanilla.toISOString().split('T')[0]);
+            }
+            
+            // Formatear fecha para mostrar en la planilla
+            const fechaFormateada = fechaFinalParaPlanilla.toLocaleDateString('es-CO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            
+            // Fecha de generación
+            const fechaGeneracion = new Date().toLocaleString('es-CO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            console.log('📋 Generando planilla con fecha:', fechaFormateada, 
+                       '| Hora actual:', horaActual + ':00',
+                       '| Envíos a imprimir:', enviosAImprimir.length);
+            
+            let htmlPlanilla = '';
+            
+            Object.keys(enviosPorMensajero).forEach((mensajero, mensajeroIndex) => {
+                const enviosMensajero = enviosPorMensajero[mensajero];
+                let totalRecaudar = 0;
+                let totalEnvíos = enviosMensajero.length;
+                
+                // Calcular total a recaudar
+                enviosMensajero.forEach(envio => {
+                    const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
+                    if (!isNaN(valor)) totalRecaudar += valor;
+                });
+                
+                htmlPlanilla += `
+                    <div class="planilla-mensajero print-optimized" ${mensajeroIndex > 0 ? 'style="page-break-before: always;"' : ''}>
+                        <!-- Encabezado compacto -->
+                        <div class="header-impresion text-center mb-3">
+                            <h1 style="font-size: 16px; font-weight: bold; margin: 0;">EXPRES CONTRAENTREGA</h1>
+                            <h2 style="font-size: 14px; font-weight: bold; margin: 0;">PLANILLA DE MENSAJERO</h2>
+                            <div style="font-size: 11px; margin-top: 5px;">
+                                <strong>Fecha de entrega:</strong> ${fechaFormateada} | 
+                                <strong>Mensajero:</strong> ${mensajero} | 
+                                <strong>Envíos:</strong> ${totalEnvíos} | 
+                                <strong>Total a recaudar:</strong> $${totalRecaudar.toLocaleString('es-CO')}
+                            </div>
+                            <div style="font-size: 9px; color: #666; margin-top: 2px;">
+                                <strong>Planilla generada:</strong> ${fechaGeneracion}
+                            </div>
+                        </div>
+                        
+                        <!-- Tabla optimizada -->
+                        <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
+                            <thead>
+                                <tr style="background-color: #f0f0f0;">
+                                    <th style="border: 1px solid #000; padding: 2px; width: 20px;">✓</th>
+                                    <th style="border: 1px solid #000; padding: 2px; width: 80px;">ID GUÍA</th>
+                                    <th style="border: 1px solid #000; padding: 2px;">DESTINATARIO</th>
+                                    <th style="border: 1px solid #000; padding: 2px; width: 70px;">TELÉFONO</th>
+                                    <th style="border: 1px solid #000; padding: 2px; width: 60px;">VALOR</th>
+                                    <th style="border: 1px solid #000; padding: 2px; width: 100px;">OBSERVACIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                enviosMensajero.forEach((envio, index) => {
+                    const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
+                    const telefono = envio["TELEFONOCLIENTE"] || envio.telefonoCliente || '';
+                    const observacion = envio["OBS_IMPRESION"] || envio["OBS"] || envio.observaciones || '';
+                    
+                    htmlPlanilla += `
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 2px; text-align: center;">
+                                <div class="guia-checkbox"></div>
+                            </td>
+                            <td style="border: 1px solid #000; padding: 2px; font-family: monospace; font-size: 8px;">
+                                ${envio["ENVIO ID"] || envio.id || ''}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 2px;">
+                                ${envio["DESTINO"] || envio.destino || ''}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 2px; font-family: monospace; font-size: 8px;">
+                                ${telefono}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 2px; text-align: right; font-weight: bold;">
+                                $${valor.toLocaleString('es-CO')}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 2px; font-size: 8px;">
+                                ${observacion}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                // Pie de página compacto
+                htmlPlanilla += `
+                            </tbody>
+                        </table>
+                        
+                        <!-- Resumen al pie -->
+                        <div style="margin-top: 15px; font-size: 9px; border-top: 1px solid #000; padding-top: 5px;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 60%;">
+                                        <strong>RESUMEN:</strong> ${totalEnvíos} envíos | Total a recaudar: $${totalRecaudar.toLocaleString('es-CO')}
+                                    </td>
+                                    <td style="width: 40%; text-align: center;">
+                                        <div style="border-top: 1px solid #000; padding-top: 3px; margin-top: 10px;">
+                                            <strong>FIRMA MENSAJERO</strong><br>
+                                            Nombre: _________________________
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 10px; font-size: 8px; color: #666;">
+                                        Fecha de entrega: ${fechaFormateada} | 
+                                        Planilla generada: ${fechaGeneracion} | 
+                                        Página ${mensajeroIndex + 1} de ${Object.keys(enviosPorMensajero).length}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Insertar en el contenedor de impresión
+            const contenedorImpresion = document.getElementById('plantillaImpresion');
+            contenedorImpresion.innerHTML = htmlPlanilla;
+            contenedorImpresion.classList.remove('hidden');
+            
+            // Mostrar mensaje informativo y confirmación
+            const horaActualParaMensaje = ahora.getHours();
+            if (fechaSeleccionadaISO === hoyISO && horaActualParaMensaje < 12) {
+                const fechaAyer = new Date();
+                fechaAyer.setDate(fechaAyer.getDate() - 1);
+                const fechaAyerFormateada = fechaAyer.toLocaleDateString('es-CO', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                console.log(`ℹ️ INFORMACIÓN: Es ${horaActualParaMensaje}:00, generando planilla con fecha ${fechaAyerFormateada}`);
+                
+                if (confirm(`Son las ${horaActualParaMensaje}:00. La planilla se generará con fecha ${fechaAyerFormateada} (día anterior). ¿Continuar?`)) {
+                    setTimeout(() => {
+                        window.print();
+                        contenedorImpresion.classList.add('hidden');
+                    }, 100);
+                } else {
+                    contenedorImpresion.classList.add('hidden');
+                }
+            } else {
+                // Imprimir directamente
+                setTimeout(() => {
+                    window.print();
+                    contenedorImpresion.classList.add('hidden');
+                }, 100);
+            }
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('mensajeroFiltro').value = '';
+            document.getElementById('estadoFiltro').value = '';
+            aplicarFiltros();
+        }
+        
+        function mostrarLoading(mostrar) {
+            if (mostrar) {
+                // Mostrar indicador de carga
+                document.getElementById('tablaPreviewBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-500">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                            <p>Cargando envíos...</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function mostrarError(mensaje) {
+            // Mostrar error en la tabla
+            document.getElementById('tablaPreviewBody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-8 text-center text-red-500">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-2"></i>
+                        <p>${mensaje}</p>
+                        <p class="text-sm mt-2">Intenta nuevamente o verifica la conexión</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        function actualizarSelectMensajeros() {
+            const select = document.getElementById('mensajeroFiltro');
+            const valorActual = select.value;
+            
+            select.innerHTML = '<option value="">Todos los mensajeros</option>';
+            
+            mensajerosLista.forEach(mensajero => {
+                const option = document.createElement('option');
+                option.value = mensajero;
+                option.textContent = mensajero;
+                select.appendChild(option);
+            });
+            
+            // Restaurar valor seleccionado si existe
+            if (valorActual && mensajerosLista.includes(valorActual)) {
+                select.value = valorActual;
+            }
+        }
+    </script>
+</body>
+</html>
