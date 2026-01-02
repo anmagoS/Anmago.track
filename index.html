@@ -621,25 +621,38 @@ body {
         </div>
 
         <!-- Sección derecha: usuario y botones -->
-        <div class="flex items-center gap-4">
-            <!-- Información del usuario (solo desktop) -->
-            <div class="hidden md:flex flex-col items-end mr-2">
-                <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Cargando...</span>
-                <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Verificando...</span>
-            </div>
-            
-            <!-- Avatar del usuario -->
-            <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
-                 data-alt="User profile avatar" 
-                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
-            </div>
-            
-            <!-- Botón de historial -->
-<button id="historialButton" 
-        class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        title="Ver mi historial de envíos">
-    <span class="material-symbols-outlined text-[#4c669a]">history</span>
-</button>
+<div class="flex items-center gap-4">
+    <!-- Información del usuario (solo desktop) -->
+    <div class="hidden md:flex flex-col items-end mr-2">
+        <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Cargando...</span>
+        <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Verificando...</span>
+    </div>
+    
+    <!-- Avatar del usuario -->
+    <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
+         data-alt="User profile avatar" 
+         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
+    </div>
+    
+    <!-- Botón de Planillas Mensajeros (solo visible para ADMIN) -->
+    <button id="adminPlanillaButton" 
+            class="hidden flex items-center justify-center size-10 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 transition-colors group relative"
+            title="Planillas de mensajeros (Admin)">
+        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">assignment</span>
+        <!-- Tooltip para móviles -->
+        <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+            Planillas Mensajeros
+        </div>
+    </button>
+    
+    <!-- Botón de historial -->
+    <button id="historialButton" 
+            class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title="Ver mi historial de envíos">
+        <span class="material-symbols-outlined text-[#4c669a]">history</span>
+    </button>
+
+
 
 <!-- MODAL PARA HISTORIAL -->
 <div id="modalHistorial" class="fixed inset-0 z-[100] hidden overflow-y-auto">
