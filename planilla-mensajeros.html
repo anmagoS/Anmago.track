@@ -69,6 +69,40 @@
             padding-top: 3px;
             font-size: 9px;
         }
+        
+        /* Estilos para estados */
+        .estado-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .estado-RECIBIDO {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .estado-REPARTO {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .estado-ENTREGADO {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .estado-NOVEDAD {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .estado-CANCELADO {
+            background-color: #f5f5f5;
+            color: #616161;
+        }
     </style>
     
     <script>
@@ -108,7 +142,7 @@
             </div>
             <div class="text-right">
                 <h1 class="text-xl font-bold text-gray-800">📋 Planilla de Mensajeros</h1>
-                <p class="text-sm text-gray-600">Vista exclusiva para Administradores</p>
+                <p class="text-sm text-gray-600">Generar planilla para envíos en REPARTO</p>
             </div>
         </div>
     </nav>
@@ -116,7 +150,7 @@
     <!-- Controles de filtros -->
     <div class="container mx-auto p-4 no-print">
         <div class="bg-white rounded-lg shadow p-4 mb-4">
-            <h2 class="text-lg font-bold mb-4">Filtros de Planilla</h2>
+            <h2 class="text-lg font-bold mb-4">Filtros para Planilla</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
@@ -136,10 +170,12 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
                     <select id="estadoFiltro" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="RECIBIDO">RECIBIDO (para planilla)</option>
+                        <option value="REPARTO">EN REPARTO</option>
+                        <option value="ENTREGADO">ENTREGADO</option>
+                        <option value="NOVEDAD">NOVEDAD</option>
+                        <option value="CANCELADO">CANCELADO</option>
                         <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendientes</option>
-                        <option value="entregado">Entregados</option>
-                        <option value="devuelto">Devueltos</option>
                     </select>
                 </div>
             </div>
@@ -157,6 +193,20 @@
                 <button id="btnLimpiarFiltros" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
                     <i class="fas fa-broom mr-2"></i>Limpiar
                 </button>
+                <button id="btnCambiarReparto" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
+                    <i class="fas fa-truck-loading mr-2"></i>Cambiar a REPARTO
+                </button>
+            </div>
+            
+            <!-- Mensaje informativo -->
+            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Instrucciones:</strong> 
+                    1. Carga envíos con estado "RECIBIDO" 
+                    2. Selecciona los envíos para la planilla 
+                    3. Genera planilla → Los envíos pasan a "REPARTO"
+                </p>
             </div>
         </div>
     </div>
@@ -166,8 +216,8 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-lg shadow p-4">
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">Total Envíos</p>
-                    <p class="text-2xl font-bold" id="totalEnvios">0</p>
+                    <p class="text-sm text-gray-600">Envíos RECIBIDOS</p>
+                    <p class="text-2xl font-bold text-blue-600" id="totalRecibidos">0</p>
                 </div>
             </div>
             
@@ -180,15 +230,15 @@
             
             <div class="bg-white rounded-lg shadow p-4">
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">Mensajeros Activos</p>
-                    <p class="text-2xl font-bold text-blue-600" id="totalMensajeros">0</p>
+                    <p class="text-sm text-gray-600">Mensajeros</p>
+                    <p class="text-2xl font-bold text-indigo-600" id="totalMensajeros">0</p>
                 </div>
             </div>
             
             <div class="bg-white rounded-lg shadow p-4">
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">Envíos Pendientes</p>
-                    <p class="text-2xl font-bold text-orange-600" id="totalPendientes">0</p>
+                    <p class="text-sm text-gray-600">Seleccionados</p>
+                    <p class="text-2xl font-bold text-purple-600" id="totalSeleccionados">0</p>
                 </div>
             </div>
         </div>
@@ -197,23 +247,38 @@
     <!-- Vista previa en pantalla -->
     <div class="container mx-auto px-4 no-print">
         <div class="bg-white rounded-lg shadow p-4 mb-4">
-            <h3 class="text-lg font-bold mb-4">Vista previa de planilla</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Envíos para planilla</h3>
+                <div class="flex items-center space-x-2">
+                    <div class="text-sm text-gray-600">
+                        Mostrando: <span id="mostrandoCount">0</span> de <span id="totalCount">0</span>
+                    </div>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="selectAll" class="rounded">
+                        <span class="text-sm">Seleccionar todos</span>
+                    </label>
+                </div>
+            </div>
+            
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white border text-sm" id="tablaPreview">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="py-1 px-2 border">✓</th>
-                            <th class="py-1 px-2 border">ID</th>
-                            <th class="py-1 px-2 border">Destinatario</th>
-                            <th class="py-1 px-2 border">Teléfono</th>
-                            <th class="py-1 px-2 border">Valor</th>
-                            <th class="py-1 px-2 border">Observaciones</th>
+                            <th class="py-2 px-2 border text-center w-10">
+                                <input type="checkbox" id="headerCheckbox" class="rounded">
+                            </th>
+                            <th class="py-2 px-2 border">ID GUÍA</th>
+                            <th class="py-2 px-2 border">DESTINATARIO</th>
+                            <th class="py-2 px-2 border">TELÉFONO</th>
+                            <th class="py-2 px-2 border">VALOR</th>
+                            <th class="py-2 px-2 border">MENSAJERO</th>
+                            <th class="py-2 px-2 border">ESTADO</th>
+                            <th class="py-2 px-2 border">OBSERVACIONES</th>
                         </tr>
                     </thead>
                     <tbody id="tablaPreviewBody">
-                        <!-- Se llena dinámicamente -->
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-gray-500">
+                            <td colspan="8" class="py-8 text-center text-gray-500">
                                 <i class="fas fa-box-open text-4xl mb-2"></i>
                                 <p>No hay envíos para mostrar</p>
                                 <p class="text-sm">Usa los filtros para cargar envíos</p>
@@ -238,6 +303,16 @@
         let todosEnvios = [];
         let enviosFiltrados = [];
         let mensajerosLista = [];
+        let enviosSeleccionadosIds = new Set(); // Para trackear selecciones
+        
+        // Estados válidos del sistema
+        const ESTADOS_SISTEMA = {
+            RECIBIDO: "RECIBIDO",
+            REPARTO: "REPARTO", 
+            ENTREGADO: "ENTREGADO",
+            NOVEDAD: "NOVEDAD",
+            CANCELADO: "CANCELADO"
+        };
         
         // Inicializar cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
@@ -249,56 +324,62 @@
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('fechaFiltro').value = hoy;
             
+            // Configurar estado por defecto a RECIBIDO
+            document.getElementById('estadoFiltro').value = ESTADOS_SISTEMA.RECIBIDO;
+            
             // Configurar eventos
             configurarEventos();
             
             // Cargar mensajeros
             cargarMensajeros();
             
-            // Cargar envíos del día actual
+            // Cargar envíos del día actual (RECIBIDOS)
             cargarEnviosDelDia();
         }
         
         function configurarEventos() {
-            // Botones
+            // Botones principales
             document.getElementById('btnCargarHoy').addEventListener('click', cargarEnviosDelDia);
             document.getElementById('btnCargarEnvíos').addEventListener('click', cargarEnviosPorFechaDesdeAPI);
             document.getElementById('btnGenerarPlanilla').addEventListener('click', generarPlanillaImpresion);
             document.getElementById('btnLimpiarFiltros').addEventListener('click', limpiarFiltros);
+            document.getElementById('btnCambiarReparto').addEventListener('click', cambiarEnvíosAReparto);
             
             // Filtros
             document.getElementById('fechaFiltro').addEventListener('change', aplicarFiltros);
             document.getElementById('mensajeroFiltro').addEventListener('change', aplicarFiltros);
             document.getElementById('estadoFiltro').addEventListener('change', aplicarFiltros);
+            
+            // Selección multiple
+            document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
+            document.getElementById('headerCheckbox').addEventListener('change', toggleSelectAll);
         }
         
         async function cargarMensajeros() {
             try {
-                // Usar endpoint específico para mensajeros
                 const response = await fetch(`${WEB_APP_URL}?action=getMensajeros`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success && Array.isArray(data.mensajeros)) {
                         mensajerosLista = data.mensajeros.sort();
                         actualizarSelectMensajeros();
-                        console.log('✅ Mensajeros cargados desde API:', mensajerosLista.length);
+                        console.log('✅ Mensajeros cargados:', mensajerosLista.length);
                     }
                 }
             } catch (error) {
                 console.log('⚠️ No se pudieron cargar mensajeros:', error);
-                // Intentar extraer de localStorage como respaldo
+                // Intentar extraer de localStorage
                 let historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
                 if (historial.length > 0) {
                     const mensajerosSet = new Set();
                     historial.forEach(envio => {
                         const mensajero = envio["MENSAJERO"] || envio.mensajero;
-                        if (mensajero && mensajero !== 'Por asignar' && mensajero !== 'N/A') {
+                        if (mensajero && mensajero !== 'Por asignar') {
                             mensajerosSet.add(mensajero);
                         }
                     });
                     mensajerosLista = Array.from(mensajerosSet).sort();
                     actualizarSelectMensajeros();
-                    console.log('✅ Mensajeros extraídos de historial:', mensajerosLista.length);
                 }
             }
         }
@@ -323,24 +404,18 @@
             }
             
             document.getElementById('fechaFiltro').value = fechaParaCargar;
-            
-            // Mostrar mensaje informativo
             actualizarMensajeFecha(horaActual);
             
             await cargarEnviosPorFechaDesdeAPI();
         }
         
         function actualizarMensajeFecha(horaActual) {
-            const mensajeExistente = document.getElementById('mensajeFecha');
-            if (mensajeExistente) {
-                mensajeExistente.innerHTML = horaActual < 12 
-                    ? 'Mostrando envíos del día anterior (se generará planilla para entrega hoy)'
-                    : 'Mostrando envíos del día actual';
+            const mensajeDiv = document.getElementById('mensajeFecha');
+            if (mensajeDiv) {
+                mensajeDiv.innerHTML = horaActual < 12 
+                    ? 'Mostrando envíos RECIBIDOS del día anterior'
+                    : 'Mostrando envíos RECIBIDOS del día actual';
             }
-        }
-        
-        async function cargarTodosEnvios() {
-            await cargarEnviosPorFechaDesdeAPI();
         }
         
         async function cargarEnviosPorFechaDesdeAPI() {
@@ -348,30 +423,36 @@
                 mostrarLoading(true);
                 
                 const fecha = document.getElementById('fechaFiltro').value;
-                console.log('📅 Cargando envíos para fecha desde API:', fecha);
+                console.log('📅 Cargando envíos para fecha:', fecha);
                 
-                // Usar el endpoint getAllEnvios que tiene tu Apps Script
                 const url = `${WEB_APP_URL}?action=getAllEnvios&fecha=${encodeURIComponent(fecha)}`;
-                console.log('🔗 URL de consulta:', url);
-                
                 const response = await fetch(url);
+                
                 if (response.ok) {
                     const data = await response.json();
                     
-                    console.log('📊 Respuesta de API getAllEnvios:', data);
-                    
                     if (data.success && Array.isArray(data.data)) {
                         todosEnvios = data.data;
-                        console.log(`✅ ${todosEnvios.length} envíos cargados desde API para ${fecha}`);
+                        console.log(`✅ ${todosEnvios.length} envíos cargados para ${fecha}`);
                         
-                        // DEBUG: Mostrar primeros envíos para verificar
+                        // Mostrar información del primer envío para debug
                         if (todosEnvios.length > 0) {
-                            console.log('🔍 Primer envío cargado:', {
-                                id: todosEnvios[0]["ENVIO ID"],
-                                fecha: todosEnvios[0]["FECHA DE CREACION"],
-                                destinatario: todosEnvios[0]["DESTINO"],
-                                mensajero: todosEnvios[0]["MENSAJERO"]
+                            const primerEnvio = todosEnvios[0];
+                            console.log('🔍 Ejemplo de envío cargado:', {
+                                id: primerEnvio["ENVIO ID"],
+                                fecha: primerEnvio["FECHA DE CREACION"],
+                                estado: primerEnvio["ESTADO"],
+                                destinatario: primerEnvio["DESTINO"],
+                                mensajero: primerEnvio["MENSAJERO"]
                             });
+                            
+                            // Mostrar distribución de estados
+                            const estadosCount = {};
+                            todosEnvios.forEach(envio => {
+                                const estado = envio["ESTADO"] || ESTADOS_SISTEMA.RECIBIDO;
+                                estadosCount[estado] = (estadosCount[estado] || 0) + 1;
+                            });
+                            console.log('📊 Distribución de estados:', estadosCount);
                         }
                     } else {
                         console.log('⚠️ Respuesta API no exitosa:', data);
@@ -382,31 +463,29 @@
                     todosEnvios = [];
                 }
                 
-                // Si no hay datos, mostrar mensaje
                 if (todosEnvios.length === 0) {
                     console.log('⚠️ No hay envíos para la fecha seleccionada');
                     mostrarError('No se encontraron envíos para la fecha seleccionada');
                     
-                    // Intentar cargar desde localStorage como respaldo
+                    // Intentar desde localStorage
                     let historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
                     if (historial.length > 0) {
-                        console.log('🔄 Intentando cargar desde localStorage...');
                         todosEnvios = filtrarEnviosPorFechaLocal(historial, fecha);
                         console.log(`🔄 ${todosEnvios.length} envíos cargados desde localStorage`);
                     }
                 }
                 
-                // Extraer mensajeros de los envíos cargados
+                // Extraer mensajeros de los envíos
                 extraerMensajerosDeEnvios();
                 
-                // Aplicar filtros iniciales
+                // Aplicar filtros (por defecto muestra RECIBIDOS)
                 aplicarFiltros();
                 
             } catch (error) {
                 console.error('❌ Error cargando envíos:', error);
                 mostrarError('Error al cargar envíos: ' + error.message);
                 
-                // Intentar desde localStorage como último recurso
+                // Intentar desde localStorage
                 try {
                     let historial = JSON.parse(localStorage.getItem('historialCompleto')) || [];
                     const fecha = document.getElementById('fechaFiltro').value;
@@ -424,26 +503,19 @@
         }
         
         function filtrarEnviosPorFechaLocal(envios, fecha) {
-            // Formatear fecha para comparación (YYYY-MM-DD)
             const fechaFormateada = new Date(fecha).toISOString().split('T')[0];
             
             return envios.filter(envio => {
                 try {
-                    // Intentar varios campos de fecha
-                    const fechaEnvio = envio["FECHA DE CREACION"] || envio.fechaCreacion || envio.fecha || envio.timestamp;
-                    
+                    const fechaEnvio = envio["FECHA DE CREACION"] || envio.fechaCreacion || envio.fecha;
                     if (!fechaEnvio) return false;
                     
-                    // Convertir a Date
                     const fechaObj = new Date(fechaEnvio);
                     if (isNaN(fechaObj.getTime())) return false;
                     
-                    // Formatear a YYYY-MM-DD
                     const fechaEnvioStr = fechaObj.toISOString().split('T')[0];
-                    
                     return fechaEnvioStr === fechaFormateada;
                 } catch (e) {
-                    console.log('Error filtrando fecha:', e);
                     return false;
                 }
             });
@@ -460,15 +532,11 @@
                 });
                 
                 const nuevosMensajeros = Array.from(mensajerosSet).sort();
-                
-                // Actualizar lista si hay nuevos mensajeros
                 if (nuevosMensajeros.length > 0) {
-                    // Combinar con lista existente sin duplicados
                     const todosMensajeros = [...new Set([...mensajerosLista, ...nuevosMensajeros])].sort();
                     if (todosMensajeros.length !== mensajerosLista.length) {
                         mensajerosLista = todosMensajeros;
                         actualizarSelectMensajeros();
-                        console.log('✅ Mensajeros actualizados:', mensajerosLista.length);
                     }
                 }
             }
@@ -476,7 +544,7 @@
         
         function aplicarFiltros() {
             const mensajero = document.getElementById('mensajeroFiltro').value;
-            const estado = document.getElementById('estadoFiltro').value;
+            const estadoFiltro = document.getElementById('estadoFiltro').value;
             
             // Filtrar envíos
             enviosFiltrados = todosEnvios.filter(envio => {
@@ -488,14 +556,18 @@
                     cumple = cumple && (mensajeroEnvio === mensajero.toUpperCase());
                 }
                 
-                // Filtrar por estado
-                if (estado && estado !== '') {
-                    const estadoEnvio = (envio["ESTADO"] || envio.estado || 'pendiente').toLowerCase();
-                    cumple = cumple && (estadoEnvio === estado);
+                // Filtrar por estado (si se especificó)
+                if (estadoFiltro && estadoFiltro !== '') {
+                    const estadoEnvio = (envio["ESTADO"] || ESTADOS_SISTEMA.RECIBIDO).toUpperCase();
+                    cumple = cumple && (estadoEnvio === estadoFiltro.toUpperCase());
                 }
                 
                 return cumple;
             });
+            
+            // Actualizar contadores
+            document.getElementById('mostrandoCount').textContent = enviosFiltrados.length;
+            document.getElementById('totalCount').textContent = todosEnvios.length;
             
             // Actualizar estadísticas
             actualizarEstadisticas();
@@ -503,14 +575,18 @@
             // Actualizar vista previa
             actualizarVistaPrevia();
             
-            console.log(`✅ ${enviosFiltrados.length} envíos después de filtrar`);
+            console.log(`✅ ${enviosFiltrados.length} envíos después de filtrar (estado: ${estadoFiltro || 'todos'})`);
         }
         
         function actualizarEstadisticas() {
-            // Totales
-            document.getElementById('totalEnvios').textContent = enviosFiltrados.length;
+            // Contar envíos RECIBIDOS
+            const recibidos = todosEnvios.filter(envio => {
+                const estado = (envio["ESTADO"] || ESTADOS_SISTEMA.RECIBIDO).toUpperCase();
+                return estado === ESTADOS_SISTEMA.RECIBIDO;
+            });
+            document.getElementById('totalRecibidos').textContent = recibidos.length;
             
-            // Calcular valor a recaudar
+            // Calcular valor a recaudar de los filtrados
             let totalRecaudar = 0;
             enviosFiltrados.forEach(envio => {
                 const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
@@ -518,7 +594,7 @@
             });
             document.getElementById('totalRecaudar').textContent = `$${totalRecaudar.toLocaleString('es-CO')}`;
             
-            // Contar mensajeros únicos
+            // Contar mensajeros únicos en filtrados
             const mensajerosUnicos = new Set();
             enviosFiltrados.forEach(envio => {
                 const mensajero = envio["MENSAJERO"] || envio.mensajero;
@@ -528,12 +604,8 @@
             });
             document.getElementById('totalMensajeros').textContent = mensajerosUnicos.size;
             
-            // Contar pendientes
-            const pendientes = enviosFiltrados.filter(envio => {
-                const estado = (envio["ESTADO"] || envio.estado || 'pendiente').toLowerCase();
-                return estado === 'pendiente';
-            });
-            document.getElementById('totalPendientes').textContent = pendientes.length;
+            // Contar seleccionados
+            document.getElementById('totalSeleccionados').textContent = enviosSeleccionadosIds.size;
         }
         
         function actualizarVistaPrevia() {
@@ -542,7 +614,7 @@
             if (enviosFiltrados.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-gray-500">
+                        <td colspan="8" class="py-8 text-center text-gray-500">
                             <i class="fas fa-box-open text-4xl mb-2"></i>
                             <p>No hay envíos para mostrar</p>
                             <p class="text-sm">Usa los filtros para cargar envíos</p>
@@ -555,29 +627,51 @@
             let html = '';
             
             enviosFiltrados.forEach((envio, index) => {
+                const envioId = envio["ENVIO ID"] || envio.id || `N/A-${index}`;
+                const estaSeleccionado = enviosSeleccionadosIds.has(envioId);
                 const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
+                const telefono = envio["TELEFONOCLIENTE"] || envio.telefonoCliente || '';
+                const destinatario = envio["DESTINO"] || envio.destino || 'N/A';
+                const mensajero = envio["MENSAJERO"] || envio.mensajero || 'Por asignar';
+                const estado = envio["ESTADO"] || ESTADOS_SISTEMA.RECIBIDO;
+                const observacion = envio["OBS"] || envio.observaciones || '';
+                
+                // Determinar clase CSS para el estado
+                const estadoClass = `estado-${estado}`;
                 
                 html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-1 px-2 border text-center">
-                            <input type="checkbox" class="envio-checkbox" data-index="${index}" checked>
+                    <tr class="hover:bg-gray-50 ${estaSeleccionado ? 'bg-blue-50' : ''}">
+                        <td class="py-2 px-2 border text-center">
+                            <input type="checkbox" 
+                                   class="envio-checkbox" 
+                                   data-id="${envioId}"
+                                   ${estaSeleccionado ? 'checked' : ''}>
                         </td>
-                        <td class="py-1 px-2 border font-mono text-xs">
-                            ${envio["ENVIO ID"] || envio.id || 'N/A'}
+                        <td class="py-2 px-2 border font-mono text-xs">
+                            ${envioId}
                         </td>
-                        <td class="py-1 px-2 border">
-                            ${envio["DESTINO"] || envio.destino || 'N/A'}
+                        <td class="py-2 px-2 border">
+                            ${destinatario}
                         </td>
-                        <td class="py-1 px-2 border font-mono">
-                            ${envio["TELEFONOCLIENTE"] || envio.telefonoCliente || 'N/A'}
+                        <td class="py-2 px-2 border font-mono">
+                            ${telefono}
                         </td>
-                        <td class="py-1 px-2 border font-bold">
+                        <td class="py-2 px-2 border font-bold text-right">
                             $${valor.toLocaleString('es-CO')}
                         </td>
-                        <td class="py-1 px-2 border">
-                            <input type="text" class="w-full px-1 py-0.5 border border-gray-300 rounded text-xs" 
+                        <td class="py-2 px-2 border">
+                            ${mensajero}
+                        </td>
+                        <td class="py-2 px-2 border text-center">
+                            <span class="estado-badge ${estadoClass}">${estado}</span>
+                        </td>
+                        <td class="py-2 px-2 border">
+                            <input type="text" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded text-xs" 
                                    placeholder="Observaciones" 
-                                   data-index="${index}">
+                                   value="${observacion}"
+                                   data-id="${envioId}"
+                                   onchange="actualizarObservacion('${envioId}', this.value)">
                         </td>
                     </tr>
                 `;
@@ -588,17 +682,118 @@
             // Añadir eventos a los checkboxes
             document.querySelectorAll('.envio-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
-                    console.log('Checkbox cambiado:', this.checked, 'índice:', this.dataset.index);
+                    const envioId = this.dataset.id;
+                    if (this.checked) {
+                        enviosSeleccionadosIds.add(envioId);
+                    } else {
+                        enviosSeleccionadosIds.delete(envioId);
+                    }
+                    
+                    // Actualizar contador
+                    document.getElementById('totalSeleccionados').textContent = enviosSeleccionadosIds.size;
+                    
+                    // Actualizar fila con estilo
+                    const fila = this.closest('tr');
+                    if (this.checked) {
+                        fila.classList.add('bg-blue-50');
+                    } else {
+                        fila.classList.remove('bg-blue-50');
+                    }
+                    
+                    console.log('Selección actualizada:', enviosSeleccionadosIds.size, 'seleccionados');
                 });
             });
             
-            // Añadir eventos a los inputs de observaciones
-            document.querySelectorAll('input[placeholder="Observaciones"]').forEach(input => {
-                input.addEventListener('change', function() {
-                    const index = this.dataset.index;
-                    console.log('Observación para envío', index, ':', this.value);
-                });
+            // Actualizar checkboxes header
+            const totalCheckboxes = document.querySelectorAll('.envio-checkbox').length;
+            const checkedCheckboxes = document.querySelectorAll('.envio-checkbox:checked').length;
+            document.getElementById('headerCheckbox').checked = totalCheckboxes > 0 && checkedCheckboxes === totalCheckboxes;
+            document.getElementById('selectAll').checked = totalCheckboxes > 0 && checkedCheckboxes === totalCheckboxes;
+        }
+        
+        function toggleSelectAll(event) {
+            const isChecked = event.target.checked;
+            const checkboxes = document.querySelectorAll('.envio-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const envioId = checkbox.dataset.id;
+                
+                if (isChecked) {
+                    enviosSeleccionadosIds.add(envioId);
+                    const fila = checkbox.closest('tr');
+                    fila.classList.add('bg-blue-50');
+                } else {
+                    enviosSeleccionadosIds.delete(envioId);
+                    const fila = checkbox.closest('tr');
+                    fila.classList.remove('bg-blue-50');
+                }
             });
+            
+            document.getElementById('headerCheckbox').checked = isChecked;
+            document.getElementById('selectAll').checked = isChecked;
+            document.getElementById('totalSeleccionados').textContent = enviosSeleccionadosIds.size;
+            
+            console.log('Todos seleccionados:', isChecked, '| Total:', enviosSeleccionadosIds.size);
+        }
+        
+        function actualizarObservacion(envioId, observacion) {
+            console.log('Observación actualizada para', envioId, ':', observacion);
+            // Aquí podrías guardar la observación si necesitas persistencia
+        }
+        
+        async function cambiarEnvíosAReparto() {
+            if (enviosSeleccionadosIds.size === 0) {
+                alert('Selecciona al menos un envío para cambiar a estado REPARTO');
+                return;
+            }
+            
+            const enviosIds = Array.from(enviosSeleccionadosIds);
+            
+            if (!confirm(`¿Cambiar ${enviosIds.length} envío(s) a estado REPARTO?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
+            
+            try {
+                mostrarLoading(true);
+                
+                // Usar la API para cambiar estado
+                const url = `${WEB_APP_URL}?action=cambiarMasivoReparto&ids=${encodeURIComponent(JSON.stringify(enviosIds))}`;
+                console.log('URL para cambiar estado:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ ${data.actualizados} envíos cambiados a REPARTO exitosamente`);
+                    
+                    // Actualizar la lista local
+                    todosEnvios.forEach(envio => {
+                        const envioId = envio["ENVIO ID"] || envio.id;
+                        if (enviosIds.includes(envioId)) {
+                            envio["ESTADO"] = ESTADOS_SISTEMA.REPARTO;
+                        }
+                    });
+                    
+                    // Limpiar selecciones
+                    enviosSeleccionadosIds.clear();
+                    
+                    // Volver a aplicar filtros
+                    aplicarFiltros();
+                    
+                    // Recargar datos para asegurar sincronización
+                    setTimeout(() => cargarEnviosPorFechaDesdeAPI(), 1000);
+                    
+                } else {
+                    alert('❌ Error al cambiar estados: ' + (data.error || 'Desconocido'));
+                }
+                
+            } catch (error) {
+                console.error('Error cambiando estados:', error);
+                alert('❌ Error de conexión al cambiar estados');
+            } finally {
+                mostrarLoading(false);
+            }
         }
         
         function generarPlanillaImpresion() {
@@ -607,30 +802,41 @@
                 return;
             }
             
-            // Obtener envíos seleccionados (o todos si no hay selección)
-            const enviosSeleccionados = [];
-            const checkboxes = document.querySelectorAll('.envio-checkbox');
+            // Usar envíos seleccionados, o todos los filtrados si no hay selección
+            const idsParaPlanilla = enviosSeleccionadosIds.size > 0 
+                ? Array.from(enviosSeleccionadosIds) 
+                : enviosFiltrados.map(envio => envio["ENVIO ID"] || envio.id);
             
-            checkboxes.forEach((checkbox, index) => {
-                if (checkbox.checked && index < enviosFiltrados.length) {
-                    // Obtener observación si existe
-                    const observacionInput = document.querySelector(`input[data-index="${index}"][placeholder="Observaciones"]`);
-                    const observacion = observacionInput ? observacionInput.value : '';
-                    
-                    const envioConObservacion = {
-                        ...enviosFiltrados[index],
-                        OBS_IMPRESION: observacion
-                    };
-                    
-                    enviosSeleccionados.push(envioConObservacion);
-                }
+            const enviosParaPlanilla = enviosFiltrados.filter(envio => 
+                idsParaPlanilla.includes(envio["ENVIO ID"] || envio.id)
+            );
+            
+            if (enviosParaPlanilla.length === 0) {
+                alert('No hay envíos seleccionados para la planilla');
+                return;
+            }
+            
+            // Verificar que los envíos estén en estado RECIBIDO
+            const enviosNoRecibidos = enviosParaPlanilla.filter(envio => {
+                const estado = (envio["ESTADO"] || ESTADOS_SISTEMA.RECIBIDO).toUpperCase();
+                return estado !== ESTADOS_SISTEMA.RECIBIDO;
             });
             
-            const enviosAImprimir = enviosSeleccionados.length > 0 ? enviosSeleccionados : enviosFiltrados;
+            if (enviosNoRecibidos.length > 0) {
+                const confirmar = confirm(
+                    `${enviosNoRecibidos.length} envío(s) no están en estado RECIBIDO.\n` +
+                    `Estados encontrados: ${[...new Set(enviosNoRecibidos.map(e => e["ESTADO"] || 'N/A'))].join(', ')}\n\n` +
+                    `¿Deseas generar la planilla de todas formas?`
+                );
+                
+                if (!confirmar) {
+                    return;
+                }
+            }
             
             // Agrupar por mensajero
             const enviosPorMensajero = {};
-            enviosAImprimir.forEach(envio => {
+            enviosParaPlanilla.forEach(envio => {
                 const mensajero = envio["MENSAJERO"] || envio.mensajero || 'Sin asignar';
                 if (!enviosPorMensajero[mensajero]) {
                     enviosPorMensajero[mensajero] = [];
@@ -638,36 +844,28 @@
                 enviosPorMensajero[mensajero].push(envio);
             });
             
-            // OBTENER FECHA CORRECTA PARA LA PLANILLA
+            // Obtener fecha para planilla
             const fechaSeleccionada = document.getElementById('fechaFiltro').value;
-            console.log('📅 Fecha seleccionada en filtro:', fechaSeleccionada);
-            
             const fechaParaPlanilla = new Date(fechaSeleccionada);
             const ahora = new Date();
             const horaActual = ahora.getHours();
-            
-            // Verificar si estamos trabajando con fecha de hoy
             const hoyISO = new Date().toISOString().split('T')[0];
             const fechaSeleccionadaISO = new Date(fechaSeleccionada).toISOString().split('T')[0];
             
             let fechaFinalParaPlanilla = fechaParaPlanilla;
             
-            // Solo ajustar si estamos trabajando con "hoy" y es temprano
+            // Ajustar fecha si es temprano
             if (fechaSeleccionadaISO === hoyISO && horaActual < 12) {
-                // Para la mañana antes del mediodía, la planilla es del día anterior
                 fechaFinalParaPlanilla.setDate(fechaFinalParaPlanilla.getDate() - 1);
-                console.log('🕐 Es antes del mediodía, ajustando a fecha de ayer:', 
-                           fechaFinalParaPlanilla.toISOString().split('T')[0]);
             }
             
-            // Formatear fecha para mostrar en la planilla
+            // Formatear fecha
             const fechaFormateada = fechaFinalParaPlanilla.toLocaleDateString('es-CO', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
             });
             
-            // Fecha de generación
             const fechaGeneracion = new Date().toLocaleString('es-CO', {
                 day: '2-digit',
                 month: '2-digit',
@@ -676,18 +874,18 @@
                 minute: '2-digit'
             });
             
-            console.log('📋 Generando planilla con fecha:', fechaFormateada, 
-                       '| Hora actual:', horaActual + ':00',
-                       '| Envíos a imprimir:', enviosAImprimir.length);
+            console.log('📋 Generando planilla para:', fechaFormateada, 
+                       '| Envíos:', enviosParaPlanilla.length,
+                       '| Mensajeros:', Object.keys(enviosPorMensajero).length);
             
+            // Generar HTML de impresión
             let htmlPlanilla = '';
             
             Object.keys(enviosPorMensajero).forEach((mensajero, mensajeroIndex) => {
                 const enviosMensajero = enviosPorMensajero[mensajero];
                 let totalRecaudar = 0;
-                let totalEnvíos = enviosMensajero.length;
                 
-                // Calcular total a recaudar
+                // Calcular total
                 enviosMensajero.forEach(envio => {
                     const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
                     if (!isNaN(valor)) totalRecaudar += valor;
@@ -695,22 +893,22 @@
                 
                 htmlPlanilla += `
                     <div class="planilla-mensajero print-optimized" ${mensajeroIndex > 0 ? 'style="page-break-before: always;"' : ''}>
-                        <!-- Encabezado compacto -->
                         <div class="header-impresion text-center mb-3">
                             <h1 style="font-size: 16px; font-weight: bold; margin: 0;">EXPRES CONTRAENTREGA</h1>
                             <h2 style="font-size: 14px; font-weight: bold; margin: 0;">PLANILLA DE MENSAJERO</h2>
                             <div style="font-size: 11px; margin-top: 5px;">
                                 <strong>Fecha de entrega:</strong> ${fechaFormateada} | 
                                 <strong>Mensajero:</strong> ${mensajero} | 
-                                <strong>Envíos:</strong> ${totalEnvíos} | 
+                                <strong>Envíos:</strong> ${enviosMensajero.length} | 
                                 <strong>Total a recaudar:</strong> $${totalRecaudar.toLocaleString('es-CO')}
                             </div>
                             <div style="font-size: 9px; color: #666; margin-top: 2px;">
-                                <strong>Planilla generada:</strong> ${fechaGeneracion}
+                                <strong>Planilla generada:</strong> ${fechaGeneracion} | 
+                                <strong>Estado anterior:</strong> RECIBIDO | 
+                                <strong>Nuevo estado:</strong> REPARTO
                             </div>
                         </div>
                         
-                        <!-- Tabla optimizada -->
                         <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                             <thead>
                                 <tr style="background-color: #f0f0f0;">
@@ -719,16 +917,16 @@
                                     <th style="border: 1px solid #000; padding: 2px;">DESTINATARIO</th>
                                     <th style="border: 1px solid #000; padding: 2px; width: 70px;">TELÉFONO</th>
                                     <th style="border: 1px solid #000; padding: 2px; width: 60px;">VALOR</th>
-                                    <th style="border: 1px solid #000; padding: 2px; width: 100px;">OBSERVACIONES</th>
+                                    <th style="border: 1px solid #000; padding: 2px;">OBSERVACIONES</th>
                                 </tr>
                             </thead>
                             <tbody>
                 `;
                 
-                enviosMensajero.forEach((envio, index) => {
+                enviosMensajero.forEach(envio => {
                     const valor = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
                     const telefono = envio["TELEFONOCLIENTE"] || envio.telefonoCliente || '';
-                    const observacion = envio["OBS_IMPRESION"] || envio["OBS"] || envio.observaciones || '';
+                    const observacion = envio["OBS"] || envio.observaciones || '';
                     
                     htmlPlanilla += `
                         <tr>
@@ -754,17 +952,15 @@
                     `;
                 });
                 
-                // Pie de página compacto
                 htmlPlanilla += `
                             </tbody>
                         </table>
                         
-                        <!-- Resumen al pie -->
                         <div style="margin-top: 15px; font-size: 9px; border-top: 1px solid #000; padding-top: 5px;">
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="width: 60%;">
-                                        <strong>RESUMEN:</strong> ${totalEnvíos} envíos | Total a recaudar: $${totalRecaudar.toLocaleString('es-CO')}
+                                        <strong>RESUMEN:</strong> ${enviosMensajero.length} envíos | Total a recaudar: $${totalRecaudar.toLocaleString('es-CO')}
                                     </td>
                                     <td style="width: 40%; text-align: center;">
                                         <div style="border-top: 1px solid #000; padding-top: 3px; margin-top: 10px;">
@@ -775,9 +971,7 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="padding-top: 10px; font-size: 8px; color: #666;">
-                                        Fecha de entrega: ${fechaFormateada} | 
-                                        Planilla generada: ${fechaGeneracion} | 
-                                        Página ${mensajeroIndex + 1} de ${Object.keys(enviosPorMensajero).length}
+                                        <strong>INSTRUCCIONES:</strong> Entregar según planilla | Reportar novedades inmediatamente
                                     </td>
                                 </tr>
                             </table>
@@ -786,53 +980,79 @@
                 `;
             });
             
-            // Insertar en el contenedor de impresión
-            const contenedorImpresion = document.getElementById('plantillaImpresion');
-            contenedorImpresion.innerHTML = htmlPlanilla;
-            contenedorImpresion.classList.remove('hidden');
+            // Mostrar confirmación antes de imprimir
+            const mensajeConfirmacion = `¿Generar planilla para ${enviosParaPlanilla.length} envío(s)?\n\n` +
+                                       `Mensajeros: ${Object.keys(enviosPorMensajero).length}\n` +
+                                       `Fecha planilla: ${fechaFormateada}`;
             
-            // Mostrar mensaje informativo y confirmación
-            const horaActualParaMensaje = ahora.getHours();
-            if (fechaSeleccionadaISO === hoyISO && horaActualParaMensaje < 12) {
-                const fechaAyer = new Date();
-                fechaAyer.setDate(fechaAyer.getDate() - 1);
-                const fechaAyerFormateada = fechaAyer.toLocaleDateString('es-CO', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
+            if (confirm(mensajeConfirmacion)) {
+                // Insertar en contenedor de impresión
+                const contenedorImpresion = document.getElementById('plantillaImpresion');
+                contenedorImpresion.innerHTML = htmlPlanilla;
+                contenedorImpresion.classList.remove('hidden');
                 
-                console.log(`ℹ️ INFORMACIÓN: Es ${horaActualParaMensaje}:00, generando planilla con fecha ${fechaAyerFormateada}`);
-                
-                if (confirm(`Son las ${horaActualParaMensaje}:00. La planilla se generará con fecha ${fechaAyerFormateada} (día anterior). ¿Continuar?`)) {
-                    setTimeout(() => {
-                        window.print();
-                        contenedorImpresion.classList.add('hidden');
-                    }, 100);
-                } else {
-                    contenedorImpresion.classList.add('hidden');
-                }
-            } else {
-                // Imprimir directamente
+                // Mostrar diálogo para cambiar a REPARTO después de imprimir
                 setTimeout(() => {
                     window.print();
-                    contenedorImpresion.classList.add('hidden');
+                    
+                    // Después de imprimir, preguntar si cambiar a REPARTO
+                    setTimeout(() => {
+                        contenedorImpresion.classList.add('hidden');
+                        
+                        if (confirm('¿Deseas cambiar los envíos de esta planilla a estado REPARTO?\n\n' +
+                                   'Los mensajeros podrán verlos en su app después de este cambio.')) {
+                            // Cambiar automáticamente a REPARTO
+                            const idsParaCambio = enviosParaPlanilla
+                                .filter(envio => {
+                                    const estado = (envio["ESTADO"] || ESTADOS_SISTEMA.RECIBIDO).toUpperCase();
+                                    return estado === ESTADOS_SISTEMA.RECIBIDO;
+                                })
+                                .map(envio => envio["ENVIO ID"] || envio.id);
+                            
+                            if (idsParaCambio.length > 0) {
+                                cambiarEnviosARepartoBatch(idsParaCambio);
+                            } else {
+                                alert('Todos los envíos ya están en REPARTO o otro estado');
+                            }
+                        }
+                    }, 500);
+                    
                 }, 100);
+            }
+        }
+        
+        async function cambiarEnviosARepartoBatch(ids) {
+            try {
+                const url = `${WEB_APP_URL}?action=cambiarMasivoReparto&ids=${encodeURIComponent(JSON.stringify(ids))}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ ${data.actualizados} envíos cambiados a REPARTO`);
+                    
+                    // Actualizar datos locales
+                    setTimeout(() => cargarEnviosPorFechaDesdeAPI(), 1000);
+                } else {
+                    alert('⚠️ No se pudieron cambiar todos los estados: ' + (data.error || ''));
+                }
+            } catch (error) {
+                alert('❌ Error cambiando estados: ' + error.message);
             }
         }
         
         function limpiarFiltros() {
             document.getElementById('mensajeroFiltro').value = '';
-            document.getElementById('estadoFiltro').value = '';
+            document.getElementById('estadoFiltro').value = ESTADOS_SISTEMA.RECIBIDO;
+            enviosSeleccionadosIds.clear();
             aplicarFiltros();
         }
         
         function mostrarLoading(mostrar) {
+            const tbody = document.getElementById('tablaPreviewBody');
             if (mostrar) {
-                // Mostrar indicador de carga
-                document.getElementById('tablaPreviewBody').innerHTML = `
+                tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-gray-500">
+                        <td colspan="8" class="py-8 text-center text-gray-500">
                             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
                             <p>Cargando envíos...</p>
                         </td>
@@ -842,13 +1062,11 @@
         }
         
         function mostrarError(mensaje) {
-            // Mostrar error en la tabla
             document.getElementById('tablaPreviewBody').innerHTML = `
                 <tr>
-                    <td colspan="6" class="py-8 text-center text-red-500">
+                    <td colspan="8" class="py-8 text-center text-red-500">
                         <i class="fas fa-exclamation-triangle text-4xl mb-2"></i>
                         <p>${mensaje}</p>
-                        <p class="text-sm mt-2">Intenta nuevamente o verifica la conexión</p>
                     </td>
                 </tr>
             `;
@@ -867,7 +1085,6 @@
                 select.appendChild(option);
             });
             
-            // Restaurar valor seleccionado si existe
             if (valorActual && mensajerosLista.includes(valorActual)) {
                 select.value = valorActual;
             }
