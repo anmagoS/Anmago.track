@@ -166,7 +166,8 @@ function inicializarGooglePlacesAutocomplete() {
                 lngField.value = longitud;
                 
                 // Generar URL de Maps con coordenadas EXACTAS
-                const urlMaps = `https://www.google.com/maps?q=${latitud},${longitud}&z=17`;
+               const latitud = lugar.geometry.location.lat();  // 4.654321
+const longitud = lugar.geometry.location.lng(); // -74.123456
                 urlField.value = urlMaps;
                 
                 console.log('✅ Coordenadas y URL guardadas:', {
@@ -2684,4 +2685,5 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
