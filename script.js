@@ -2172,7 +2172,7 @@ async function manejarEnvioFormulario(e) {
             // 🔥 AGREGAR COORDENADAS AL FORMDATA
             if (latitud) formData.append("latitud", latitud);
             if (longitud) formData.append("longitud", longitud);
-            if (urlMapsFinal) formData.append("urlMaps", urlMapsFinal);
+            
             
             // Debug: Ver qué estamos enviando
             console.log('📤 Enviando FormData (con ID único y coordenadas):');
@@ -2684,3 +2684,4 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
