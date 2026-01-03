@@ -168,7 +168,7 @@ function inicializarGooglePlacesAutocomplete() {
                 // Generar URL de Maps con coordenadas EXACTAS
                const latitud = lugar.geometry.location.lat();  // 4.654321
 const longitud = lugar.geometry.location.lng(); // -74.123456
-                urlField.value = urlMaps;
+               
                 
                 console.log('✅ Coordenadas y URL guardadas:', {
                     latitud: latField.value,
@@ -187,7 +187,7 @@ const longitud = lugar.geometry.location.lng(); // -74.123456
                 if (newLatField && newLngField && newUrlField) {
                     newLatField.value = latitud;
                     newLngField.value = longitud;
-                    newUrlField.value = `https://www.google.com/maps?q=${latitud},${longitud}&z=17`;
+                    newUrlField.value = ``;
                 }
             }
             
@@ -1987,18 +1987,7 @@ async function manejarEnvioFormulario(e) {
         });
         
         // Si no hay coordenadas, intentar generar URL con la dirección
-        let urlMapsFinal = urlMaps;
-        if (!urlMapsFinal) {
-            const direccion = document.getElementById('direccionDestino').value;
-            if (direccion) {
-                if (latitud && longitud) {
-                    urlMapsFinal = `https://www.google.com/maps?q=${latitud},${longitud}&z=17`;
-                } else {
-                    const direccionCodificada = encodeURIComponent(direccion);
-                    urlMapsFinal = `https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`;
-                }
-            }
-        }
+       
         
         // Calcular valores
         const formaPago = document.getElementById('formaPago').value;
@@ -2105,9 +2094,7 @@ async function manejarEnvioFormulario(e) {
             // ============================================
             // 🔥 NUEVOS CAMPOS - COORDENADAS Y URL DE MAPS
             // ============================================
-            "LATITUD": latitud,        // Nueva columna X
-            "LONGITUD": longitud,      // Nueva columna Y
-            "URL_MAPS": urlMapsFinal   // Columna W ya existe
+           
         };
         
         console.log('📝 Datos a enviar (con coordenadas):', datosEnvio);
@@ -2685,5 +2672,6 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
 
