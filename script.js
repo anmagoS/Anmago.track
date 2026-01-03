@@ -1755,14 +1755,27 @@ async function manejarEnvioFormulario(e) {
         // PASO 2: CREAR URL DE GOOGLE MAPS AUTOMÁTICAMENTE
         // ============================================
         const direccionDestino = document.getElementById('direccionDestino').value;
-        
-        // Codificar la dirección para URL
-        const direccionCodificada = encodeURIComponent(direccionDestino.trim());
-        
-        // Crear URL de Google Maps
-        const urlGoogleMaps = `https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`;
-        
-        console.log('📍 URL Google Maps generada:', urlGoogleMaps);
+
+// Obtener coordenadas de Google Places
+let latitud = "";
+let longitud = "";
+
+// Verificar si tenemos coordenadas del autocomplete
+if (window.ultimaDireccionSeleccionada) {
+    latitud = window.ultimaDireccionSeleccionada.latitud.toString();
+    longitud = window.ultimaDireccionSeleccionada.longitud.toString();
+    
+    console.log("📍 Coordenadas obtenidas:", latitud, longitud);
+} else {
+    console.warn("⚠️ No hay coordenadas disponibles");
+}
+
+// Crear URL de Google Maps
+const direccionCodificada = encodeURIComponent(direccionDestino.trim());
+const urlGoogleMaps = `https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`;
+
+console.log('📍 URL Google Maps generada:', urlGoogleMaps);
+console.log('📍 Coordenadas para hoja:', `${latitud}, ${longitud}`);
         
         // ============================================
         // DATOS ENVIADOS A GOOGLE SHEETS (CON EL MISMO ID)
@@ -1837,7 +1850,8 @@ async function manejarEnvioFormulario(e) {
             // ============================================
             // NUEVA COLUMNA W: URL DIRECCION MAPS
             // ============================================
-            "URL DIRECCION MAPS": urlGoogleMaps
+            "URL DIRECCION MAPS": urlGoogleMaps,
+            "COORDENADAS": `${latitud}, ${longitud}`,
         };
         
         console.log('📝 Datos a enviar a Google Sheets (con URL de Maps):', datosEnvio);
@@ -1900,6 +1914,7 @@ async function manejarEnvioFormulario(e) {
             formData.append("correoRemitente", datosEnvio["CORREO REMITENTE"]);
             formData.append("usuarioId", datosEnvio["USUARIO ID"]);
             formData.append("urlMaps", datosEnvio["URL DIRECCION MAPS"]);
+            formData.append("coordenadas", datosEnvio["COORDENADAS"]);
             
             // Debug: Ver qué estamos enviando
             console.log('📤 Enviando FormData (con ID único):');
