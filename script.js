@@ -28,12 +28,9 @@ let paymentOptions, barrioInput, barrioIdInput, autocompleteDropdown;
 let remitenteInput, remitenteDropdown;
 let resumenFormaPago, resumenValorRecaudar, resumenEstado;
 let submitButton, submitText, submitIcon;
-// ============================================
-// GOOGLE PLACES AUTOCOMPLETE - COMPLETO CON COORDENADAS
-// ============================================
 
 // ============================================
-// GOOGLE PLACES AUTOCOMPLETE - CORREGIDO
+// GOOGLE PLACES AUTOCOMPLETE - CORREGIDO COMPLETO
 // ============================================
 
 function inicializarGooglePlacesAutocomplete() {
@@ -84,7 +81,10 @@ function inicializarGooglePlacesAutocomplete() {
         // ============================================
         function crearCamposCoordenadas() {
             const form = document.getElementById('deliveryForm');
-            if (!form) return;
+            if (!form) {
+                console.error("❌ No se encontró el formulario");
+                return;
+            }
             
             // Verificar si ya existen
             let latField = document.getElementById('latitud');
@@ -123,10 +123,12 @@ function inicializarGooglePlacesAutocomplete() {
                 form.appendChild(urlField);
                 console.log('✅ Campo oculto "urlMaps" creado');
             }
+            
+            return { latField, lngField, urlField };
         }
         
         // Crear campos al inicializar
-        crearCamposCoordenadas();
+        const campos = crearCamposCoordenadas();
         
         // ============================================
         // CONFIGURAR EVENTO CUANDO SE SELECCIONA UNA DIRECCIÓN
@@ -173,8 +175,19 @@ function inicializarGooglePlacesAutocomplete() {
                     urlMaps: urlField.value
                 });
             } else {
-                console.error('❌ Campos ocultos no encontrados');
+                console.error('❌ Campos ocultos no encontrados, creando...');
                 crearCamposCoordenadas();
+                
+                // Intentar asignar valores nuevamente
+                const newLatField = document.getElementById('latitud');
+                const newLngField = document.getElementById('longitud');
+                const newUrlField = document.getElementById('urlMaps');
+                
+                if (newLatField && newLngField && newUrlField) {
+                    newLatField.value = latitud;
+                    newLngField.value = longitud;
+                    newUrlField.value = `https://www.google.com/maps?q=${latitud},${longitud}&z=17`;
+                }
             }
             
             // ============================================
@@ -183,45 +196,53 @@ function inicializarGooglePlacesAutocomplete() {
             let barrioEncontrado = '';
             let localidadEncontrada = '';
             
-            place.address_components.forEach(component => {
-                const tipos = component.types;
-                
-                console.log("🔍 Componente de dirección:", {
-                    tipos: tipos,
-                    nombre: component.long_name,
-                    nombre_corto: component.short_name
+            if (place.address_components) {
+                place.address_components.forEach(component => {
+                    const tipos = component.types;
+                    
+                    console.log("🔍 Componente de dirección:", {
+                        tipos: tipos,
+                        nombre: component.long_name,
+                        nombre_corto: component.short_name
+                    });
+                    
+                    // Barrio (sublocality_level_1 o neighborhood)
+                    if (tipos.includes('sublocality_level_1') || 
+                        tipos.includes('neighborhood') ||
+                        tipos.includes('sublocality')) {
+                        
+                        if (!barrioEncontrado) {
+                            barrioEncontrado = component.long_name;
+                            console.log("🏘️ Barrio encontrado:", barrioEncontrado);
+                        }
+                    }
+                    
+                    // Localidad (locality o administrative_area_level_2)
+                    if (tipos.includes('locality') || 
+                        tipos.includes('administrative_area_level_2')) {
+                        
+                        if (!localidadEncontrada) {
+                            localidadEncontrada = component.long_name;
+                            console.log("📍 Localidad encontrada:", localidadEncontrada);
+                        }
+                    }
                 });
-                
-                // Barrio (sublocality_level_1 o neighborhood)
-                if (tipos.includes('sublocality_level_1') || 
-                    tipos.includes('neighborhood') ||
-                    tipos.includes('sublocality')) {
-                    
-                    if (!barrioEncontrado) {
-                        barrioEncontrado = component.long_name;
-                        console.log("🏘️ Barrio encontrado:", barrioEncontrado);
-                    }
-                }
-                
-                // Localidad (locality o administrative_area_level_2)
-                if (tipos.includes('locality') || 
-                    tipos.includes('administrative_area_level_2')) {
-                    
-                    if (!localidadEncontrada) {
-                        localidadEncontrada = component.long_name;
-                        console.log("📍 Localidad encontrada:", localidadEncontrada);
-                    }
-                }
-            });
+            }
             
             // Poblar campo de barrio
             const barrioInput = document.getElementById('barrioLocalidad');
-            if (barrioInput && barrioEncontrado) {
-                barrioInput.value = barrioEncontrado;
-                console.log("✅ Barrio autocompletado:", barrioEncontrado);
+            if (barrioInput) {
+                if (barrioEncontrado) {
+                    barrioInput.value = barrioEncontrado;
+                    console.log("✅ Barrio autocompletado:", barrioEncontrado);
+                    
+                    // También buscar en la base de datos de barrios
+                    buscarBarrioEnBaseDatos(barrioEncontrado);
+                }
                 
-                // También buscar en la base de datos de barrios
-                buscarBarrioEnBaseDatos(barrioEncontrado);
+                // Disparar evento para que el sistema sepa que el barrio cambió
+                barrioInput.dispatchEvent(new Event('input', { bubbles: true }));
+                barrioInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
             
             // Mostrar notificación
@@ -240,6 +261,7 @@ function inicializarGooglePlacesAutocomplete() {
         direccionInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && document.activeElement === direccionInput) {
                 e.preventDefault();
+                e.stopPropagation();
             }
         });
         
@@ -250,52 +272,82 @@ function inicializarGooglePlacesAutocomplete() {
         mostrarErrorGoogleMaps();
     }
 }
+
 // ============================================
-// AGREGAR ESTA FUNCIÓN AL EVENTO DE ENVÍO DEL FORMULARIO
+// FUNCIÓN PARA BUSCAR BARRIO EN BASE DE DATOS
 // ============================================
-function agregarVerificacionCoordenadasAlFormulario() {
-    const formulario = document.querySelector('form');
-    if (formulario) {
-        formulario.addEventListener('submit', function(e) {
-            console.log('📤 FORMULARIO ENVIÁNDOSE - VERIFICANDO COORDENADAS');
-            
-            // Verificar campos de coordenadas
-            const latitud = document.getElementById('latitud')?.value;
-            const longitud = document.getElementById('longitud')?.value;
-            
-            console.log('📊 Datos de coordenadas a enviar:', {
-                latitud: latitud,
-                longitud: longitud,
-                tieneLatitud: !!latitud,
-                tieneLongitud: !!longitud
-            });
-            
-            // Mostrar todos los datos del formulario para depuración
-            const formData = new FormData(formulario);
-            console.log('📝 Todos los datos del formulario:');
-            for (let [key, value] of formData.entries()) {
-                console.log(`  ${key}: ${value}`);
-            }
-        });
+function buscarBarrioEnBaseDatos(nombreBarrio) {
+    if (!nombreBarrio || !window.barriosData || window.barriosData.length === 0) {
+        console.log("ℹ️ No hay datos de barrios para buscar");
+        return;
+    }
+    
+    const barrioBuscado = nombreBarrio.toUpperCase().trim();
+    console.log(`🔍 Buscando barrio en base de datos: "${barrioBuscado}"`);
+    
+    // Buscar coincidencia exacta o parcial
+    const barrioEncontrado = window.barriosData.find(barrio => {
+        if (!barrio.nombre) return false;
+        const nombreBarrioDB = barrio.nombre.toUpperCase();
+        return nombreBarrioDB.includes(barrioBuscado) || barrioBuscado.includes(nombreBarrioDB);
+    });
+    
+    if (barrioEncontrado) {
+        console.log("✅ Barrio encontrado en base de datos:", barrioEncontrado);
+        
+        // Actualizar campo de barrio con el formato correcto
+        const barrioInput = document.getElementById('barrioLocalidad');
+        if (barrioInput) {
+            barrioInput.value = barrioEncontrado.nombre;
+        }
+        
+        // Actualizar campo oculto de barrioId si existe
+        const barrioIdInput = document.getElementById('barrioId');
+        if (barrioIdInput) {
+            barrioIdInput.value = barrioEncontrado.id || '';
+            console.log("✅ ID de barrio asignado:", barrioEncontrado.id);
+        }
+    } else {
+        console.log("ℹ️ Barrio no encontrado en base de datos, se usará el de Google");
     }
 }
 
 // ============================================
-// INICIALIZACIÓN COMPLETA
+// FUNCIÓN MEJORADA DE NOTIFICACIÓN CON COORDENADAS
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar autocomplete
-    inicializarGooglePlacesAutocomplete();
+function mostrarNotificacionDireccion(direccion, latitud, longitud) {
+    // Crear notificación flotante
+    const notificacion = document.createElement('div');
+    notificacion.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl z-50 flex items-center gap-3 animate-slideUp';
+    notificacion.style.cssText = `
+        animation: slideUp 0.3s ease-out forwards;
+        max-width: 90%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    `;
     
-    // Agregar animaciones CSS
-    agregarAnimacionesCSS();
+    let texto = `📍 Dirección encontrada: ${direccion.substring(0, 40)}${direccion.length > 40 ? '...' : ''}`;
     
-    // Agregar verificación al formulario (opcional, para debug)
+    if (latitud && longitud) {
+        texto += `<br><small class="opacity-80">Coordenadas: ${latitud.toFixed(6)}, ${longitud.toFixed(6)}</small>`;
+    }
+    
+    notificacion.innerHTML = `
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        <div class="text-sm font-medium">${texto}</div>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Eliminar después de 4 segundos
     setTimeout(() => {
-        agregarVerificacionCoordenadasAlFormulario();
-        console.log('🔄 Sistema de coordenadas listo');
-    }, 1000);
-});
+        notificacion.style.animation = 'slideDown 0.3s ease-in forwards';
+        setTimeout(() => {
+            if (notificacion.parentElement) notificacion.remove();
+        }, 300);
+    }, 4000);
+}
 
 function mostrarErrorGoogleMaps() {
     const direccionInput = document.getElementById('direccionDestino');
@@ -390,8 +442,84 @@ function agregarAnimacionesCSS() {
                 border-radius: 12px 12px 0 0 !important;
             }
         }
+        
+        /* Modo oscuro */
+        .dark .pac-container {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        }
+        
+        .dark .pac-item {
+            border-bottom-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        
+        .dark .pac-item:hover {
+            background-color: #334155 !important;
+        }
+        
+        .dark .pac-item-selected {
+            background-color: #2563eb !important;
+        }
     `;
     document.head.appendChild(style);
+}
+
+// ============================================
+// AGREGAR ESTA FUNCIÓN AL EVENTO DE ENVÍO DEL FORMULARIO
+// ============================================
+function agregarVerificacionCoordenadasAlFormulario() {
+    const formulario = document.querySelector('form');
+    if (formulario) {
+        formulario.addEventListener('submit', function(e) {
+            console.log('📤 FORMULARIO ENVIÁNDOSE - VERIFICANDO COORDENADAS');
+            
+            // Verificar campos de coordenadas
+            const latitud = document.getElementById('latitud')?.value;
+            const longitud = document.getElementById('longitud')?.value;
+            const urlMaps = document.getElementById('urlMaps')?.value;
+            
+            console.log('📊 Datos de coordenadas a enviar:', {
+                latitud: latitud,
+                longitud: longitud,
+                urlMaps: urlMaps,
+                tieneLatitud: !!latitud,
+                tieneLongitud: !!longitud,
+                tieneUrlMaps: !!urlMaps
+            });
+            
+            // Mostrar todos los datos del formulario para depuración
+            const formData = new FormData(formulario);
+            console.log('📝 Todos los datos del formulario:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}: ${value}`);
+            }
+        });
+    }
+}
+
+// ============================================
+// FUNCIÓN DE DEBUG PARA VERIFICAR COORDENADAS
+// ============================================
+function debugCoordenadas() {
+    console.log('🔍 DEBUG - Verificando coordenadas:');
+    
+    const campos = [
+        'latitud', 'longitud', 'urlMaps', 'direccionDestino', 'barrioLocalidad'
+    ];
+    
+    campos.forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo) {
+            console.log(`  ${id}:`, campo.value);
+        } else {
+            console.log(`  ${id}: NO EXISTE`);
+        }
+    });
+    
+    // Verificar si Google Places está cargado
+    console.log('  Google Places cargado:', typeof google !== 'undefined' && google.maps && google.maps.places);
 }
 
 // ============================================
@@ -403,7 +531,7 @@ function initApp() {
     
     initializeDOMElements();
     
-   loadBarriosData().then(() => {
+    loadBarriosData().then(() => {
         loadRemitentesData();
         loadUsuariosParaAutocomplete().then(() => {
             setupEventListeners();
@@ -434,8 +562,10 @@ function initApp() {
                         }
                     }, 2000);
                 }
-            }, 1000); // Aumentado a 1 segundo
-            // ========== FIN DE GOOGLE PLACES ==========
+            }, 1000);
+            
+            // Agregar botón de debug temporalmente (opcional)
+            agregarBotonDebug();
             
             console.log('✅ Aplicación inicializada');
         });
@@ -445,6 +575,19 @@ function initApp() {
         setupEventListeners();
         initializeUI();
     });
+}
+
+function agregarBotonDebug() {
+    // Solo en desarrollo
+    if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
+        setTimeout(() => {
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = '🔍 Debug Coordenadas';
+            debugBtn.style.cssText = 'position: fixed; bottom: 60px; right: 10px; z-index: 9999; background: #f00; color: white; padding: 8px 12px; border-radius: 5px; font-size: 12px; border: none; cursor: pointer;';
+            debugBtn.onclick = debugCoordenadas;
+            document.body.appendChild(debugBtn);
+        }, 3000);
+    }
 }
 
 // ============================================
@@ -538,11 +681,6 @@ async function loadUsuariosParaAutocomplete() {
         window.usuariosDisponibles = usuariosDisponibles;
         
         console.log(`📊 ${usuariosDisponibles.length} usuarios disponibles para autocomplete`);
-        
-        // Mostrar detalles de los usuarios disponibles
-        usuariosDisponibles.forEach((usuario, index) => {
-            console.log(`   ${index + 1}. ${usuario["NOMBRE REMITENTE"] || usuario["NOMBRE COMPLETO"]} - Tel: ${usuario["TELEFONO REMITENTE"] || usuario.TELEFONO}`);
-        });
         
         return usuariosDisponibles;
         
@@ -1801,7 +1939,7 @@ function actualizarResumen() {
 }
 
 // ============================================
-// FUNCIÓN PARA MANEJAR EL ENVÍO DEL FORMULARIO
+// FUNCIÓN PARA MANEJAR EL ENVÍO DEL FORMULARIO - CORREGIDA
 // ============================================
 
 async function manejarEnvioFormulario(e) {
@@ -1833,6 +1971,34 @@ async function manejarEnvioFormulario(e) {
     submitIcon.textContent = 'hourglass_top';
     
     try {
+        // ============================================
+        // 🔥 CORRECCIÓN: OBTENER COORDENADAS Y URL DE MAPS
+        // ============================================
+        const latitud = document.getElementById('latitud')?.value || '';
+        const longitud = document.getElementById('longitud')?.value || '';
+        const urlMaps = document.getElementById('urlMaps')?.value || '';
+        
+        console.log('📍 Coordenadas capturadas:', {
+            latitud: latitud,
+            longitud: longitud,
+            urlMaps: urlMaps,
+            tieneCoordenadas: !!(latitud && longitud)
+        });
+        
+        // Si no hay coordenadas, intentar generar URL con la dirección
+        let urlMapsFinal = urlMaps;
+        if (!urlMapsFinal) {
+            const direccion = document.getElementById('direccionDestino').value;
+            if (direccion) {
+                if (latitud && longitud) {
+                    urlMapsFinal = `https://www.google.com/maps?q=${latitud},${longitud}&z=17`;
+                } else {
+                    const direccionCodificada = encodeURIComponent(direccion);
+                    urlMapsFinal = `https://www.google.com/maps/search/?api=1&query=${direccionCodificada}`;
+                }
+            }
+        }
+        
         // Calcular valores
         const formaPago = document.getElementById('formaPago').value;
         const ciudadDestino = document.getElementById('ciudadDestino').value;
@@ -1860,7 +2026,7 @@ async function manejarEnvioFormulario(e) {
         const usuarioActual = JSON.parse(localStorage.getItem("usuarioLogueado"));
         
         // ============================================
-        // PASO 1: GENERAR UN ÚNICO ID AL PRINCIPIO
+        // GENERAR UN ÚNICO ID AL PRINCIPIO
         // ============================================
         const idLocal = generarIDLocal();
         console.log("🆔 ID ÚNICO generado para TODO:", idLocal);
@@ -1933,10 +2099,17 @@ async function manejarEnvioFormulario(e) {
             "CORREO REMITENTE": document.getElementById('correoRemitente').value || "",
             
             // Columna V: USUARIO ID
-            "USUARIO ID": usuarioActual ? usuarioActual.USUARIO : ""
+            "USUARIO ID": usuarioActual ? usuarioActual.USUARIO : "",
+            
+            // ============================================
+            // 🔥 NUEVOS CAMPOS - COORDENADAS Y URL DE MAPS
+            // ============================================
+            "LATITUD": latitud,        // Nueva columna X
+            "LONGITUD": longitud,      // Nueva columna Y
+            "URL_MAPS": urlMapsFinal   // Columna W ya existe
         };
         
-        console.log('📝 Datos a enviar a Google Sheets (con ID único):', datosEnvio);
+        console.log('📝 Datos a enviar (con coordenadas):', datosEnvio);
         
         // Verificar que TODOS los campos requeridos estén presentes
         const camposRequeridos = [
@@ -1996,8 +2169,13 @@ async function manejarEnvioFormulario(e) {
             formData.append("correoRemitente", datosEnvio["CORREO REMITENTE"]);
             formData.append("usuarioId", datosEnvio["USUARIO ID"]);
             
+            // 🔥 AGREGAR COORDENADAS AL FORMDATA
+            if (latitud) formData.append("latitud", latitud);
+            if (longitud) formData.append("longitud", longitud);
+            if (urlMapsFinal) formData.append("urlMaps", urlMapsFinal);
+            
             // Debug: Ver qué estamos enviando
-            console.log('📤 Enviando FormData (con ID único):');
+            console.log('📤 Enviando FormData (con ID único y coordenadas):');
             for (let pair of formData.entries()) {
                 console.log(`  ${pair[0]}: ${pair[1]}`);
             }
@@ -2012,7 +2190,7 @@ async function manejarEnvioFormulario(e) {
             console.log('📨 Respuesta recibida:', response);
             
             // ============================================
-            // PASO 3: GUARDAR DATOS PARA LA GUÍA (CON EL MISMO ID)
+            // GUARDAR DATOS PARA LA GUÍA (CON EL MISMO ID)
             // ============================================
             const datosCompletosParaGuia = {
                 ...datosEnvio,
@@ -2030,7 +2208,10 @@ async function manejarEnvioFormulario(e) {
                 complementoDir: datosEnvio["COMPLEMENTO DE DIR"],
                 ciudadDestino: datosEnvio["CIUDAD DESTINO"],
                 valorRecaudar: datosEnvio["VALOR A RECAUDAR"],
-                totalAPagar: datosEnvio["TOTAL A PAGAR"]
+                totalAPagar: datosEnvio["TOTAL A PAGAR"],
+                latitud: latitud,
+                longitud: longitud,
+                urlMaps: urlMapsFinal
             };
 
             // Guardar en localStorage para que guia.js lo encuentre
@@ -2213,6 +2394,15 @@ function resetearFormulario() {
     
     // Resetear campos ocultos
     if (barrioIdInput) barrioIdInput.value = '';
+    
+    // También resetear campos de coordenadas si existen
+    const latField = document.getElementById('latitud');
+    const lngField = document.getElementById('longitud');
+    const urlField = document.getElementById('urlMaps');
+    
+    if (latField) latField.value = '';
+    if (lngField) lngField.value = '';
+    if (urlField) urlField.value = '';
     
     // Resetear selección de pago
     const paymentOptions = document.querySelectorAll('.payment-option');
@@ -2494,5 +2684,3 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
-
-
