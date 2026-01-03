@@ -6,6 +6,7 @@ const REMITENTES_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
 
 // Variables globales
+let barriosData = [];
 let remitentesData = [];
 let usuariosDisponibles = [];
 let currentFocus = -1;
@@ -50,25 +51,25 @@ function inicializarGooglePlacesAutocomplete() {
     }
     
     try {
-        // Área más específica para Bogotá + Soacha
-        const bogotaSoachaBounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(4.48, -74.25),  // Soacha
-            new google.maps.LatLng(4.85, -74.00)   // Bogotá norte
-        );
-        
-        const autocomplete = new google.maps.places.Autocomplete(direccionInput, {
-            componentRestrictions: { 
-                country: 'co'
-            },
-            bounds: bogotaSoachaBounds,
-            strictBounds: true,  // ← ¡SOLO resultados dentro del área!
-            fields: [
-                'address_components', 
-                'formatted_address', 
-                'geometry',
-                'name'
-            ]
-        });
+    // Área más específica para Bogotá + Soacha
+    const bogotaSoachaBounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(4.48, -74.25),  // Soacha
+        new google.maps.LatLng(4.85, -74.00)   // Bogotá norte
+    );
+    
+    const autocomplete = new google.maps.places.Autocomplete(direccionInput, {
+        componentRestrictions: { 
+            country: 'co'
+        },
+        bounds: bogotaSoachaBounds,
+        strictBounds: true,  // ← ¡SOLO resultados dentro del área!
+        fields: [
+            'address_components', 
+            'formatted_address', 
+            'geometry',
+            'name'
+        ]
+    });
         
         // Deshabilitar el autocomplete nativo del navegador
         direccionInput.setAttribute('autocomplete', 'off');
@@ -92,59 +93,36 @@ function inicializarGooglePlacesAutocomplete() {
                 nombre_lugar: place.name || ''
             };
             
-            // ============================================
-            // EXTRAER DATOS DESDE GOOGLE PLACES
-            // ============================================
-            
-            // Variables para almacenar datos
-            let barrio = '';
-            let localidad = '';
-            let ciudad = '';
-            
             // Extraer componentes de la dirección
             place.address_components.forEach(component => {
                 const tipos = component.types;
                 
-                // Barrio (sublocality_level_1 o neighborhood)
+                // Barrio
                 if (tipos.includes('neighborhood') || tipos.includes('sublocality_level_1')) {
-                    barrio = component.long_name;
-                }
-                
-                // Localidad (sublocality)
-                if (tipos.includes('sublocality')) {
-                    localidad = component.long_name;
+                    const barrioInput = document.getElementById('barrioLocalidad');
+                    if (barrioInput && (!barrioInput.value.trim())) {
+                        barrioInput.value = component.long_name;
+                        barrioInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
                 }
                 
                 // Ciudad
                 if (tipos.includes('locality')) {
-                    ciudad = component.long_name;
+                    const ciudadSelect = document.getElementById('ciudadDestino');
+                    if (ciudadSelect) {
+                        const ciudadEncontrada = component.long_name.toLowerCase();
+                        
+                        // Buscar coincidencia en las opciones
+                        Array.from(ciudadSelect.options).forEach(option => {
+                            if (option.value && option.value.toLowerCase().includes(ciudadEncontrada)) {
+                                ciudadSelect.value = option.value;
+                                ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                                console.log(`✅ Ciudad auto-seleccionada: ${option.value}`);
+                            }
+                        });
+                    }
                 }
             });
-            
-            // 1. ASIGNAR BARRIO AL CAMPO (solo lectura)
-            const barrioInput = document.getElementById('barrioLocalidad');
-            if (barrioInput) {
-                // Si Google nos da barrio, usarlo. Si no, usar localidad como fallback
-                barrioInput.value = barrio || localidad || '';
-                barrioInput.readOnly = true;
-                barrioInput.classList.add('campo-bloqueado');
-                console.log(`🏘️ Barrio asignado desde Google: ${barrioInput.value}`);
-            }
-            
-            // 2. ASIGNAR CIUDAD AUTOMÁTICAMENTE
-            const ciudadSelect = document.getElementById('ciudadDestino');
-            if (ciudadSelect && ciudad) {
-                const ciudadEncontrada = ciudad.toLowerCase();
-                
-                // Buscar coincidencia en las opciones del select
-                Array.from(ciudadSelect.options).forEach(option => {
-                    if (option.value && option.value.toLowerCase().includes(ciudadEncontrada)) {
-                        ciudadSelect.value = option.value;
-                        ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                        console.log(`📍 Ciudad auto-seleccionada: ${option.value}`);
-                    }
-                });
-            }
             
             // Mostrar notificación
             mostrarNotificacionDireccion(place.formatted_address);
@@ -286,14 +264,6 @@ function agregarAnimacionesCSS() {
             margin-right: 8px !important;
         }
         
-        /* Estilo para campos bloqueados */
-        .campo-bloqueado {
-            background-color: #f5f5f5 !important;
-            border-color: #ddd !important;
-            color: #666 !important;
-            cursor: not-allowed !important;
-        }
-        
         @media (max-width: 767px) {
             .pac-container {
                 position: fixed !important;
@@ -319,43 +289,42 @@ function initApp() {
     
     initializeDOMElements();
     
-    // ============================================
-    // CARGAR REMITENTES Y USUARIOS PERO NO BARRIOS
-    // ============================================
-    loadRemitentesData();
-    loadUsuariosParaAutocomplete().then(() => {
-        setupEventListeners();
-        initializeUI();
-        
-        // ========== INICIALIZAR GOOGLE PLACES AQUÍ ==========
-        // Esperar un poco para asegurar que Google Maps API esté cargada
-        setTimeout(() => {
-            console.log('🌍 Verificando Google Maps API...');
+   loadBarriosData().then(() => {
+        loadRemitentesData();
+        loadUsuariosParaAutocomplete().then(() => {
+            setupEventListeners();
+            initializeUI();
             
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                console.log('✅ Google Maps API disponible');
-                try {
-                    inicializarGooglePlacesAutocomplete();
-                    console.log('🎯 Google Places Autocomplete inicializado');
-                } catch (error) {
-                    console.error('❌ Error inicializando Google Places:', error);
-                    mostrarErrorGoogleMaps();
-                }
-            } else {
-                console.warn('⚠️ Google Maps API no está disponible todavía');
-                // Intentar de nuevo después de 2 segundos
-                setTimeout(() => {
-                    if (typeof google !== 'undefined' && google.maps) {
+            // ========== INICIALIZAR GOOGLE PLACES AQUÍ ==========
+            // Esperar un poco para asegurar que Google Maps API esté cargada
+            setTimeout(() => {
+                console.log('🌍 Verificando Google Maps API...');
+                
+                if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                    console.log('✅ Google Maps API disponible');
+                    try {
                         inicializarGooglePlacesAutocomplete();
-                    } else {
+                        console.log('🎯 Google Places Autocomplete inicializado');
+                    } catch (error) {
+                        console.error('❌ Error inicializando Google Places:', error);
                         mostrarErrorGoogleMaps();
                     }
-                }, 2000);
-            }
-        }, 1000); // Aumentado a 1 segundo
-        // ========== FIN DE GOOGLE PLACES ==========
-        
-        console.log('✅ Aplicación inicializada');
+                } else {
+                    console.warn('⚠️ Google Maps API no está disponible todavía');
+                    // Intentar de nuevo después de 2 segundos
+                    setTimeout(() => {
+                        if (typeof google !== 'undefined' && google.maps) {
+                            inicializarGooglePlacesAutocomplete();
+                        } else {
+                            mostrarErrorGoogleMaps();
+                        }
+                    }, 2000);
+                }
+            }, 1000); // Aumentado a 1 segundo
+            // ========== FIN DE GOOGLE PLACES ==========
+            
+            console.log('✅ Aplicación inicializada');
+        });
     }).catch(error => {
         console.error('❌ Error inicializando:', error);
         loadRemitentesData();
@@ -391,32 +360,33 @@ function initializeDOMElements() {
     
     console.log('📍 Campo barrio:', barrioInput ? '✅' : '❌');
     console.log('📍 Dropdown barrio:', autocompleteDropdown ? '✅' : '❌');
-    
-    // ============================================
-    // CONFIGURAR CAMPO BARRIO COMO SOLO LECTURA
-    // ============================================
-    if (barrioInput) {
-        barrioInput.readOnly = true;
-        barrioInput.placeholder = "Se completará automáticamente desde Google Maps";
-        barrioInput.classList.add('campo-bloqueado');
-        console.log('🔒 Campo barrio configurado como solo lectura');
-        
-        // Eliminar event listeners de búsqueda de barrios locales
-        barrioInput.removeEventListener('input', handleBarrioInput);
-        barrioInput.removeEventListener('keydown', handleBarrioKeydown);
-        barrioInput.removeEventListener('focus', handleBarrioFocus);
-    }
-    
-    // Ocultar dropdown de barrios si existe
-    if (autocompleteDropdown) {
-        autocompleteDropdown.style.display = 'none';
-        autocompleteDropdown.innerHTML = '';
-    }
 }
 
 // ============================================
-// FUNCIONES PARA CARGA DE DATOS (SIN BARRIOS)
+// FUNCIONES PARA CARGA DE DATOS
 // ============================================
+
+function loadBarriosData() {
+    console.log('📂 Cargando datos de barrios...');
+    
+    return fetch('barrios.json')
+        .then(response => {
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            barriosData = data;
+            window.barriosData = data;
+            console.log(`✅ Cargados ${barriosData.length} barrios`);
+            return data;
+        })
+        .catch(error => {
+            console.error('❌ Error cargando barrios:', error);
+            barriosData = getDefaultBarrios();
+            window.barriosData = barriosData;
+            return barriosData;
+        });
+}
 
 function loadRemitentesData() {
     console.log('📂 Cargando datos de remitentes...');
@@ -648,6 +618,193 @@ function configurarTemporizadorInactividad() {
     
     // Iniciar temporizador
     reiniciarTemporizador();
+}
+
+// ============================================
+// FUNCIONES PARA AUTOCOMPLETE DE BARRIOS
+// ============================================
+
+function handleBarrioInput() {
+    const searchText = this.value.trim();
+    console.log(`🔍 Buscando barrio: "${searchText}"`);
+    
+    if (searchText === '') {
+        if (barrioIdInput) barrioIdInput.value = '';
+        hideDropdown();
+        return;
+    }
+    
+    if (searchText.length >= 1) {
+        filteredBarrios = filterBarrios(searchText);
+        console.log(`✅ ${filteredBarrios.length} resultados`);
+        
+        if (filteredBarrios.length > 0) {
+            showAutocomplete(filteredBarrios);
+        } else {
+            showAutocomplete([]);
+        }
+    } else {
+        hideDropdown();
+        currentFocus = -1;
+    }
+}
+
+function filterBarrios(searchText) {
+    const datos = window.barriosData || barriosData || [];
+    if (!datos.length) return [];
+    
+    const searchUpper = searchText.toUpperCase();
+    return datos.filter(barrio => 
+        barrio.nombre && barrio.nombre.toUpperCase().includes(searchUpper) ||
+        (barrio.id && barrio.id.toUpperCase().includes(searchUpper))
+    ).slice(0, 10);
+}
+
+function handleBarrioKeydown(e) {
+    if (!autocompleteDropdown || window.getComputedStyle(autocompleteDropdown).display !== 'block') return;
+    
+    const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveFocus('down', items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveFocus('up', items);
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (items[currentFocus]) {
+            dropdownJustClicked = true;
+            const clickEvent = new MouseEvent('click', { bubbles: true });
+            items[currentFocus].dispatchEvent(clickEvent);
+            setTimeout(() => { dropdownJustClicked = false; }, 100);
+        }
+    } else if (e.key === 'Escape') {
+        hideDropdown();
+        if (barrioInput) barrioInput.focus();
+    }
+}
+
+function handleBarrioFocus() {
+    console.log('🎯 Campo barrio enfocado');
+    const searchText = barrioInput.value.trim();
+    
+    if (searchText.length >= 1) {
+        filteredBarrios = filterBarrios(searchText);
+        showAutocomplete(filteredBarrios);
+    }
+}
+
+function showAutocomplete(results) {
+    if (!autocompleteDropdown || !barrioInput) return;
+    
+    console.log(`🎯 Mostrando ${results.length} resultados`);
+    
+    autocompleteDropdown.innerHTML = '';
+    
+    if (results.length === 0) {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.textContent = 'No se encontraron barrios';
+        autocompleteDropdown.appendChild(item);
+        
+        showDropdown();
+    } else {
+        results.forEach((barrio, index) => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.innerHTML = `
+                <span class="barrio-id">${barrio.id || 'N/A'}</span>
+                <span class="barrio-nombre">${barrio.nombre || ''}</span>
+            `;
+            
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdownJustClicked = true;
+                
+                setTimeout(() => {
+                    console.log(`✅ Seleccionado: ${barrio.nombre}`);
+                    barrioInput.value = barrio.nombre || '';
+                    if (barrioIdInput) barrioIdInput.value = barrio.id || '';
+                    hideDropdown();
+                    
+                    setTimeout(() => {
+                        dropdownJustClicked = false;
+                    }, 50);
+                    
+                    barrioInput.focus();
+                }, 10);
+            });
+            
+            autocompleteDropdown.appendChild(item);
+        });
+        
+        showDropdown();
+    }
+}
+
+function showDropdown() {
+    if (!autocompleteDropdown) return;
+    
+    if (closeBarrioDropdownTimeout) {
+        clearTimeout(closeBarrioDropdownTimeout);
+        closeBarrioDropdownTimeout = null;
+    }
+    
+    autocompleteDropdown.className = '';
+    autocompleteDropdown.classList.add('autocomplete-dropdown-visible');
+    
+    const aggressiveStyles = `
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: absolute !important;
+        top: calc(100% + 5px) !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 999999 !important;
+        background-color: white !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important;
+        max-height: 300px !important;
+        overflow-y: auto !important;
+        margin-top: 5px !important;
+        padding: 5px !important;
+    `;
+    
+    autocompleteDropdown.style.cssText = aggressiveStyles;
+    
+    console.log('✅ Dropdown visible - Estilos agresivos aplicados');
+}
+
+function hideDropdown() {
+    if (!autocompleteDropdown) return;
+    
+    const estilo = window.getComputedStyle(autocompleteDropdown);
+    const isVisible = estilo.display === 'block' || 
+                      autocompleteDropdown.style.display === 'block';
+    
+    if (isVisible) {
+        console.log('✅ Cerrando dropdown (autorizado)');
+        autocompleteDropdown.style.display = 'none';
+        currentFocus = -1;
+    }
+}
+
+function moveFocus(direction, items) {
+    if (!items.length) return;
+    
+    items.forEach(item => item.classList.remove('highlighted'));
+    
+    if (direction === 'down') currentFocus = (currentFocus + 1) % items.length;
+    else if (direction === 'up') currentFocus = (currentFocus - 1 + items.length) % items.length;
+    
+    if (items[currentFocus]) {
+        items[currentFocus].classList.add('highlighted');
+        items[currentFocus].scrollIntoView({ block: 'nearest' });
+    }
 }
 
 // ============================================
@@ -1187,13 +1344,28 @@ function setupEventListeners() {
         });
     }
     
-    // ============================================
-    // ELIMINADO: Event listeners para barrios locales
-    // ============================================
+    if (barrioInput) {
+        barrioInput.addEventListener('input', handleBarrioInput);
+        barrioInput.addEventListener('keydown', handleBarrioKeydown);
+        barrioInput.addEventListener('focus', handleBarrioFocus);
+        
+        barrioInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const searchText = this.value.trim();
+            
+            if (searchText.length >= 2) {
+                setTimeout(() => {
+                    handleBarrioInput.call(this);
+                }, 50);
+            }
+        });
+    }
     
     if (valorRecaudarInput) {
         valorRecaudarInput.addEventListener('input', updateSummary);
     }
+    
+    setupDropdownCloseBehavior();
     
     const form = document.getElementById('deliveryForm');
     if (form) form.addEventListener('submit', manejarEnvioFormulario);
@@ -1202,6 +1374,138 @@ function setupEventListeners() {
     if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
     
     console.log('✅ Listeners configurados');
+}
+
+function setupDropdownCloseBehavior() {
+    console.log('🔧 Configurando comportamiento MEJORADO del dropdown...');
+    
+    let escribiendo = false;
+    let dropdownJustClicked = false;
+    let ignoreBlur = false;
+    
+    // Click en dropdown - No cerrar
+    document.addEventListener('mousedown', function(e) {
+        if (!autocompleteDropdown || !autocompleteDropdown.contains(e.target)) {
+            return;
+        }
+        
+        console.log('🎯 Click en dropdown - previniendo cierre');
+        dropdownJustClicked = true;
+        ignoreBlur = true;
+        
+        setTimeout(() => {
+            dropdownJustClicked = false;
+            ignoreBlur = false;
+        }, 300);
+    });
+    
+    // Click fuera - Cerrar solo si no está interactuando
+    document.addEventListener('click', function(e) {
+        if (!autocompleteDropdown || !barrioInput) return;
+        
+        if (dropdownJustClicked || escribiendo) {
+            console.log('⏸️ No cerrar - usuario interactuando');
+            return;
+        }
+        
+        const clickedInput = barrioInput.contains(e.target);
+        const clickedDropdown = autocompleteDropdown.contains(e.target);
+        
+        const isVisible = autocompleteDropdown.style.display === 'block' || 
+                         window.getComputedStyle(autocompleteDropdown).display === 'block';
+        
+        if (isVisible && !clickedInput && !clickedDropdown) {
+            console.log('👆 Click fuera - cerrando dropdown');
+            hideDropdown();
+        }
+    });
+    
+    // Tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const isVisible = autocompleteDropdown && 
+                (autocompleteDropdown.style.display === 'block' || 
+                 window.getComputedStyle(autocompleteDropdown).display === 'block');
+            
+            if (isVisible) {
+                console.log('⎋ Escape - cerrando dropdown');
+                hideDropdown();
+                if (barrioInput) barrioInput.focus();
+            }
+        }
+    });
+    
+    if (barrioInput) {
+        // Detectar escritura
+        barrioInput.addEventListener('input', function() {
+            escribiendo = true;
+            ignoreBlur = true;
+            
+            console.log('📝 Escribiendo - manteniendo dropdown visible');
+            
+            clearTimeout(this._writingTimeout);
+            this._writingTimeout = setTimeout(() => {
+                escribiendo = false;
+                ignoreBlur = false;
+                console.log('⏹️ Terminó de escribir');
+            }, 500);
+        });
+        
+        // Blur inteligente - ¡LA CLAVE!
+        barrioInput.addEventListener('blur', function() {
+            console.log('⚠️ Blur detectado - escribiendo:', escribiendo, '- ignoreBlur:', ignoreBlur);
+            
+            if (escribiendo || ignoreBlur || dropdownJustClicked) {
+                console.log('🚫 Ignorando blur - recuperando foco');
+                
+                // Recuperar foco inmediatamente
+                setTimeout(() => {
+                    if (barrioInput) {
+                        barrioInput.focus();
+                        // Poner cursor al final
+                        const len = barrioInput.value.length;
+                        barrioInput.setSelectionRange(len, len);
+                    }
+                }, 10);
+                
+                return;
+            }
+            
+            // Solo cerrar después de verificar
+            setTimeout(() => {
+                if (!dropdownJustClicked && !escribiendo) {
+                    const isVisible = autocompleteDropdown && 
+                        (autocompleteDropdown.style.display === 'block' || 
+                         window.getComputedStyle(autocompleteDropdown).display === 'block');
+                    
+                    if (isVisible) {
+                        const activeElement = document.activeElement;
+                        const focusInDropdown = activeElement && 
+                            autocompleteDropdown.contains(activeElement);
+                        
+                        if (!focusInDropdown) {
+                            console.log('🔒 Cerrando dropdown (blur normal)');
+                            hideDropdown();
+                        }
+                    }
+                }
+            }, 150);
+        });
+        
+        // Focus - mostrar dropdown si hay texto
+        barrioInput.addEventListener('focus', function() {
+            console.log('🎯 Campo enfocado');
+            const searchText = this.value.trim();
+            
+            if (searchText.length >= 1) {
+                setTimeout(() => {
+                    handleBarrioInput.call(this);
+                }, 50);
+            }
+        });
+    }
+    
+    console.log('✅ Comportamiento mejorado configurado');
 }
 
 // ============================================
@@ -1738,6 +2042,16 @@ function guardarEnvioEnLocalStorage(datosEnvio) {
 // ============================================
 // FUNCIONES AUXILIARES
 // ============================================
+
+function getDefaultBarrios() {
+    return [
+        { id: "ATB6ZXHU", nombre: "USAQUÉN-SANTA BARBARA ORIENTAL" },
+        { id: "1HOGOY32", nombre: "USAQUÉN-SANTA BARBARA CENTRAL" },
+        { id: "WYWRDLUX", nombre: "USAQUÉN-CHICO NORTE II SECTOR" },
+        { id: "5TKZNTB2", nombre: "USAQUÉN-SANTA BARBARA OCCIDENTAL" },
+        { id: "5DUKSNR5", nombre: "USAQUÉN-SAN PATRICIO" }
+    ];
+}
 
 function validarFormulario() {
     let valido = true;
