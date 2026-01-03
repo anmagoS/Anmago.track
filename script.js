@@ -289,7 +289,7 @@ function initApp() {
     
     initializeDOMElements();
     
-   
+   loadBarriosData().then(() => {
         loadRemitentesData();
         loadUsuariosParaAutocomplete().then(() => {
             setupEventListeners();
