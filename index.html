@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Sistema de Envíos - Contraentrega</title>
-   
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚚</text></svg>">
@@ -35,7 +35,6 @@
             },
         }
     </script>
-
     <style>
         /* ============================================
            ESTILOS PARA GOOGLE PLACES AUTOCOMPLETE
@@ -57,7 +56,6 @@
             transition: background-color 0.2s !important;
         }
 
-        
         .pac-item:hover {
             background-color: #f9fafb !important;
         }
@@ -670,9 +668,7 @@
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" id="latitud" name="latitud">
-<input type="hidden" id="longitud" name="longitud">
-<input type="hidden" id="urlMaps" name="urlMaps">
+
                     <!-- Footer Actions -->
                     <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6 mt-2 border-t border-[#e7ebf3] dark:border-gray-800">
                         <button class="w-full sm:w-auto min-w-[140px] h-12 rounded-lg border border-[#e7ebf3] dark:border-gray-600 bg-transparent text-[#4c669a] dark:text-gray-400 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" type="button" id="cancelButton">
@@ -737,28 +733,7 @@
 
     <!-- Script principal unificado -->
     <script src="script.js"></script>
-         <script>
-  let googleMapsLoaded = false;
-  
-  function loadGoogleMaps() {
-    if (!googleMapsLoaded) {
-      const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO&callback=googleMapsReady';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-      googleMapsLoaded = true;
-    }
-  }
-  
-  function googleMapsReady() {
-    console.log('✅ Google Maps API cargada correctamente');
-    // Aquí puedes inicializar tu aplicación
-    if (window.initApp) {
-      window.initApp();
-    }
-  }
-</script>
+    
     <script>
         // Ocultar la intro después de 2 segundos
         setTimeout(() => {
@@ -768,9 +743,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
