@@ -669,7 +669,9 @@
                             </div>
                         </div>
                     </div>
-
+                    <input type="hidden" id="latitud" name="latitud">
+<input type="hidden" id="longitud" name="longitud">
+<input type="hidden" id="urlMaps" name="urlMaps">
                     <!-- Footer Actions -->
                     <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6 mt-2 border-t border-[#e7ebf3] dark:border-gray-800">
                         <button class="w-full sm:w-auto min-w-[140px] h-12 rounded-lg border border-[#e7ebf3] dark:border-gray-600 bg-transparent text-[#4c669a] dark:text-gray-400 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" type="button" id="cancelButton">
@@ -695,9 +697,7 @@
                                     <p class="text-green-600 dark:text-green-400 text-sm mt-1" id="resultMessage">Guía generada exitosamente. Puedes imprimir la guía para el mensajero.</p>
                                 </div>
                             </div>
-                            <input type="hidden" id="latitud" name="latitud">
-<input type="hidden" id="longitud" name="longitud">
-<input type="hidden" id="urlMaps" name="urlMaps">
+                            
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <button type="button" id="printGuideBtn" 
                                         class="min-w-[180px] h-12 rounded-lg bg-primary hover:bg-primary-dark text-white font-bold px-6 flex items-center justify-center gap-2 transition-all">
@@ -746,5 +746,6 @@
     </script>
 </body>
 </html>
+
 
 
