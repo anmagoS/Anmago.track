@@ -35,28 +35,7 @@
             },
         }
     </script>
-     <script>
-  let googleMapsLoaded = false;
-  
-  function loadGoogleMaps() {
-    if (!googleMapsLoaded) {
-      const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO&callback=googleMapsReady';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-      googleMapsLoaded = true;
-    }
-  }
-  
-  function googleMapsReady() {
-    console.log('✅ Google Maps API cargada correctamente');
-    // Aquí puedes inicializar tu aplicación
-    if (window.initApp) {
-      window.initApp();
-    }
-  }
-</script>
+
     <style>
         /* ============================================
            ESTILOS PARA GOOGLE PLACES AUTOCOMPLETE
@@ -758,7 +737,28 @@
 
     <!-- Script principal unificado -->
     <script src="script.js"></script>
-    
+         <script>
+  let googleMapsLoaded = false;
+  
+  function loadGoogleMaps() {
+    if (!googleMapsLoaded) {
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO&callback=googleMapsReady';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+      googleMapsLoaded = true;
+    }
+  }
+  
+  function googleMapsReady() {
+    console.log('✅ Google Maps API cargada correctamente');
+    // Aquí puedes inicializar tu aplicación
+    if (window.initApp) {
+      window.initApp();
+    }
+  }
+</script>
     <script>
         // Ocultar la intro después de 2 segundos
         setTimeout(() => {
@@ -768,6 +768,7 @@
     </script>
 </body>
 </html>
+
 
 
 
