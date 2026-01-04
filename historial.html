@@ -1071,6 +1071,18 @@
             
             console.log(`✅ Cliente: ${todosEnvios.length} envíos cargados para ${usuarioActual.USUARIO}`);
             
+            // DEBUG: Verificar los campos del primer envío
+            if (todosEnvios.length > 0) {
+                const primerEnvio = todosEnvios[0];
+                console.log('🔍 Primer envío procesado:', {
+                    id: primerEnvio["ENVIO ID"],
+                    formaPago: primerEnvio["FORMA DE PAGO"],
+                    pagadoRemitente: primerEnvio["PAGADO A REMITENTE"],
+                    estadoEnvio: primerEnvio["ESTADO"],
+                    totalPagar: primerEnvio.totalPagar
+                });
+            }
+            
         } else {
             console.log('⚠️ Respuesta vacía o no es array');
             todosEnvios = [];
@@ -1225,158 +1237,150 @@
         // ============================================
         
         // ============================================
-// FUNCIONES COMUNES - MODIFICADAS
-// ============================================
-
-function determinarSiEstaPagado(estadoPago) {
-    if (!estadoPago) return false;
-    
-    if (typeof estadoPago === 'string') {
-        const estadoUpper = estadoPago.toUpperCase().trim();
-        return estadoUpper === 'SI' || 
-               estadoUpper === 'TRUE' ||
-               estadoUpper === 'VERDADERO' || 
-               estadoUpper === '1' || 
-               estadoUpper === 'YES' || 
-               estadoUpper === 'PAGADO' ||
-               estadoUpper === 'PAID';
-               estadoUpper === 'PAGO';
-    }
-    
-    if (typeof estadoPago === 'boolean') {
-        return estadoPago;
-    }
-    
-    if (typeof estadoPago === 'number') {
-        return estadoPago === 1;
-    }
-    
-    return false;
-}
-
-function determinarEstadoPago(envio) {
-    // ========== DEBUG CRÍTICO (TEMPORAL - después lo quitas) ==========
-    console.log('🔴 DEBUG para envío:', envio["ENVIO ID"]);
-    console.log('🔴 Campo PAGADO A REMITENTE crudo:', envio["PAGADO A REMITENTE"]);
-    console.log('🔴 Tipo:', typeof envio["PAGADO A REMITENTE"]);
-    console.log('🔴 ¿Existe el campo?:', '"PAGADO A REMITENTE"' in envio);
-    
-    // Buscar cualquier campo que contenga "pago" o "pagado"
-    Object.keys(envio).forEach(key => {
-        const keyLower = key.toLowerCase();
-        if (keyLower.includes('pago') || keyLower.includes('pagado') || keyLower.includes('paid')) {
-            console.log(`🔴 Campo encontrado: "${key}" =`, envio[key], `(tipo: ${typeof envio[key]})`);
-        }
-    });
-    // ========== FIN DEBUG ==========
-    
-    // Campos del envío - BÚSQUEDA ROBUSTA
-    const estadoPagoCelda = 
-        envio["PAGADO A REMITENTE"] || 
-        envio["Pagado a Remitente"] || 
-        envio["pagado_a_remitente"] || 
-        envio["PAGADO"] || 
-        envio["pagado"] || 
-        envio["Pagado"] || 
-        envio["PAID"] || 
-        envio["paid"] || 
-        envio.pagadoRemitente || 
-        envio.pagado || 
-        "NO";
-    
-    const estadoEnvio = (envio["estado"] || envio["ESTADO"] || envio["ESTADO ENVIO"] || '').toUpperCase().trim();
-    const totalPagar = parseFloat(envio["TOTAL A PAGAR"] || envio.totalPagar || envio.totalAPagar || 0);
-    const formaPago = (envio["FORMA DE PAGO"] || envio.formaPago || '').toLowerCase();
-    const valorRecaudar = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
-    
-    console.log('🔴 estadoPagoCelda después de ||:', estadoPagoCelda);
-    console.log('🔴 DeterminarSiEstaPagado será llamado con:', estadoPagoCelda);
-    
-    console.log('🔍 Analizando envío:', {
-        id: envio["ENVIO ID"],
-        formaPago: formaPago,
-        estadoPagoCelda: estadoPagoCelda,
-        estadoEnvio: estadoEnvio,
-        totalPagar: totalPagar,
-        valorRecaudar: valorRecaudar
-    });
-    
-    // 1. Verificar si está marcado como PAGADO en la celda
-    const estaPagado = determinarSiEstaPagado(estadoPagoCelda);
-    console.log('🔴 Resultado de determinarSiEstaPagado:', estaPagado);
-    
-    // ============================================
-    // LÓGICA POR FORMA DE PAGO
-    // ============================================
-    
-    // CASO A: CONTADO → Siempre "Sin pago"
-    if (formaPago === 'contado') {
-        console.log(`📄 Envío ${envio["ENVIO ID"]} es CONTADO → SIN PAGO`);
-        return { texto: 'Sin pago', clase: 'badge-sin-pago', pendientePago: false };
-    }
-    
-    // CASO B: CONTRAENTREGA → Siempre "Sin pago" (fijo $10k/$12k)
-    if (formaPago === 'contraentrega') {
-        console.log(`📦 Envío ${envio["ENVIO ID"]} es CONTRAENTREGA → SIN PAGO`);
-        return { texto: 'Sin pago', clase: 'badge-sin-pago', pendientePago: false };
-    }
-    
-    // CASO C: CONTRAENTREGA CON RECAUDO (o similar) → Aquí aplican los estados
-    const esConRecaudo = formaPago.includes('recaudo') || 
-                         formaPago === 'contraentrega_recaudo' || 
-                         formaPago === 'con recaudo' ||
-                         (valorRecaudar > 0 && totalPagar > 0);
-    
-    if (esConRecaudo) {
-        console.log(`💰 Envío ${envio["ENVIO ID"]} es CON RECAUDO → Verificar estados`);
-        
-        // 1. PRIMERO verificar si está PAGADO en la celda (esto es lo PRINCIPAL)
-        if (estaPagado) {
-            console.log(`✅ Envío ${envio["ENVIO ID"]} marcado como PAGADO en la celda`);
+        // FUNCIÓN DETERMINAR SI ESTÁ PAGADO - CORREGIDA
+        // ============================================
+        function determinarSiEstaPagado(estadoPago) {
+            if (!estadoPago) return false;
             
-            // Si está pagado, mostrar "Pagado" sin importar el estado del envío
-            return { texto: 'Pagado', clase: 'badge-pagado', pendientePago: false };
+            const estadoStr = estadoPago.toString().toUpperCase().trim();
+            
+            // Mapeo de valores que significan "SÍ está pagado"
+            const valoresPagado = [
+                'SI', 'SÍ', 'YES', 'Y',
+                'TRUE', 'VERDADERO',
+                '1', 'OK', 'PAGADO', 'PAID',
+                'PAGO', 'COMPLETADO', 'COMPLETO',
+                'PAGADO A REMITENTE'
+            ];
+            
+            return valoresPagado.includes(estadoStr);
         }
-        
-        // 2. Si NO está pagado, verificar estado del envío
-        const estadosEntregado = ['ENTREGADO', 'ENTREGA EXITOSA', 'COMPLETADO', 'FINALIZADO'];
-        const estadosProceso = ['RECIBIDO', 'EN BODEGA', 'EN REPARTO', 'REPARTO', 'NOVEDAD', 'PROCESO', 'EN PROCESO'];
-        const estadosPendiente = ['PENDIENTE', ''];
-        
-        const esEntregado = estadosEntregado.some(estado => estadoEnvio.includes(estado));
-        const estaEnProceso = estadosProceso.some(estado => estadoEnvio.includes(estado));
-        const estaPendiente = estadosPendiente.some(estado => estadoEnvio.includes(estado));
-        
-        console.log(`📊 Estado del envío ${envio["ENVIO ID"]}: "${estadoEnvio}"`);
-        console.log(`   Entregado: ${esEntregado}, Proceso: ${estaEnProceso}, Pendiente: ${estaPendiente}`);
-        
-        if (esEntregado) {
-            // Si está ENTREGADO y NO está pagado → PENDIENTE de pago
-            console.log(`⏳ Envío ${envio["ENVIO ID"]} ENTREGADO pero NO PAGADO → PENDIENTE`);
-            return { 
-                texto: 'Pendiente', 
-                clase: 'badge-pendiente', 
-                pendientePago: totalPagar > 0 
-            };
-        } else if (estaEnProceso) {
-            // Si está en proceso (RECIBIDO, REPARTO, etc.)
-            console.log(`🔄 Envío ${envio["ENVIO ID"]} EN PROCESO`);
-            return { texto: 'En proceso', clase: 'badge-proceso', pendientePago: false };
-        } else if (estaPendiente || estadoEnvio === '') {
-            // Si está pendiente o sin estado
-            console.log(`⏸️ Envío ${envio["ENVIO ID"]} PENDIENTE o SIN ESTADO`);
-            return { texto: 'Pendiente', clase: 'badge-pendiente', pendientePago: totalPagar > 0 };
-        } else {
-            // Cualquier otro estado
-            console.log(`❓ Envío ${envio["ENVIO ID"]} con estado desconocido: "${estadoEnvio}"`);
-            return { texto: estadoEnvio, clase: 'badge-sin-pago', pendientePago: false };
+
+        // ============================================
+        // FUNCIÓN DETERMINAR ESTADO DE PAGO - COMPLETAMENTE CORREGIDA
+        // ============================================
+        function determinarEstadoPago(envio) {
+            // Extraer datos del envío
+            const envioId = envio["ENVIO ID"] || 'Sin ID';
+            const formaPago = (envio["FORMA DE PAGO"] || '').toLowerCase();
+            const estadoEnvio = (envio["ESTADO"] || envio["ESTADO ENVIO"] || '').toUpperCase().trim();
+            const totalPagar = parseFloat(envio["TOTAL A PAGAR"] || envio.totalPagar || 0);
+            const valorRecaudar = parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0);
+            
+            console.log(`🔍 Analizando envío ${envioId}:`, {
+                formaPago: formaPago,
+                estadoEnvio: estadoEnvio,
+                totalPagar: totalPagar,
+                valorRecaudar: valorRecaudar
+            });
+            
+            // ============================================
+            // PRIMERO: Buscar el campo "PAGADO A REMITENTE" en todas sus variaciones
+            // ============================================
+            let estadoPagoCelda = "NO";
+            
+            // Lista completa de posibles nombres del campo
+            const posiblesCampos = [
+                "PAGADO A REMITENTE",
+                "PAGADO_REMITENTE", 
+                "Pagado a Remitente",
+                "pagadoRemitente",
+                "pagado_a_remitente",
+                "PAGADO",
+                "pagado",
+                "Pagado",
+                "PAID",
+                "paid",
+                "PagadoRemitente",
+                "PAGO REALIZADO",
+                "pagoRealizado",
+                "PAGADO REMITENTE"
+            ];
+            
+            // Buscar en los campos del envío
+            for (const campo of posiblesCampos) {
+                if (envio[campo] !== undefined && envio[campo] !== null && envio[campo] !== "") {
+                    estadoPagoCelda = envio[campo];
+                    console.log(`✅ Campo "${campo}" encontrado para ${envioId}:`, estadoPagoCelda);
+                    break;
+                }
+            }
+            
+            // Verificar si está pagado según la celda
+            const estaPagadoEnCelda = determinarSiEstaPagado(estadoPagoCelda);
+            
+            console.log(`📊 Resultado para ${envioId}:`, {
+                estadoPagoCelda: estadoPagoCelda,
+                estaPagadoEnCelda: estaPagadoEnCelda,
+                formaPago: formaPago,
+                estadoEnvio: estadoEnvio
+            });
+            
+            // ============================================
+            // LÓGICA POR FORMA DE PAGO
+            // ============================================
+            
+            // CASO A: CONTADO → Siempre "Sin pago"
+            if (formaPago === 'contado') {
+                console.log(`📄 ${envioId} es CONTADO → SIN PAGO`);
+                return { texto: 'Sin pago', clase: 'badge-sin-pago', pendientePago: false };
+            }
+            
+            // CASO B: CONTRAENTREGA (sin recaudo) → Siempre "Sin pago" (tarifa fija)
+            if (formaPago === 'contraentrega' && !formaPago.includes('recaudo')) {
+                console.log(`📦 ${envioId} es CONTRAENTREGA simple → SIN PAGO`);
+                return { texto: 'Sin pago', clase: 'badge-sin-pago', pendientePago: false };
+            }
+            
+            // CASO C: CONTRAENTREGA CON RECAUDO o similar
+            const esConRecaudo = formaPago.includes('recaudo') || 
+                                formaPago === 'contraentrega_recaudo' || 
+                                formaPago === 'con recaudo' ||
+                                (valorRecaudar > 0 && totalPagar > 0);
+            
+            if (esConRecaudo) {
+                console.log(`💰 ${envioId} es CON RECAUDO`);
+                
+                // 1. PRIMERO verificar si está PAGADO en la celda
+                if (estaPagadoEnCelda) {
+                    console.log(`✅ ${envioId} marcado como PAGADO en la celda → PAGADO`);
+                    return { texto: 'Pagado', clase: 'badge-pagado', pendientePago: false };
+                }
+                
+                // 2. Si NO está pagado en la celda, verificar estado del envío
+                const estadosEntregado = ['ENTREGADO', 'ENTREGA EXITOSA', 'COMPLETADO', 'FINALIZADO', 'ENTREGADA'];
+                const estadosProceso = ['RECIBIDO', 'EN BODEGA', 'EN REPARTO', 'REPARTO', 'NOVEDAD', 'PROCESO', 'EN PROCESO'];
+                
+                const esEntregado = estadosEntregado.some(estado => estadoEnvio.includes(estado));
+                const estaEnProceso = estadosProceso.some(estado => estadoEnvio.includes(estado));
+                
+                if (esEntregado) {
+                    // ENTREGADO pero NO PAGADO en celda → PENDIENTE
+                    console.log(`⏳ ${envioId} ENTREGADO pero NO PAGADO en celda → PENDIENTE`);
+                    return { 
+                        texto: 'Pendiente', 
+                        clase: 'badge-pendiente', 
+                        pendientePago: totalPagar > 0 
+                    };
+                } else if (estaEnProceso) {
+                    // EN PROCESO
+                    console.log(`🔄 ${envioId} EN PROCESO`);
+                    return { texto: 'En proceso', clase: 'badge-proceso', pendientePago: false };
+                } else if (!estadoEnvio || estadoEnvio === '') {
+                    // Sin estado definido
+                    console.log(`❓ ${envioId} SIN ESTADO definido`);
+                    return { texto: 'Pendiente', clase: 'badge-pendiente', pendientePago: totalPagar > 0 };
+                } else {
+                    // Cualquier otro estado
+                    console.log(`❓ ${envioId} Estado desconocido: "${estadoEnvio}"`);
+                    return { texto: 'Pendiente', clase: 'badge-pendiente', pendientePago: totalPagar > 0 };
+                }
+            }
+            
+            // CASO D: Cualquier otra forma de pago no reconocida
+            console.log(`⚠️ ${envioId} Forma de pago desconocida: "${formaPago}"`);
+            return { texto: 'Sin pago', clase: 'badge-sin-pago', pendientePago: false };
         }
-    }
-    
-    // CASO D: Cualquier otra forma de pago no reconocida
-    console.log(`⚠️ Envío ${envio["ENVIO ID"]} forma de pago desconocida: "${formaPago}"`);
-    return { texto: 'Sin pago', clase: 'badge-sin-pago', pendientePago: false };
-}
         
         function parsearFechaEnvio(fechaStr) {
             if (!fechaStr) return null;
@@ -1426,204 +1430,173 @@ function determinarEstadoPago(envio) {
             mostrarPagina();
         }
         
-      function mostrarPagina() {
-    const tbody = document.getElementById('tablaEnvios');
-    const sinResultados = document.getElementById('sinResultados');
-    const tablaLoading = document.getElementById('tablaLoading');
-    const paginacion = document.getElementById('paginacion');
-    const contador = document.getElementById('contadorEnvios');
-    const tituloSinResultados = document.getElementById('tituloSinResultados');
-    const mensajeSinResultados = document.getElementById('mensajeSinResultados');
-    
-    // Ocultar loading
-    tablaLoading.classList.add('hidden');
-    
-    // Verificar si hay resultados
-    if (enviosFiltrados.length === 0) {
-        tbody.innerHTML = '';
-        sinResultados.classList.remove('hidden');
-        paginacion.classList.add('hidden');
-        contador.textContent = '0 envíos';
-        
-        if (esAdmin) {
-            tituloSinResultados.textContent = 'No hay envíos con los filtros aplicados';
-            mensajeSinResultados.textContent = 'Intenta con otros criterios de búsqueda';
-        } else {
-            tituloSinResultados.textContent = 'No tienes envíos registrados';
-            mensajeSinResultados.textContent = 'No se encontraron envíos con los filtros aplicados';
+        function mostrarPagina() {
+            const tbody = document.getElementById('tablaEnvios');
+            const sinResultados = document.getElementById('sinResultados');
+            const tablaLoading = document.getElementById('tablaLoading');
+            const paginacion = document.getElementById('paginacion');
+            const contador = document.getElementById('contadorEnvios');
+            const tituloSinResultados = document.getElementById('tituloSinResultados');
+            const mensajeSinResultados = document.getElementById('mensajeSinResultados');
+            
+            // Ocultar loading
+            tablaLoading.classList.add('hidden');
+            
+            // Verificar si hay resultados
+            if (enviosFiltrados.length === 0) {
+                tbody.innerHTML = '';
+                sinResultados.classList.remove('hidden');
+                paginacion.classList.add('hidden');
+                contador.textContent = '0 envíos';
+                
+                if (esAdmin) {
+                    tituloSinResultados.textContent = 'No hay envíos con los filtros aplicados';
+                    mensajeSinResultados.textContent = 'Intenta con otros criterios de búsqueda';
+                } else {
+                    tituloSinResultados.textContent = 'No tienes envíos registrados';
+                    mensajeSinResultados.textContent = 'No se encontraron envíos con los filtros aplicados';
+                }
+                
+                return;
+            }
+            
+            // Ocultar mensaje sin resultados
+            sinResultados.classList.add('hidden');
+            
+            // Calcular paginación
+            const totalPaginas = Math.ceil(enviosFiltrados.length / itemsPorPagina);
+            const inicio = (paginaActual - 1) * itemsPorPagina;
+            const fin = Math.min(inicio + itemsPorPagina, enviosFiltrados.length);
+            const enviosPagina = enviosFiltrados.slice(inicio, fin);
+            
+            // Actualizar controles de paginación
+            document.getElementById('paginaInicio').textContent = inicio + 1;
+            document.getElementById('paginaFin').textContent = fin;
+            document.getElementById('totalItems').textContent = enviosFiltrados.length;
+            document.getElementById('paginaActual').textContent = `${paginaActual} de ${totalPaginas}`;
+            
+            document.getElementById('btnAnterior').disabled = paginaActual <= 1;
+            document.getElementById('btnSiguiente').disabled = paginaActual >= totalPaginas;
+            
+            // Mostrar paginación si hay más de una página
+            if (totalPaginas > 1) {
+                paginacion.classList.remove('hidden');
+            } else {
+                paginacion.classList.add('hidden');
+            }
+            
+            // Generar filas de la tabla
+            let html = '';
+            enviosPagina.forEach((envio, index) => {
+                const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"]) || new Date();
+                const fechaFormateada = fecha.toLocaleDateString('es-CO', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                // Forma de pago
+                let formaPagoTexto = '';
+                const formaPago = envio["FORMA DE PAGO"] || '';
+                switch(formaPago.toLowerCase()) {
+                    case 'contado': formaPagoTexto = 'Contado'; break;
+                    case 'contraentrega': formaPagoTexto = 'Contraentrega'; break;
+                    case 'contraentrega_recaudo': 
+                    case 'con recaudo':
+                        formaPagoTexto = 'Con Recaudo'; 
+                        break;
+                    default: formaPagoTexto = formaPago || 'N/A';
+                }
+                
+                // Estado de pago (usando la función corregida)
+                const estadoInfo = determinarEstadoPago(envio);
+                const valorRecaudar = envio.valorRecaudar || 0;
+                const totalPagar = envio.totalPagar || 0;
+                const estadoHTML = estadoInfo.texto;
+                const estadoClase = estadoInfo.clase;
+                
+                // ID del envío
+                const envioId = (envio["ENVIO ID"] || '').replace(/'/g, "\\'");
+                
+                if (esAdmin) {
+                    html += `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4">
+                                <span class="font-mono font-bold text-sm">${envio["ENVIO ID"] || ''}</span>
+                            </td>
+                            <td class="py-3 px-4 text-sm">${fechaFormateada}</td>
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-sm">${envio["USUARIO ID"] || ''}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="font-medium">${envio["DESTINO"] || ''}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">${envio["BARRIO"] || ''}</div>
+                            </td>
+                            <td class="py-3 px-4 text-sm">${formaPagoTexto}</td>
+                            <td class="py-3 px-4 font-medium text-blue-600 dark:text-blue-400">
+                                $${valorRecaudar.toLocaleString('es-CO')}
+                            </td>
+                            <td class="py-3 px-4 font-bold text-green-600 dark:text-green-400">
+                                $${totalPagar.toLocaleString('es-CO')}
+                            </td>
+                            <td class="py-3 px-4 text-sm">
+                                ${envio["MENSAJERO"] || 'Sin asignar'}
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${estadoClase}">
+                                    ${estadoHTML}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button onclick="verDetalles('${envioId}')" 
+                                        class="px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                    Ver
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    html += `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="py-3 px-4">
+                                <span class="font-mono font-bold text-sm">${envio["ENVIO ID"] || ''}</span>
+                            </td>
+                            <td class="py-3 px-4 text-sm">${fechaFormateada}</td>
+                            <td class="py-3 px-4">
+                                <div class="font-medium">${envio["DESTINO"] || ''}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">${envio["BARRIO"] || ''}</div>
+                            </td>
+                            <td class="py-3 px-4 text-sm">${formaPagoTexto}</td>
+                            <td class="py-3 px-4 font-medium text-blue-600 dark:text-blue-400">
+                                $${valorRecaudar.toLocaleString('es-CO')}
+                            </td>
+                            <td class="py-3 px-4 font-bold text-green-600 dark:text-green-400">
+                                $${totalPagar.toLocaleString('es-CO')}
+                            </td>
+                            <td class="py-3 px-4 text-sm">
+                                ${envio["MENSAJERO"] || 'Sin asignar'}
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${estadoClase}">
+                                    ${estadoHTML}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button onclick="verDetalles('${envioId}')" 
+                                        class="px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                    Ver
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            tbody.innerHTML = html;
+            contador.textContent = `${enviosFiltrados.length} envíos`;
         }
-        
-        return;
-    }
-    
-    // Ocultar mensaje sin resultados
-    sinResultados.classList.add('hidden');
-    
-    // Calcular paginación
-    const totalPaginas = Math.ceil(enviosFiltrados.length / itemsPorPagina);
-    const inicio = (paginaActual - 1) * itemsPorPagina;
-    const fin = Math.min(inicio + itemsPorPagina, enviosFiltrados.length);
-    const enviosPagina = enviosFiltrados.slice(inicio, fin);
-    
-    // Actualizar controles de paginación
-    document.getElementById('paginaInicio').textContent = inicio + 1;
-    document.getElementById('paginaFin').textContent = fin;
-    document.getElementById('totalItems').textContent = enviosFiltrados.length;
-    document.getElementById('paginaActual').textContent = `${paginaActual} de ${totalPaginas}`;
-    
-    document.getElementById('btnAnterior').disabled = paginaActual <= 1;
-    document.getElementById('btnSiguiente').disabled = paginaActual >= totalPaginas;
-    
-    // Mostrar paginación si hay más de una página
-    if (totalPaginas > 1) {
-        paginacion.classList.remove('hidden');
-    } else {
-        paginacion.classList.add('hidden');
-    }
-    
-    // ============================================
-    // AQUÍ ESTÁ LA PARTE QUE DEBES REEMPLAZAR
-    // ============================================
-    
-    // Generar filas de la tabla
-    let html = '';
-    enviosPagina.forEach((envio, index) => {
-        const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"]) || new Date();
-        const fechaFormateada = fecha.toLocaleDateString('es-CO', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-        
-        // Forma de pago
-        let formaPagoTexto = '';
-        const formaPago = envio["FORMA DE PAGO"] || '';
-        switch(formaPago.toLowerCase()) {
-            case 'contado': formaPagoTexto = 'Contado'; break;
-            case 'contraentrega': formaPagoTexto = 'Contraentrega'; break;
-            case 'contraentrega_recaudo': 
-            case 'con recaudo':
-                formaPagoTexto = 'Con Recaudo'; 
-                break;
-            default: formaPagoTexto = formaPago || 'N/A';
-        }
-        
-        // ============================================
-        // REEMPLAZA ESTO (código viejo):
-        // 
-        // Estado de pago
-        // const estaPagado = determinarSiEstaPagado(envio["PAGADO A REMITENTE"]);
-        // const valorRecaudar = envio.valorRecaudar || 0;
-        // const totalPagar = envio.totalPagar || 0;
-        // 
-        // let estadoHTML = '';
-        // let estadoClase = '';
-        // 
-        // if (estaPagado) {
-        //     estadoHTML = 'Pagado';
-        //     estadoClase = 'badge-pagado';
-        // } else if (totalPagar > 0) {
-        //     estadoHTML = 'Pendiente';
-        //     estadoClase = 'badge-pendiente';
-        // } else {
-        //     estadoHTML = 'Sin pago';
-        //     estadoClase = 'badge-sin-pago';
-        // }
-        // ============================================
-        
-        // ============================================
-        // POR ESTO (código nuevo):
-        // Estado de pago
-        const estadoInfo = determinarEstadoPago(envio);
-        const valorRecaudar = envio.valorRecaudar || 0;
-        const totalPagar = envio.totalPagar || 0;
-
-        const estadoHTML = estadoInfo.texto;
-        const estadoClase = estadoInfo.clase;
-        // ============================================
-        
-        // ID del envío
-        const envioId = (envio["ENVIO ID"] || '').replace(/'/g, "\\'");
-        
-        if (esAdmin) {
-            html += `
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td class="py-3 px-4">
-                        <span class="font-mono font-bold text-sm">${envio["ENVIO ID"] || ''}</span>
-                    </td>
-                    <td class="py-3 px-4 text-sm">${fechaFormateada}</td>
-                    <td class="py-3 px-4">
-                        <div class="font-medium text-sm">${envio["USUARIO ID"] || ''}</div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="font-medium">${envio["DESTINO"] || ''}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">${envio["BARRIO"] || ''}</div>
-                    </td>
-                    <td class="py-3 px-4 text-sm">${formaPagoTexto}</td>
-                    <td class="py-3 px-4 font-medium text-blue-600 dark:text-blue-400">
-                        $${valorRecaudar.toLocaleString('es-CO')}
-                    </td>
-                    <td class="py-3 px-4 font-bold text-green-600 dark:text-green-400">
-                        $${totalPagar.toLocaleString('es-CO')}
-                    </td>
-                    <td class="py-3 px-4 text-sm">
-                        ${envio["MENSAJERO"] || 'Sin asignar'}
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium ${estadoClase}">
-                            ${estadoHTML}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <button onclick="verDetalles('${envioId}')" 
-                                class="px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm flex items-center gap-1 transition-colors">
-                            <span class="material-symbols-outlined text-sm">visibility</span>
-                            Ver
-                        </button>
-                    </td>
-                </tr>
-            `;
-        } else {
-            html += `
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td class="py-3 px-4">
-                        <span class="font-mono font-bold text-sm">${envio["ENVIO ID"] || ''}</span>
-                    </td>
-                    <td class="py-3 px-4 text-sm">${fechaFormateada}</td>
-                    <td class="py-3 px-4">
-                        <div class="font-medium">${envio["DESTINO"] || ''}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">${envio["BARRIO"] || ''}</div>
-                    </td>
-                    <td class="py-3 px-4 text-sm">${formaPagoTexto}</td>
-                    <td class="py-3 px-4 font-medium text-blue-600 dark:text-blue-400">
-                        $${valorRecaudar.toLocaleString('es-CO')}
-                    </td>
-                    <td class="py-3 px-4 font-bold text-green-600 dark:text-green-400">
-                        $${totalPagar.toLocaleString('es-CO')}
-                    </td>
-                    <td class="py-3 px-4 text-sm">
-                        ${envio["MENSAJERO"] || 'Sin asignar'}
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium ${estadoClase}">
-                            ${estadoHTML}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <button onclick="verDetalles('${envioId}')" 
-                                class="px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm flex items-center gap-1 transition-colors">
-                            <span class="material-symbols-outlined text-sm">visibility</span>
-                            Ver
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }
-    });
-    
-    tbody.innerHTML = html;
-    contador.textContent = `${enviosFiltrados.length} envíos`;
-}
         
         function cambiarPagina(direccion) {
             const totalPaginas = Math.ceil(enviosFiltrados.length / itemsPorPagina);
@@ -1672,11 +1645,11 @@ function determinarEstadoPago(envio) {
             }
             
            // Estado de pago
-const estadoInfo = determinarEstadoPago(envio);
-const estadoPagoTexto = estadoInfo.texto;
-const estadoPagoColor = estadoInfo.texto === 'Pagado' ? 'text-green-600' : 
-                       estadoInfo.texto === 'Pendiente' ? 'text-yellow-600' :
-                       estadoInfo.texto === 'En proceso' ? 'text-blue-600' : 'text-red-600';
+            const estadoInfo = determinarEstadoPago(envio);
+            const estadoPagoTexto = estadoInfo.texto;
+            const estadoPagoColor = estadoInfo.texto === 'Pagado' ? 'text-green-600' : 
+                               estadoInfo.texto === 'Pendiente' ? 'text-yellow-600' :
+                               estadoInfo.texto === 'En proceso' ? 'text-blue-600' : 'text-red-600';
             
             let html = `
                 <div class="space-y-4">
