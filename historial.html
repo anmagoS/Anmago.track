@@ -1046,40 +1046,41 @@
         // ============================================
         
         async function cargarEnviosCliente() {
-            try {
-                console.log('📡 Cliente: Cargando envíos del usuario...');
-                
-                const url = `${WEB_APP_URL}?action=getHistorialCliente&usuarioId=${encodeURIComponent(usuarioActual.USUARIO)}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                console.log('📊 Datos recibidos (cliente):', data);
-                
-                if (data && Array.isArray(data)) {
-                    todosEnvios = data.map(envio => ({
-                        ...envio,
-                        valorRecaudar: parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0),
-                        totalPagar: parseFloat(envio["TOTAL A PAGAR"] || envio.totalPagar || 0),
-                        // Asegurar que tenga el usuario correcto
-                        "USUARIO ID": usuarioActual.USUARIO
-                    }));
-                    
-                    console.log(`✅ Cliente: ${todosEnvios.length} envíos cargados para ${usuarioActual.USUARIO}`);
-                    
-                } else {
-                    console.log('⚠️ Respuesta vacía o no es array');
-                    todosEnvios = [];
-                }
-                
-            } catch (error) {
-                console.log('⚠️ Error cargando desde API:', error.message);
-                todosEnvios = [];
-            }
+    try {
+        console.log('📡 Cliente: Cargando envíos del usuario...');
+        
+        const url = `${WEB_APP_URL}?action=getHistorialCliente&usuarioId=${encodeURIComponent(usuarioActual.USUARIO)}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
+        const data = await response.json();
+        console.log('📊 Datos recibidos (cliente):', data);
+        
+        if (data && Array.isArray(data)) {
+            todosEnvios = data.map(envio => ({
+                ...envio,
+                valorRecaudar: parseFloat(envio["VALOR A RECAUDAR"] || envio.valorRecaudar || 0),
+                totalPagar: parseFloat(envio["TOTAL A PAGAR"] || envio.totalPagar || 0),
+                "USUARIO ID": usuarioActual.USUARIO,
+                // ========== SOLUCIÓN: Asegurar que el campo exista ==========
+                "PAGADO A REMITENTE": envio["PAGADO A REMITENTE"] || "NO"
+            }));
+            
+            console.log(`✅ Cliente: ${todosEnvios.length} envíos cargados para ${usuarioActual.USUARIO}`);
+            
+        } else {
+            console.log('⚠️ Respuesta vacía o no es array');
+            todosEnvios = [];
+        }
+        
+    } catch (error) {
+        console.log('⚠️ Error cargando desde API:', error.message);
+        todosEnvios = [];
+    }
+}
         
         function extraerListasFiltrosCliente() {
             const mensajerosSet = new Set();
