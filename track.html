@@ -1,1 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anmago Track - Envíos Rápidos en Bogotá</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚚</text></svg>">
+    
+    <!-- CSS Institucional Personalizado -->
+    <style>
+        /* ============================================
+           ESTILOS INSTITUCIONALES - Tu CSS personalizado
+           ============================================ */
+        :root {
+            /* Colores institucionales según tus requisitos */
+            --azul-oscuro: #0d121b;    /* Confianza */
+            --azul-primario: #135bec;  /* Principal */
+            --verde-rapidez: #10b981;  /* Rapidez */
+            --blanco-fondo: #ffffff;   /* Fondo limpio */
+            --gris-claro: #f6f6f8;
+            --gris-medio: #4c669a;
+            
+            /* Espaciados y bordes */
+            --radio-borde: 0.5rem;
+            --radio-borde-grande: 1rem;
+            --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --sombra-fuerte: 0 8px 24px rgba(19, 91, 236, 0.15);
+            
+            /* Transiciones */
+            --transicion-rapida: 0.2s ease;
+            --transicion-media: 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--blanco-fondo);
+            color: var(--azul-oscuro);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* ============================================
+           TIPOGRAFÍA Y ELEMENTOS BÁSICOS
+           ============================================ */
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        /* ============================================
+           BOTONES INSTITUCIONALES (sin clases externas)
+           ============================================ */
+        .boton-primario {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background-color: var(--azul-primario);
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radio-borde);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transicion-rapida);
+            box-shadow: var(--sombra-suave);
+            font-size: 1rem;
+            min-height: 3.5rem;
+        }
+        
+        .boton-primario:hover {
+            background-color: #0f4bc4;
+            transform: translateY(-2px);
+            box-shadow: var(--sombra-fuerte);
+        }
+        
+        .boton-secundario {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background-color: var(--verde-rapidez);
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radio-borde);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transicion-rapida);
+            box-shadow: var(--sombra-suave);
+            font-size: 1rem;
+            min-height: 3.5rem;
+        }
+        
+        .boton-secundario:hover {
+            background-color: #0da271;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+        }
+        
+        .boton-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background-color: transparent;
+            color: var(--azul-primario);
+            font-weight: 600;
+            border-radius: var(--radio-borde);
+            border: 2px solid var(--azul-primario);
+            cursor: pointer;
+            transition: all var(--transicion-rapida);
+            font-size: 1rem;
+            min-height: 3.5rem;
+        }
+        
+        .boton-outline:hover {
+            background-color: rgba(19, 91, 236, 0.05);
+        }
+        
+        /* ============================================
+           ENCABEZADO Y NAVEGACIÓN
+           ============================================ */
+        .encabezado {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--blanco-fondo);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+        }
+        
+        .encabezado-contenido {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-icono {
+            font-size: 2rem;
+            color: var(--azul-primario);
+        }
+        
+        .logo-texto {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--azul-oscuro);
+        }
+        
+        .navegacion {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        
+        .menu-movil {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* ============================================
+           HERO SECTION - Encabezado llamativo
+           ============================================ */
+        .hero {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #f6f6f8 0%, #ffffff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="%23135bec" opacity="0.03"/></svg>');
+            background-size: cover;
+            z-index: 0;
+        }
+        
+        .hero-contenido {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+        
+        .hero-titulo {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--azul-oscuro);
+        }
+        
+        .hero-subtitulo {
+            font-size: 1.25rem;
+            color: var(--gris-medio);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+        
+        .hero-destacado {
+            color: var(--verde-rapidez);
+            font-weight: 700;
+        }
+        
+        .hero-botones {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        /* ============================================
+           SECCIÓN DE BENEFICIOS
+           ============================================ */
+        .beneficios {
+            padding: 4rem 0;
+            background-color: var(--blanco-fondo);
+        }
+        
+        .beneficios-titulo {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .beneficios-lista {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .beneficio-item {
+            background-color: var(--blanco-fondo);
+            border-radius: var(--radio-borde-grande);
+            padding: 2rem;
+            box-shadow: var(--sombra-suave);
+            transition: transform var(--transicion-media);
+        }
+        
+        .beneficio-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .beneficio-icono {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--azul-primario);
+        }
+        
+        .beneficio-titulo {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .beneficio-descripcion {
+            color: var(--gris-medio);
+        }
+        
+        .beneficio-precio {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--verde-rapidez);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 var(--radio-borde) var(--radio-borde) 0;
+        }
+        
+        /* ============================================
+           SECCIÓN DE COBERTURA (MAPA)
+           ============================================ */
+        .cobertura {
+            padding: 4rem 0;
+            background-color: var(--gris-claro);
+        }
+        
+        .cobertura-titulo {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .cobertura-subtitulo {
+            text-align: center;
+            color: var(--gris-medio);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .mapa-contenedor {
+            width: 100%;
+            height: 400px;
+            border-radius: var(--radio-borde-grande);
+            overflow: hidden;
+            box-shadow: var(--sombra-suave);
+            margin-bottom: 2rem;
+        }
+        
+        /* Estilo específico para el mapa de Google */
+        .mapa-google {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.75rem;
+            }
+            
+            .hero-titulo {
+                font-size: 2.25rem;
+            }
+            
+            .hero-botones {
+                flex-direction: column;
+            }
+            
+            .hero-botones .boton-primario,
+            .hero-botones .boton-secundario {
+                width: 100%;
+            }
+            
+            .navegacion {
+                display: none;
+            }
+            
+            .menu-movil {
+                display: block;
+            }
+            
+            .mapa-contenedor {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-titulo {
+                font-size: 1.75rem;
+            }
+            
+            .beneficios-lista {
+                grid-template-columns: 1fr;
+            }
+            
+            .mapa-contenedor {
+                height: 250px;
+            }
+        }
+        
+        /* ============================================
+           ANIMACIONES Y EFECTOS
+           ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animado {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .retraso-1 { animation-delay: 0.1s; }
+        .retraso-2 { animation-delay: 0.2s; }
+        .retraso-3 { animation-delay: 0.3s; }
+        .retraso-4 { animation-delay: 0.4s; }
+        
+        /* ============================================
+           PIE DE PÁGINA
+           ============================================ */
+        .pie-pagina {
+            background-color: var(--azul-oscuro);
+            color: white;
+            padding: 3rem 0 2rem;
+        }
+        
+        .pie-contenido {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .pie-columna-titulo {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        
+        .pie-lista {
+            list-style: none;
+        }
+        
+        .pie-lista li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .pie-lista a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color var(--transicion-rapida);
+        }
+        
+        .pie-lista a:hover {
+            color: white;
+        }
+        
+        .contacto-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .contacto-icono {
+            color: var(--verde-rapidez);
+        }
+        
+        .pie-derechos {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+        }
+    </style>
+    
+    <!-- Fuente Inter para consistencia -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Íconos de Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- ============================================
+         LANDING PAGE PÚBLICA
+         ============================================ -->
+    
+    <!-- Encabezado -->
+    <header class="encabezado" id="encabezado">
+        <div class="container encabezado-contenido">
+            <div class="logo">
+                <span class="material-symbols-outlined logo-icono">two_wheeler</span>
+                <span class="logo-texto">Anmago Track</span>
+            </div>
+            
+            <div class="navegacion">
+                <a href="#beneficios">Beneficios</a>
+                <a href="#cobertura">Cobertura</a>
+                <a href="https://anmagos.github.io/ENVIOS-EXPRESS/consultas.html" target="_blank">Rastreo</a>
+                <!-- CAMBIADO: Ahora apunta a sistema.html -->
+                <a href="sistema.html" class="boton-outline">Ingreso / Login</a>
+            </div>
+            
+            <div class="menu-movil" id="menu-movil">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Sección Hero -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-contenido animado">
+                <h1 class="hero-titulo">Logística ágil con transparencia digital.</h1>
+                <h2 class="hero-subtitulo">Transparencia y velocidad en cada entrega: tu envío siempre bajo control</h2>
+                
+                <div class="hero-botones">
+                    <a href="https://anmagos.github.io/ENVIOS-EXPRESS/consultas.html" target="_blank" class="boton-primario">
+                        <span class="material-symbols-outlined" style="margin-right: 0.5rem;">search</span>
+                        Rastreo de paquetes
+                    </a>
+                    <!-- CAMBIADO: Ahora apunta a sistema.html -->
+                    <a href="sistema.html" class="boton-secundario">
+                        <span class="material-symbols-outlined" style="margin-right: 0.5rem;">login</span>
+                        Ingreso / Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Sección de Beneficios -->
+    <section class="beneficios" id="beneficios">
+        <div class="container">
+            <h2 class="beneficios-titulo animado">¿Por qué elegir nuestro servicio?</h2>
+            
+            <div class="beneficios-lista">
+                <div class="beneficio-item animado retraso-1">
+                    <span class="material-symbols-outlined beneficio-icono">schedule</span>
+                    <h3 class="beneficio-titulo">Entregas el mismo día</h3>
+                    <p class="beneficio-descripcion">Entregamos tus paquetes en menos de 24 horas en toda Bogotá.</p>
+                </div>
+                
+                <div class="beneficio-item animado retraso-2">
+                    <span class="material-symbols-outlined beneficio-icono">track_changes</span>
+                    <h3 class="beneficio-titulo">Reportes en tiempo real</h3>
+                    <p class="beneficio-descripcion">Tu envío siempre bajo control: rastreo y novedades al instante.</p>
+                </div>
+                
+                <div class="beneficio-item animado retraso-3">
+                    <span class="material-symbols-outlined beneficio-icono">visibility</span>
+                    <h3 class="beneficio-titulo">Transparencia en recaudo</h3>
+                    <p class="beneficio-descripcion">Control interno con evidencia digital en cada recaudo, para que siempre tengas respaldo confiable.</p>
+                </div>
+                
+                <div class="beneficio-item animado retraso-4">
+                    <span class="material-symbols-outlined beneficio-icono">sell</span>
+                    <h3 class="beneficio-titulo">Precio especial de lanzamiento</h3>
+                    <p class="beneficio-descripcion">Aprovecha nuestra promoción especial para nuevos clientes.</p>
+                    <div class="beneficio-precio">
+                        <strong>$8.000</strong> en los primeros 5 envíos
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Sección de Cobertura -->
+    <section class="cobertura" id="cobertura">
+        <div class="container">
+            <h2 class="cobertura-titulo animado">Cobertura en toda Bogotá</h2>
+            <p class="cobertura-subtitulo animado">Llegamos a todas las localidades con nuestro servicio de entrega el mismo día</p>
+            
+            <div class="mapa-contenedor animado">
+                <!-- Mapa de Google Maps de Bogotá -->
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d159073.37571055163!2d-74.26383081694138!3d4.648620941778894!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3f9bfd2da6e29%3A0x5b5e5b5b5b5b5b5b!2sBogot%C3%A1!5e0!3m2!1ses!2sco!4v1620000000000!5m2!1ses!2sco" 
+                    class="mapa-google"
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+            
+            <div class="text-center animado retraso-1">
+                <a href="#cobertura" class="boton-outline" onclick="ampliarMapa()">
+                    <span class="material-symbols-outlined" style="margin-right: 0.5rem;">zoom_in</span>
+                    Ampliar mapa de cobertura
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pie de Página -->
+    <footer class="pie-pagina" id="pie-pagina">
+        <div class="container">
+            <div class="pie-contenido">
+                <div>
+                    <h3 class="pie-columna-titulo">Anmago Track</h3>
+                    <p>Servicio de mensajería local confiable y rápido. Entregas el mismo día en toda Bogotá.</p>
+                </div>
+                
+                <div>
+                    <h3 class="pie-columna-titulo">Contacto</h3>
+                    <div class="contacto-item">
+                        <span class="material-symbols-outlined contacto-icono">phone</span>
+                        <span>WhatsApp: +57 300 649 8710</span>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="material-symbols-outlined contacto-icono">mail</span>
+                        <span>Anmagostore@gmail.com</span>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="material-symbols-outlined contacto-icono">location_on</span>
+                        <span>Bogotá D.C., Colombia</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="pie-columna-titulo">Enlaces Rápidos</h3>
+                    <ul class="pie-lista">
+                        <li><a href="#hero">Inicio</a></li>
+                        <li><a href="#beneficios">Beneficios</a></li>
+                        <li><a href="#cobertura">Cobertura</a></li>
+                        <li><a href="https://anmagos.github.io/ENVIOS-EXPRESS/consultas.html" target="_blank">Rastreo</a></li>
+                        <!-- CAMBIADO: Ahora apunta a sistema.html -->
+                        <li><a href="sistema.html">Sistema Interno</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pie-derechos">
+                <p>&copy; 2026 Anmago Track. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- ============================================
+         JAVASCRIPT PARA FUNCIONALIDAD
+         ============================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const menuMovil = document.getElementById('menu-movil');
+            const navegacion = document.querySelector('.navegacion');
+            
+            // Toggle menú móvil
+            function toggleMenuMovil() {
+                if (navegacion.style.display === 'flex') {
+                    navegacion.style.display = 'none';
+                } else {
+                    navegacion.style.display = 'flex';
+                    navegacion.style.flexDirection = 'column';
+                    navegacion.style.position = 'absolute';
+                    navegacion.style.top = '100%';
+                    navegacion.style.left = '0';
+                    navegacion.style.right = '0';
+                    navegacion.style.backgroundColor = 'white';
+                    navegacion.style.padding = '1.5rem';
+                    navegacion.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    navegacion.style.zIndex = '1000';
+                }
+            }
+            
+            // Animaciones al cargar
+            function animarElementos() {
+                const elementos = document.querySelectorAll('.animado');
+                elementos.forEach(elemento => {
+                    elemento.style.opacity = '0';
+                });
+                
+                // Trigger para animaciones después de un pequeño delay
+                setTimeout(() => {
+                    elementos.forEach(elemento => {
+                        elemento.style.opacity = '1';
+                    });
+                }, 100);
+            }
+            
+            // Función para ampliar el mapa
+            window.ampliarMapa = function() {
+                const mapa = document.querySelector('.mapa-contenedor');
+                if (mapa.style.height === '600px') {
+                    mapa.style.height = '400px';
+                } else {
+                    mapa.style.height = '600px';
+                }
+            }
+            
+            // Event listeners
+            menuMovil.addEventListener('click', toggleMenuMovil);
+            
+            // Cerrar menú móvil al hacer clic en un enlace
+            document.querySelectorAll('.navegacion a').forEach(enlace => {
+                enlace.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        navegacion.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Inicializar animaciones
+            animarElementos();
+            
+            // Smooth scroll para enlaces internos
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    // Solo aplicar smooth scroll si no es un enlace externo
+                    if (this.getAttribute('href').startsWith('#') && 
+                        !this.getAttribute('href').includes('http')) {
+                        e.preventDefault();
+                        
+                        const targetId = this.getAttribute('href');
+                        if (targetId === '#') return;
+                        
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Ajustar menú en resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navegacion.style.display = 'flex';
+                    navegacion.style.flexDirection = 'row';
+                    navegacion.style.position = 'static';
+                    navegacion.style.backgroundColor = 'transparent';
+                    navegacion.style.padding = '0';
+                    navegacion.style.boxShadow = 'none';
+                } else {
+                    navegacion.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
 
