@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (usuario.ESTADO === "ACTIVO" && sessionTime < (horasExpiracion * 60 * 60 * 1000)) {
           console.log("✅ Sesión activa encontrada, redirigiendo...");
-          window.location.href = "index.html";
+          window.location.href = "sistema.html";
         } else {
           // Sesión expirada, limpiar
           console.log("⚠️ Sesión expirada, limpiando...");
