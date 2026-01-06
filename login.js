@@ -1,16 +1,25 @@
 // login.js - VERSIÓN MEJORADA CON VALIDACIONES
 async function cargarUsuarios() {
   try {
-    const response = await fetch("usuarios.json");
+    // Agregar timestamp para evitar caché
+    const timestamp = new Date().getTime();
+    const response = await fetch(`usuarios.json?t=${timestamp}`);
     const data = await response.json();
     console.log("Usuarios cargados:", data);
+    
+    // DEPURACIÓN: Ver qué usuarios se están cargando
+    console.log("=== DEPURACIÓN DE USUARIOS ===");
+    data.forEach(user => {
+      console.log(`Usuario: ${user.USUARIO}, Estado: ${user.ESTADO}`);
+    });
+    console.log("=============================");
+    
     return data;
   } catch (error) {
     console.error("Error cargando usuarios:", error);
     return [];
   }
 }
-
 // Función para encriptar (simplificada para demostración)
 function encriptarContraseña(password) {
   // En producción, usaría una librería como bcrypt
