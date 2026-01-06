@@ -742,9 +742,14 @@
             const intro = document.getElementById('intro');
             if (intro) intro.style.display = 'none';
         }, 2000);
+        // Cargar remitentes cuando se cargue la página
+document.addEventListener('DOMContentLoaded', function() {
+    cargarRemitentesDesdeSheets();
+});
     </script>
 </body>
 </html>
+
 
 
 
