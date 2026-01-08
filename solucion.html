@@ -4,32 +4,122 @@
   <meta charset="UTF-8">
   <title>Anmago Track - Solución de Novedad</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    h1 { color: #2c3e50; }
-    label { display: block; margin-top: 20px; font-weight: bold; }
+    /* Estilos generales */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f9fc;
+      color: #333;
+    }
+
+    /* Header */
+    header {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 1px;
+    }
+
+    /* Contenedor principal */
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    main h2 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    main p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Formulario */
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
     input[type="text"], textarea {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border: 1px solid #ccc; border-radius: 4px;
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
     }
     button {
-      margin-top: 20px; padding: 10px 20px;
-      background-color: #2c3e50; color: white;
-      border: none; border-radius: 4px; cursor: pointer;
+      margin-top: 25px;
+      padding: 12px 25px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #1a252f;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #2c3e50;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+    footer p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    footer a {
+      color: #1abc9c;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>Anmago Track</h1>
-  <p>Por favor diligencie la solución para la guía:</p>
-  <p id="guia"></p>
-  <form method="POST" action="https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec">
-    <input type="hidden" name="guia" id="guiaInput">
-    
-    <label for="solucion">Solución:</label>
-    <textarea id="solucion" name="solucion" rows="4" required></textarea>
-    
-    <button type="submit">Enviar Solución</button>
-  </form>
+  <header>
+    <h1>Anmago Track</h1>
+  </header>
+
+  <main>
+    <h2>Solución de Novedad</h2>
+    <p>Por favor diligencie la solución para la guía:</p>
+    <p id="guia" style="font-weight:bold; color:#1abc9c;"></p>
+
+    <form method="POST" action="https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec">
+      <input type="hidden" name="guia" id="guiaInput">
+      
+      <label for="solucion">Solución:</label>
+      <textarea id="solucion" name="solucion" rows="4" required></textarea>
+      
+      <button type="submit">Enviar Solución</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>© 2026 Anmago Track</p>
+    <p>Contacto: <a href="mailto:contacto@anmago.com">contacto@anmago.com</a> | Tel: +57 300 649 8710</p>
+    <p>Bogotá, Colombia</p>
+  </footer>
 
   <script>
     // Leer parámetro "guia" de la URL
