@@ -107,6 +107,7 @@
 
     <form method="GET" action="https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec">
       <input type="hidden" name="guia" id="guiaInput">
+      <input type="hidden" name="fecha_bogota" id="fechaBogota">
       
       <label for="solucion">Solución:</label>
       <textarea id="solucion" name="solucion" rows="4" required></textarea>
@@ -125,9 +126,73 @@
     // Leer parámetro "guia" de la URL
     const params = new URLSearchParams(window.location.search);
     const guia = params.get("guia");
+    
     if (guia) {
       document.getElementById("guia").textContent = guia;
       document.getElementById("guiaInput").value = guia;
+    }
+    
+    // FUNCIÓN PARA OBTENER FECHA BOGOTÁ (UTC-5)
+    function obtenerFechaBogota() {
+      const ahora = new Date();
+      // Bogotá es UTC-5 (5 horas detrás de UTC)
+      const offsetBogota = -5 * 60; // -5 horas en minutos
+      const horaBogota = new Date(ahora.getTime() + offsetBogota * 60 * 1000);
+      
+      return horaBogota;
+    }
+    
+    // FUNCIÓN PARA FORMATEAR FECHA COMO "DD/MM/YYYY HH:MM:SS"
+    function formatearFechaBogota() {
+      const fechaBogota = obtenerFechaBogota();
+      
+      const dia = fechaBogota.getDate().toString().padStart(2, '0');
+      const mes = (fechaBogota.getMonth() + 1).toString().padStart(2, '0');
+      const anio = fechaBogota.getFullYear();
+      const horas = fechaBogota.getHours().toString().padStart(2, '0');
+      const minutos = fechaBogota.getMinutes().toString().padStart(2, '0');
+      const segundos = fechaBogota.getSeconds().toString().padStart(2, '0');
+      
+      return `${dia}/${mes}/${anio} ${horas}:${minutos}:${segundos}`;
+    }
+    
+    // AGREGAR FECHA BOGOTÁ AL TEXTAREA AUTOMÁTICAMENTE
+    document.addEventListener('DOMContentLoaded', function() {
+      const textareaSolucion = document.getElementById('solucion');
+      const fechaBogotaInput = document.getElementById('fechaBogota');
+      
+      // Obtener fecha formateada
+      const fechaFormateada = formatearFechaBogota();
+      
+      // Guardar fecha en campo oculto
+      fechaBogotaInput.value = fechaFormateada;
+      
+      // Si el textarea está vacío, agregar fecha automáticamente
+      if (textareaSolucion && textareaSolucion.value.trim() === '') {
+        textareaSolucion.value = `[${fechaFormateada}] `;
+        textareaSolucion.focus();
+        
+        // Mover cursor al final
+        textareaSolucion.selectionStart = textareaSolucion.value.length;
+        textareaSolucion.selectionEnd = textareaSolucion.value.length;
+      }
+      
+      // También podemos mostrar la fecha actual
+      console.log('Fecha Bogotá generada:', fechaFormateada);
+    });
+    
+    // OPCIÓN 2: Botón para insertar fecha manualmente (por si acaso)
+    function insertarFechaBogota() {
+      const textarea = document.getElementById('solucion');
+      if (textarea) {
+        const fechaFormateada = formatearFechaBogota();
+        const cursorPos = textarea.selectionStart;
+        const textoActual = textarea.value;
+        
+        textarea.value = textoActual.substring(0, cursorPos) + 
+                         `[${fechaFormateada}] ` + 
+                         textoActual.substring(cursorPos);
+      }
     }
   </script>
 </body>
