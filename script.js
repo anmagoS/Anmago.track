@@ -79,7 +79,7 @@ function inicializarGooglePlacesAutocomplete() {
         // Configurar evento cuando se selecciona una dirección
         autocomplete.addListener('place_changed', function() {
             const place = autocomplete.getPlace();
-            
+            logDetalladoGooglePlace(place);
             if (!place.geometry) {
                 console.log("❌ No se seleccionó un lugar válido");
                 return;
@@ -96,35 +96,122 @@ function inicializarGooglePlacesAutocomplete() {
             };
             
             // Extraer componentes de la dirección
-            place.address_components.forEach(component => {
-                const tipos = component.types;
+           // Extraer componentes de la dirección - ¡VERSIÓN CORREGIDA!
+console.log("🔍 Analizando componentes de dirección Google...");
+
+// Función para extraer barrio CORRECTAMENTE
+function extraerBarrioDeGooglePlace(place) {
+    if (!place.address_components) {
+        console.warn("⚠️ No hay address_components");
+        return "";
+    }
+    
+    // PRIORIDAD 1: Buscar 'neighborhood' (barrio oficial)
+    for (const component of place.address_components) {
+        if (component.types.includes('neighborhood')) {
+            console.log("✅ Barrio encontrado (neighborhood):", component.long_name);
+            return component.long_name;
+        }
+    }
+    
+    // PRIORIDAD 2: Buscar 'sublocality_level_1' (localidad en Bogotá)
+    for (const component of place.address_components) {
+        if (component.types.includes('sublocality_level_1')) {
+            console.log("🏘️ Usando localidad como barrio:", component.long_name);
+            return component.long_name;
+        }
+    }
+    
+    // PRIORIDAD 3: Buscar en el nombre de la dirección
+    const direccion = place.formatted_address || "";
+    const palabrasClave = [
+        "Villas de Granada", "Granada", "Engativá", "Suba", "Usaquén",
+        "Chapinero", "Kennedy", "Bosa", "Fontibón", "Teusaquillo"
+    ];
+    
+    for (const barrio of palabrasClave) {
+        if (direccion.toLowerCase().includes(barrio.toLowerCase())) {
+            console.log("🔍 Barrio detectado en texto:", barrio);
+            return barrio;
+        }
+    }
+    
+    console.warn("⚠️ No se pudo extraer barrio");
+    return "";
+}
+
+// Función para NORMALIZAR barrio (quitar tildes, etc.)
+function normalizarBarrioParaComparacion(barrio) {
+    if (!barrio) return "";
+    
+    return barrio
+        .toUpperCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar tildes
+        .replace(/[^A-Z0-9\s]/g, " ") // Quitar caracteres especiales
+        .replace(/\s+/g, " ") // Espacios múltiples a uno
+        .trim();
+}
+
+// ============================================
+// PASO 1: EXTRAER BARRIO CORRECTO
+// ============================================
+const barrioExtraido = extraerBarrioDeGooglePlace(place);
+
+// ============================================
+// PASO 2: ASIGNAR BARRIO AL CAMPO
+// ============================================
+if (barrioExtraido) {
+    const barrioInput = document.getElementById('barrioLocalidad');
+    if (barrioInput) {
+        // Asignar barrio extraído
+        barrioInput.value = barrioExtraido;
+        
+        // Normalizar para buscar en barrios.json
+        const barrioNormalizado = normalizarBarrioParaComparacion(barrioExtraido);
+        console.log("🔧 Barrio normalizado para búsqueda:", barrioNormalizado);
+        
+        // Buscar coincidencias en barriosData
+        if (window.barriosData && window.barriosData.length > 0) {
+            const resultados = window.barriosData.filter(b => 
+                normalizarBarrioParaComparacion(b.nombre).includes(barrioNormalizado) ||
+                barrioNormalizado.includes(normalizarBarrioParaComparacion(b.nombre))
+            );
+            
+            console.log("📊 Resultados en barrios.json:", resultados.length);
+            if (resultados.length > 0) {
+                console.log("🎯 Coincidencia encontrada:", resultados[0].nombre);
+            }
+        }
+        
+        // Disparar evento para actualizar UI
+        barrioInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+}
+
+// ============================================
+// PASO 3: EXTRAER CIUDAD
+// ============================================
+if (place.address_components) {
+    for (const component of place.address_components) {
+        if (component.types.includes('locality')) {
+            const ciudadSelect = document.getElementById('ciudadDestino');
+            if (ciudadSelect) {
+                const ciudadEncontrada = component.long_name.toLowerCase();
                 
-                // Barrio
-                if (tipos.includes('neighborhood') || tipos.includes('sublocality_level_1')) {
-                    const barrioInput = document.getElementById('barrioLocalidad');
-                    if (barrioInput && (!barrioInput.value.trim())) {
-                        barrioInput.value = component.long_name;
-                        barrioInput.dispatchEvent(new Event('input', { bubbles: true }));
+                // Buscar coincidencia en las opciones
+                Array.from(ciudadSelect.options).forEach(option => {
+                    if (option.value && option.value.toLowerCase().includes(ciudadEncontrada)) {
+                        ciudadSelect.value = option.value;
+                        ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        console.log(`✅ Ciudad auto-seleccionada: ${option.value}`);
+                        break;
                     }
-                }
-                
-                // Ciudad
-                if (tipos.includes('locality')) {
-                    const ciudadSelect = document.getElementById('ciudadDestino');
-                    if (ciudadSelect) {
-                        const ciudadEncontrada = component.long_name.toLowerCase();
-                        
-                        // Buscar coincidencia en las opciones
-                        Array.from(ciudadSelect.options).forEach(option => {
-                            if (option.value && option.value.toLowerCase().includes(ciudadEncontrada)) {
-                                ciudadSelect.value = option.value;
-                                ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                                console.log(`✅ Ciudad auto-seleccionada: ${option.value}`);
-                            }
-                        });
-                    }
-                }
-            });
+                });
+            }
+            break; // Solo tomar la primera localidad
+        }
+    }
+}
             
             // Mostrar notificación
             mostrarNotificacionDireccion(place.formatted_address);
@@ -2415,3 +2502,4 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
