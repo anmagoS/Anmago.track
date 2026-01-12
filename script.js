@@ -30,14 +30,15 @@ let resumenFormaPago, resumenValorRecaudar, resumenEstado;
 let submitButton, submitText, submitIcon;
 
 // ============================================
-// GOOGLE PLACES AUTOCOMPLETE - COMPLETO
-// ============================================
-// ============================================
 // REEMPLAZAR ESTA FUNCIÓN EN LA SECCIÓN DE GOOGLE PLACES
+// ============================================
+// ============================================
+// REEMPLAZAR COMPLETAMENTE LA FUNCIÓN inicializarGooglePlacesAutocomplete()
+// CON ESTA VERSIÓN MEJORADA:
 // ============================================
 
 function inicializarGooglePlacesAutocomplete() {
-    console.log("📍 Inicializando Google Places Autocomplete...");
+    console.log("📍 Inicializando Google Places Autocomplete (VERSIÓN MEJORADA)...");
     
     const direccionInput = document.getElementById('direccionDestino');
     
@@ -60,7 +61,9 @@ function inicializarGooglePlacesAutocomplete() {
             new google.maps.LatLng(4.85, -74.00)   // Bogotá norte
         );
         
-        // CONFIGURACIÓN MEJORADA: Buscar solo direcciones exactas
+        // ============================================
+        // CONFIGURACIÓN CRÍTICA: SOLO DIRECCIONES, NO LUGARES
+        // ============================================
         const autocomplete = new google.maps.places.Autocomplete(direccionInput, {
             componentRestrictions: { 
                 country: 'co'
@@ -72,161 +75,101 @@ function inicializarGooglePlacesAutocomplete() {
                 'formatted_address', 
                 'geometry',
                 'name',
-                'types'
+                'types',
+                'place_id'
             ],
-            // FILTROS ESPECÍFICOS PARA OBTENER DIRECCIONES PRECISAS
-            types: ['address', 'street_address', 'premise', 'subpremise'],
-            placeholder: 'Ej: Cra 15 #123-45, Chapinero Alto, Bogotá'
-        });
+            // ============================================
+            // ESTA ES LA CLAVE: types específico para SOLO direcciones
+            // ============================================
+            types: ['geocode', 'address'],  // 'geocode' es para direcciones numéricas
+            // NO usar: 'establishment' (lugares de interés)
             
+            // OPCIONAL: Filtrar aún más para Colombia
+            // placeIdOnly: false,
+            // location: new google.maps.LatLng(4.609710, -74.081750), // Centro de Bogotá
+            // radius: 50000 // 50km
+        });
+        
+        console.log("✅ Autocomplete configurado SOLO para direcciones (geocode/address)");
+        
+        // ============================================
+        // LIMPIAR EL INPUT Y CAMBIAR PLACEHOLDER
+        // ============================================
+        direccionInput.value = '';
+        direccionInput.placeholder = 'Ej: Carrera 15 #123-45, Chapinero Alto';
+        direccionInput.title = 'Ingresa dirección EXACTA (calle, carrera, número)';
+        
         // Deshabilitar el autocomplete nativo del navegador
         direccionInput.setAttribute('autocomplete', 'off');
         
-        // Configurar evento cuando se selecciona una dirección
+        // ============================================
+        // EVENTO MEJORADO: Validar que sea dirección, no lugar
+        // ============================================
         autocomplete.addListener('place_changed', function() {
             const place = autocomplete.getPlace();
             
-            console.log("📍 Lugar seleccionado:", place);
-            console.log("📍 Tipos del lugar:", place.types);
+            console.log("📍 Lugar seleccionado - DEBUG COMPLETO:");
+            console.log("📍 Nombre:", place.name);
+            console.log("📍 Dirección completa:", place.formatted_address);
+            console.log("📍 Tipos:", place.types);
+            console.log("📍 Place ID:", place.place_id);
             
             if (!place.geometry) {
                 console.log("❌ No se seleccionó un lugar válido");
-                mostrarMensajeBarrio('Por favor, selecciona una dirección exacta de la lista', 'error');
+                mostrarMensajeDireccion('Por favor, selecciona una dirección válida de la lista', 'error');
                 return;
             }
             
-            // Verificar que sea una dirección real y no un lugar genérico
-            const tiposPermitidos = ['street_address', 'premise', 'subpremise', 'route'];
-            const esDireccionValida = place.types.some(tipo => tiposPermitidos.includes(tipo));
+            // ============================================
+            // VALIDACIÓN CRÍTICA: ¿ES UNA DIRECCIÓN O UN LUGAR?
+            // ============================================
+            const esDireccionValida = esDireccionReal(place);
             
             if (!esDireccionValida) {
-                console.log("⚠️ No es una dirección exacta, tipos:", place.types);
-                mostrarMensajeBarrio('Por favor, ingresa una dirección exacta (ej: Cra 15 #123-45)', 'warning');
+                console.log("❌ ERROR: Se seleccionó un lugar, no una dirección");
+                console.log("📍 Tipos detectados:", place.types);
+                
+                // Mostrar error claro al usuario
+                mostrarMensajeDireccion(
+                    `"${place.name}" parece ser un lugar, no una dirección. Por favor, ingresa dirección exacta (Ej: Cra 15 #123-45)`,
+                    'error'
+                );
+                
+                // Limpiar el input para que reintente
+                setTimeout(() => {
+                    direccionInput.value = '';
+                    direccionInput.focus();
+                }, 1000);
+                
+                return;
             }
             
-            console.log("✅ Dirección Google seleccionada:", place.formatted_address);
+            console.log("✅ Dirección válida detectada");
             
-            // Guardar datos para posible uso futuro
+            // Guardar datos
             window.ultimaDireccionSeleccionada = {
                 direccion_completa: place.formatted_address,
                 latitud: place.geometry.location.lat(),
                 longitud: place.geometry.location.lng(),
                 nombre_lugar: place.name || '',
-                tipos: place.types || []
+                tipos: place.types || [],
+                place_id: place.place_id || ''
             };
             
-            // VARIABLES PARA BUSCAR BARRIO
-            let barrioEncontrado = '';
-            let localidadEncontrada = '';
+            // ============================================
+            // PROCESAR LA DIRECCIÓN PARA EXTRAER BARRIO
+            // ============================================
+            procesarDireccionParaBarrio(place);
             
             // ============================================
-            // ESTRATEGIA MEJORADA PARA EXTRAER BARRIO
+            // PROCESAR CIUDAD DESTINO
             // ============================================
-            place.address_components.forEach(component => {
-                const tipos = component.types;
-                
-                console.log(`📌 Componente: ${component.long_name}, Tipos: ${tipos}`);
-                
-                // ESTRATEGIA 1: Buscar neighborhood (barrio en Colombia)
-                if (tipos.includes('neighborhood')) {
-                    barrioEncontrado = component.long_name;
-                    console.log(`✅ Barrio encontrado por 'neighborhood': ${barrioEncontrado}`);
-                }
-                
-                // ESTRATEGIA 2: Buscar por sublocs (en Bogotá esto suele ser el barrio)
-                if (tipos.includes('sublocality_level_1') && !barrioEncontrado) {
-                    // En Bogotá, sublocs suelen ser barrios como "Chapinero Alto", "La Soledad", etc.
-                    barrioEncontrado = component.long_name;
-                    console.log(`✅ Barrio encontrado por 'sublocality_level_1': ${barrioEncontrado}`);
-                }
-                
-                // ESTRATEGIA 3: Buscar por administrative_area_level_3 (localidad en Bogotá)
-                if (tipos.includes('administrative_area_level_3')) {
-                    localidadEncontrada = component.long_name;
-                    console.log(`✅ Localidad encontrada: ${localidadEncontrada}`);
-                }
-                
-                // ESTRATEGIA 4: Buscar por route + street_number (calle con número)
-                if (tipos.includes('route') && tipos.includes('street_number')) {
-                    console.log(`📍 Dirección exacta: ${component.long_name}`);
-                }
-                
-                // ESTRATEGIA 5: Para Soacha - buscar por locality o administrative_area_level_2
-                if (tipos.includes('locality')) {
-                    const ciudad = component.long_name.toLowerCase();
-                    if (ciudad.includes('soacha')) {
-                        console.log(`✅ Ciudad Soacha detectada`);
-                    }
-                }
-            });
-            
-            // ============================================
-            // ASIGNAR BARRIO AL CAMPO
-            // ============================================
-            const barrioInput = document.getElementById('barrioLocalidad');
-            
-            if (barrioInput) {
-                if (barrioEncontrado) {
-                    // Asignar el barrio encontrado
-                    barrioInput.value = barrioEncontrado;
-                    console.log(`🎯 Barrio asignado automáticamente: ${barrioEncontrado}`);
-                    
-                    // Buscar en nuestros datos de barrios
-                    buscarBarrioEnBaseDatos(barrioEncontrado);
-                    
-                    // Mostrar mensaje de éxito
-                    mostrarMensajeBarrio(`Barrio detectado: ${barrioEncontrado}`, 'success');
-                    
-                } else if (localidadEncontrada) {
-                    // Si no encontramos barrio, usar la localidad
-                    barrioInput.value = localidadEncontrada;
-                    console.log(`⚠️ Usando localidad como barrio: ${localidadEncontrada}`);
-                    mostrarMensajeBarrio(`Localidad: ${localidadEncontrada} (ajusta si es necesario)`, 'warning');
-                    
-                    // Buscar en base de datos
-                    buscarBarrioEnBaseDatos(localidadEncontrada);
-                } else {
-                    // Si no encontramos nada, dejar vacío para que el usuario ingrese manualmente
-                    console.log("⚠️ No se pudo detectar barrio automáticamente");
-                    mostrarMensajeBarrio('Ingresa el barrio manualmente', 'info');
-                }
-                
-                // Disparar eventos para actualizar UI
-                barrioInput.dispatchEvent(new Event('input', { bubbles: true }));
-                barrioInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-            
-            // ============================================
-            // ASIGNAR CIUDAD DESTINO
-            // ============================================
-            place.address_components.forEach(component => {
-                const tipos = component.types;
-                
-                // Buscar ciudad (locality) o administrative_area_level_2
-                if (tipos.includes('locality') || tipos.includes('administrative_area_level_2')) {
-                    const ciudadSelect = document.getElementById('ciudadDestino');
-                    if (ciudadSelect) {
-                        const ciudadEncontrada = component.long_name;
-                        
-                        // Buscar coincidencia exacta en las opciones
-                        Array.from(ciudadSelect.options).forEach(option => {
-                            if (option.value && 
-                                (option.value.toLowerCase().includes(ciudadEncontrada.toLowerCase()) ||
-                                 ciudadEncontrada.toLowerCase().includes(option.value.toLowerCase()))) {
-                                ciudadSelect.value = option.value;
-                                ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                                console.log(`✅ Ciudad auto-seleccionada: ${option.value}`);
-                                return;
-                            }
-                        });
-                    }
-                }
-            });
+            procesarCiudadDestino(place);
             
             // Mostrar notificación
-            mostrarNotificacionDireccion(place.formatted_address);
+            mostrarNotificacionDireccionMejorada(place.formatted_address);
             
-            // Enfocar el siguiente campo automáticamente
+            // Enfocar siguiente campo
             setTimeout(() => {
                 const complementoInput = document.getElementById('complementoDireccion');
                 if (complementoInput) {
@@ -235,90 +178,183 @@ function inicializarGooglePlacesAutocomplete() {
             }, 500);
         });
         
-        // Función para buscar barrio en nuestra base de datos
-        function buscarBarrioEnBaseDatos(barrioBuscado) {
-            if (!window.barriosData || !Array.isArray(window.barriosData)) {
-                console.log("⚠️ Base de datos de barrios no disponible");
-                return;
-            }
+        // ============================================
+        // FUNCIONES AUXILIARES
+        // ============================================
+        
+        // Función para validar si es una dirección real
+        function esDireccionReal(place) {
+            const tipos = place.types || [];
             
-            const barrioBuscadoUpper = barrioBuscado.toUpperCase();
-            const barriosData = window.barriosData;
+            // Tipos que indican DIRECCIÓN REAL (no lugar)
+            const tiposDireccionValidos = [
+                'street_address',
+                'route',
+                'geocode',
+                'premise',
+                'subpremise',
+                'point_of_interest' // CUIDADO: puede ser ambos
+            ];
             
-            // Buscar coincidencia exacta o parcial
-            const barrioEncontrado = barriosData.find(barrio => 
-                barrio.nombre && barrio.nombre.toUpperCase() === barrioBuscadoUpper
-            ) || barriosData.find(barrio => 
-                barrio.nombre && barrio.nombre.toUpperCase().includes(barrioBuscadoUpper)
-            ) || barriosData.find(barrio => 
-                barrioBuscadoUpper.includes(barrio.nombre.toUpperCase())
+            // Tipos que indican LUGAR/ESTABLECIMIENTO (no queremos)
+            const tiposLugarNoDeseados = [
+                'church',
+                'place_of_worship',
+                'establishment',
+                'store',
+                'restaurant',
+                'school',
+                'university',
+                'hospital',
+                'park'
+            ];
+            
+            // Verificar si tiene tipos de lugar no deseados
+            const tieneLugarNoDeseado = tipos.some(tipo => 
+                tiposLugarNoDeseados.includes(tipo)
             );
             
-            if (barrioEncontrado) {
-                console.log(`📊 Barrio encontrado en base de datos: ${barrioEncontrado.nombre} (ID: ${barrioEncontrado.id})`);
-                
-                // Actualizar campo oculto de ID si existe
-                const barrioIdInput = document.getElementById('barrioId');
-                if (barrioIdInput) {
-                    barrioIdInput.value = barrioEncontrado.id;
-                }
-            } else {
-                console.log(`📊 Barrio "${barrioBuscado}" no encontrado en base de datos`);
+            // Verificar si tiene nombre de lugar (ej: "Parroquia...")
+            const nombre = place.name || '';
+            const esNombreDeLugar = nombre.includes('Parroquia') || 
+                                   nombre.includes('Iglesia') || 
+                                   nombre.includes('Colegio') || 
+                                   nombre.includes('Centro Comercial') ||
+                                   nombre.includes('Hospital') ||
+                                   nombre.includes('Universidad');
+            
+            // Si tiene tipos de lugar no deseados o nombre de lugar, NO ES DIRECCIÓN
+            if (tieneLugarNoDeseado || esNombreDeLugar) {
+                return false;
             }
+            
+            // Debe tener al menos un tipo de dirección válido
+            return tipos.some(tipo => tiposDireccionValidos.includes(tipo));
         }
         
-        // Función para mostrar mensajes sobre el barrio
-        function mostrarMensajeBarrio(mensaje, tipo = 'info') {
-            // Eliminar mensajes anteriores
-            const mensajesAnteriores = document.querySelectorAll('.barrio-mensaje');
-            mensajesAnteriores.forEach(msg => msg.remove());
-            
+        // Función para procesar dirección y extraer barrio
+        function procesarDireccionParaBarrio(place) {
             const barrioInput = document.getElementById('barrioLocalidad');
             if (!barrioInput) return;
             
-            const mensajeDiv = document.createElement('div');
-            mensajeDiv.className = `barrio-mensaje text-xs mt-1 flex items-center gap-1`;
+            let barrioEncontrado = '';
+            let mejorOpcion = '';
             
-            let icono = 'info';
-            let colorClases = 'text-blue-600 dark:text-blue-400';
+            // Estrategia 1: Buscar neighborhood (barrio oficial)
+            place.address_components.forEach(component => {
+                const tipos = component.types;
+                
+                if (tipos.includes('neighborhood')) {
+                    barrioEncontrado = component.long_name;
+                    console.log(`✅ Barrio oficial encontrado: ${barrioEncontrado}`);
+                }
+                
+                // Estrategia 2: Sublocality (usualmente barrios en Bogotá)
+                if (tipos.includes('sublocality_level_1') && !barrioEncontrado) {
+                    mejorOpcion = component.long_name;
+                    console.log(`📍 Sublocalidad encontrada: ${mejorOpcion}`);
+                }
+                
+                // Estrategia 3: Administrative area level 3 (localidad)
+                if (tipos.includes('administrative_area_level_3') && !barrioEncontrado && !mejorOpcion) {
+                    mejorOpcion = component.long_name;
+                    console.log(`📍 Localidad encontrada: ${mejorOpcion}`);
+                }
+            });
             
-            if (tipo === 'success') {
-                icono = 'check_circle';
-                colorClases = 'text-green-600 dark:text-green-400';
-            } else if (tipo === 'warning') {
-                icono = 'warning';
-                colorClases = 'text-orange-600 dark:text-orange-400';
-            } else if (tipo === 'error') {
-                icono = 'error';
-                colorClases = 'text-red-600 dark:text-red-400';
+            // Decidir qué usar
+            const barrioFinal = barrioEncontrado || mejorOpcion;
+            
+            if (barrioFinal) {
+                barrioInput.value = barrioFinal;
+                console.log(`🎯 Barrio asignado: ${barrioFinal}`);
+                
+                // Buscar en base de datos
+                buscarBarrioEnBaseDatos(barrioFinal);
+                
+                // Mostrar mensaje
+                mostrarMensajeBarrio(`Barrio detectado: ${barrioFinal}`, 'success');
+            } else {
+                // No se pudo detectar barrio
+                console.log("⚠️ No se pudo detectar barrio automáticamente");
+                mostrarMensajeBarrio('Ingresa el barrio manualmente', 'info');
             }
             
-            mensajeDiv.innerHTML = `
-                <span class="material-symbols-outlined text-sm">${icono}</span>
-                <span class="${colorClases}">${mensaje}</span>
-            `;
-            
-            // Insertar después del input
-            barrioInput.parentNode.appendChild(mensajeDiv);
-            
-            // Eliminar después de 8 segundos
-            setTimeout(() => {
-                if (mensajeDiv.parentElement) mensajeDiv.remove();
-            }, 8000);
+            // Disparar eventos
+            barrioInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
         
-        // Prevenir submit del formulario al presionar Enter
+        // Función para procesar ciudad destino
+        function procesarCiudadDestino(place) {
+            const ciudadSelect = document.getElementById('ciudadDestino');
+            if (!ciudadSelect) return;
+            
+            let ciudadEncontrada = '';
+            
+            place.address_components.forEach(component => {
+                const tipos = component.types;
+                
+                // Buscar ciudad
+                if (tipos.includes('locality')) {
+                    ciudadEncontrada = component.long_name;
+                } else if (tipos.includes('administrative_area_level_2') && !ciudadEncontrada) {
+                    ciudadEncontrada = component.long_name;
+                }
+            });
+            
+            if (ciudadEncontrada) {
+                // Buscar coincidencia en las opciones
+                const ciudadLower = ciudadEncontrada.toLowerCase();
+                Array.from(ciudadSelect.options).forEach(option => {
+                    if (option.value && option.value.toLowerCase().includes(ciudadLower)) {
+                        ciudadSelect.value = option.value;
+                        ciudadSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        console.log(`✅ Ciudad seleccionada: ${option.value}`);
+                        return;
+                    }
+                });
+            }
+        }
+        
+        // Función para buscar barrio en base de datos
+        function buscarBarrioEnBaseDatos(barrioBuscado) {
+            const barrioIdInput = document.getElementById('barrioId');
+            if (!barrioIdInput || !window.barriosData) return;
+            
+            const barrioUpper = barrioBuscado.toUpperCase().trim();
+            const barrioData = window.barriosData.find(b => 
+                b.nombre && b.nombre.toUpperCase().includes(barrioUpper)
+            );
+            
+            if (barrioData && barrioData.id) {
+                barrioIdInput.value = barrioData.id;
+                console.log(`📊 ID de barrio asignado: ${barrioData.id}`);
+            }
+        }
+        
+        // ============================================
+        // MEJORAR LA BÚSQUEDA CON SUGERENCIAS
+        // ============================================
+        
+        // Evento de teclado para ayudar al usuario
         direccionInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && document.activeElement === direccionInput) {
+            if (e.key === 'Enter') {
                 e.preventDefault();
-                if (this.value.length > 3) {
-                    this.blur();
-                    setTimeout(() => this.focus(), 10);
+                
+                // Si el usuario presiona Enter con texto, forzar búsqueda
+                if (this.value.length > 5) {
+                    // Opcional: Podrías agregar geocodificación aquí
+                    console.log("🔍 Buscando dirección manualmente:", this.value);
                 }
             }
         });
         
-        console.log("✅ Google Places Autocomplete MEJORADO inicializado exitosamente");
+        // Tooltip para guiar al usuario
+        direccionInput.addEventListener('focus', function() {
+            mostrarTooltipDireccion();
+        });
+        
+        console.log("✅ Google Places Autocomplete MEJORADO inicializado - SOLO DIRECCIONES");
         
     } catch (error) {
         console.error("❌ Error inicializando Google Places:", error);
@@ -326,43 +362,205 @@ function inicializarGooglePlacesAutocomplete() {
     }
 }
 
-// También actualizar la función de notificación para ser más específica
-function mostrarNotificacionDireccion(direccion) {
-    // Verificar si ya hay una notificación activa
-    const notificacionesActivas = document.querySelectorAll('.direccion-notificacion');
-    notificacionesActivas.forEach(notif => notif.remove());
+// ============================================
+// FUNCIONES ADICIONALES NUEVAS
+// ============================================
+
+function mostrarTooltipDireccion() {
+    // Eliminar tooltips anteriores
+    const tooltips = document.querySelectorAll('.tooltip-direccion');
+    tooltips.forEach(t => t.remove());
     
-    // Crear notificación flotante
+    const direccionInput = document.getElementById('direccionDestino');
+    if (!direccionInput) return;
+    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip-direccion absolute z-50 bg-gray-900 text-white text-xs rounded p-2 mt-1';
+    tooltip.style.cssText = `
+        max-width: 300px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    
+    tooltip.innerHTML = `
+        <div class="font-semibold mb-1">💡 Consejo para direcciones exactas:</div>
+        <div class="text-gray-300 text-[11px]">
+            1. Escribe dirección completa: <span class="text-green-300">"Carrera 15 #123-45"</span><br>
+            2. No nombres de lugares: <span class="text-red-300">"Parroquia X"</span><br>
+            3. Ejemplos buenos:<br>
+            &nbsp;&nbsp;• "Calle 72 #11-25"<br>
+            &nbsp;&nbsp;• "Carrera 7 #45-12"<br>
+            &nbsp;&nbsp;• "Diagonal 45 #12-34"
+        </div>
+    `;
+    
+    // Posicionar tooltip
+    const rect = direccionInput.getBoundingClientRect();
+    tooltip.style.left = `${rect.left}px`;
+    tooltip.style.top = `${rect.bottom + 5}px`;
+    
+    document.body.appendChild(tooltip);
+    
+    // Eliminar después de 5 segundos
+    setTimeout(() => {
+        if (tooltip.parentElement) tooltip.remove();
+    }, 5000);
+}
+
+function mostrarMensajeDireccion(mensaje, tipo = 'info') {
+    const mensajes = document.querySelectorAll('.mensaje-direccion');
+    mensajes.forEach(m => m.remove());
+    
+    const direccionInput = document.getElementById('direccionDestino');
+    if (!direccionInput) return;
+    
+    const mensajeDiv = document.createElement('div');
+    mensajeDiv.className = `mensaje-direccion text-sm p-3 rounded-lg mt-2 ${tipo === 'error' ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-blue-100 text-blue-700'}`;
+    
+    mensajeDiv.innerHTML = `
+        <div class="flex items-start">
+            <span class="material-symbols-outlined mr-2">${tipo === 'error' ? 'error' : 'info'}</span>
+            <span>${mensaje}</span>
+        </div>
+    `;
+    
+    // Insertar después del contenedor del input
+    const contenedor = direccionInput.closest('.relative') || direccionInput.parentNode;
+    contenedor.appendChild(mensajeDiv);
+    
+    // Eliminar después de 10 segundos
+    setTimeout(() => {
+        if (mensajeDiv.parentElement) mensajeDiv.remove();
+    }, 10000);
+}
+
+function mostrarNotificacionDireccionMejorada(direccion) {
     const notificacion = document.createElement('div');
-    notificacion.className = 'direccion-notificacion fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl z-50 flex items-center gap-3 animate-slideUp';
+    notificacion.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-xl z-50 flex items-center gap-2';
     notificacion.style.cssText = `
         animation: slideUp 0.3s ease-out forwards;
         max-width: 90%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     `;
     
     notificacion.innerHTML = `
-        <span class="material-symbols-outlined text-lg">check_circle</span>
-        <span class="text-sm font-medium">Dirección exacta encontrada</span>
-        <span class="material-symbols-outlined text-sm ml-2 cursor-pointer" onclick="this.parentElement.remove()">close</span>
+        <span class="material-symbols-outlined">check_circle</span>
+        <div class="text-xs">
+            <div class="font-semibold">✅ Dirección exacta registrada</div>
+            <div class="text-green-100 truncate max-w-[250px]">${direccion}</div>
+        </div>
     `;
-    
-    // Tooltip con la dirección completa
-    notificacion.title = direccion;
     
     document.body.appendChild(notificacion);
     
-    // Eliminar después de 4 segundos
     setTimeout(() => {
         notificacion.style.animation = 'slideDown 0.3s ease-in forwards';
-        setTimeout(() => {
-            if (notificacion.parentElement) notificacion.remove();
-        }, 300);
+        setTimeout(() => notificacion.remove(), 300);
     }, 4000);
 }
 
+// ============================================
+// AGREGAR ESTOS ESTILOS AL CSS
+// ============================================
+function agregarEstilosGooglePlaces() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Estilos para tooltips y mensajes */
+        .tooltip-direccion {
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .mensaje-direccion {
+            animation: slideDownFade 0.3s ease-out;
+        }
+        
+        /* Estilos para el autocomplete de Google - MÁS RESTRICTIVO */
+        .pac-container {
+            z-index: 10050 !important;
+            border: 2px solid #3b82f6 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+        }
+        
+        .pac-item {
+            padding: 10px !important;
+            border-bottom: 1px solid #e5e7eb !important;
+            font-size: 14px !important;
+        }
+        
+        .pac-item:hover {
+            background-color: #eff6ff !important;
+        }
+        
+        .pac-item-query {
+            font-size: 14px !important;
+            color: #1f2937 !important;
+        }
+        
+        .pac-icon {
+            display: none !important; /* Ocultar iconos que confunden */
+        }
+        
+        .pac-matched {
+            font-weight: bold !important;
+            color: #3b82f6 !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// ============================================
+// EN TU FUNCIÓN initApp(), AGREGAR:
+// ============================================
+function initApp() {
+    console.log('🚀 Inicializando aplicación...');
+    
+    initializeDOMElements();
+    
+    // AGREGAR ESTO ANTES DE CARGAR GOOGLE PLACES:
+    agregarEstilosGooglePlaces();
+    
+    loadBarriosData().then(() => {
+        loadRemitentesData();
+        loadUsuariosParaAutocomplete().then(() => {
+            setupEventListeners();
+            initializeUI();
+            
+            // INICIALIZAR LA NUEVA VERSIÓN
+            const checkGoogleMaps = () => {
+                if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                    console.log('✅ Google Maps API disponible');
+                    try {
+                        inicializarGooglePlacesAutocomplete(); // ← ESTA ES LA NUEVA VERSIÓN
+                        console.log('🎯 Google Places Autocomplete MEJORADO inicializado');
+                    } catch (error) {
+                        console.error('❌ Error inicializando Google Places:', error);
+                        mostrarErrorGoogleMaps();
+                    }
+                } else {
+                    setTimeout(checkGoogleMaps, 500);
+                }
+            };
+            
+            checkGoogleMaps();
+            
+            console.log('✅ Aplicación inicializada');
+        });
+    }).catch(error => {
+        console.error('❌ Error inicializando:', error);
+        loadRemitentesData();
+        setupEventListeners();
+        initializeUI();
+    });
+}
 
 function mostrarErrorGoogleMaps() {
     const direccionInput = document.getElementById('direccionDestino');
@@ -2594,4 +2792,5 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
