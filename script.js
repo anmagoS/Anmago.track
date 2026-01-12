@@ -64,7 +64,6 @@ function inicializarGooglePlacesAutocomplete() {
             componentRestrictions: { country: 'co' },
            fields: ['address_components', 'formatted_address', 'geometry', 'name', 'types'],
            types: ['geocode', 'street_address'],  // SOLO DIRECCIONES, NO LUGARES
-        });
           bounds: new google.maps.LatLngBounds(
                 new google.maps.LatLng(4.48, -74.25), // Soacha/Sur
                 new google.maps.LatLng(4.85, -74.00)  // Bogotá Norte
@@ -2497,4 +2496,5 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
