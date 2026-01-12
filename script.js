@@ -29,13 +29,7 @@ let remitenteInput, remitenteDropdown;
 let resumenFormaPago, resumenValorRecaudar, resumenEstado;
 let submitButton, submitText, submitIcon;
 
-// ============================================
-// GOOGLE PLACES AUTOCOMPLETE - COMPLETO
-// ============================================
-// ============================================
-// REEMPLAZAR SOLO LA FUNCIÓN inicializarGooglePlacesAutocomplete()
-// CON ESTA VERSIÓN MÁS ROBUSTA Y CON MEJOR MANEJO DE ERRORES:
-// ============================================
+
 
 function inicializarGooglePlacesAutocomplete() {
     console.log("📍 Inicializando Google Places Autocomplete...");
@@ -68,8 +62,14 @@ function inicializarGooglePlacesAutocomplete() {
         // ============================================
         const autocomplete = new google.maps.places.Autocomplete(direccionInput, {
             componentRestrictions: { country: 'co' },
-            fields: ['address_components', 'formatted_address', 'geometry', 'name'],
-            types: ['address']  // SOLO DIRECCIONES, NO LUGARES
+           fields: ['address_components', 'formatted_address', 'geometry', 'name', 'types'],
+           types: ['geocode', 'street_address'],  // SOLO DIRECCIONES, NO LUGARES
+        });
+          bounds: new google.maps.LatLngBounds(
+                new google.maps.LatLng(4.48, -74.25), // Soacha/Sur
+                new google.maps.LatLng(4.85, -74.00)  // Bogotá Norte
+            ),
+            strictBounds: false
         });
         
         console.log("✅ Autocomplete creado exitosamente");
@@ -2497,3 +2497,4 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
