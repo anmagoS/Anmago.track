@@ -497,34 +497,49 @@ function loadRemitentesData() {
             return [];
         });
 }
-
 async function loadUsuariosParaAutocomplete() {
     try {
-        console.log("🔄 Cargando usuarios para autocomplete...");
-        const response = await fetch("usuarios.json?v=" + Date.now());
-        const usuarios = await response.json();
+        console.log("🔄 Cargando remitentes para autocomplete desde Google Sheets...");
         
-        console.log(`✅ ${usuarios.length} usuarios cargados desde JSON`);
+        // Usar directamente el endpoint de remitentes
+        const response = await fetch(REMITENTES_URL);
         
-        usuariosDisponibles = usuarios.filter(u => 
-            u.ESTADO === "ACTIVO" && 
-            u.ROL === "CLIENTE" &&
-            (u["NOMBRE REMITENTE"] || u["NOMBRE COMPLETO"])
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const remitentes = await response.json();
+        
+        // Asignar directamente a usuariosDisponibles
+        usuariosDisponibles = remitentes.filter(r => 
+            r["NOMBRE REMITENTE"] || r["NOMBRE COMPLETO"]
         );
         
         window.usuariosDisponibles = usuariosDisponibles;
         
-        console.log(`📊 ${usuariosDisponibles.length} usuarios disponibles para autocomplete`);
+        console.log(`✅ ${usuariosDisponibles.length} remitentes cargados desde Google Sheets`);
         
         return usuariosDisponibles;
         
     } catch (error) {
-        console.error("❌ Error cargando usuarios para autocomplete:", error);
+        console.error("❌ Error cargando remitentes para autocomplete:", error);
+        
+        // Intentar usar remitentesData si ya está cargada
+        if (remitentesData && remitentesData.length > 0) {
+            console.log("🔄 Usando remitentesData ya cargada...");
+            usuariosDisponibles = remitentesData.filter(r => 
+                r["NOMBRE REMITENTE"] || r["NOMBRE COMPLETO"]
+            );
+            window.usuariosDisponibles = usuariosDisponibles;
+            return usuariosDisponibles;
+        }
+        
         usuariosDisponibles = [];
         window.usuariosDisponibles = [];
         return [];
     }
 }
+
 
 // ============================================
 // VERIFICACIÓN DE AUTENTICACIÓN Y SESIÓN (IGUAL)
@@ -2246,3 +2261,4 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
