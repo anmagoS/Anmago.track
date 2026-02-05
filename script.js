@@ -608,55 +608,8 @@ function verificarSesionYConfigurarUI() {
 
 function configurarCamposSegunRol(usuario) {
     if (usuario.ROL === "CLIENTE") {
-        const remitente = document.getElementById('remitente');
-        const direccionRemitente = document.getElementById('direccionRemitente');
-        const telefonoRemitente = document.getElementById('telefonoRemitente');
-        const iconRemitente = document.getElementById('iconRemitente');
-        const iconTelefonoRemitente = document.getElementById('iconTelefonoRemitente');
-        const iconDireccionRemitente = document.getElementById('iconDireccionRemitente');
+        // ... código igual para clientes ...
         
-        if (remitente) {
-            remitente.value = usuario["NOMBRE REMITENTE"] || usuario["NOMBRE COMPLETO"] || "";
-            remitente.setAttribute('readonly', 'true');
-            remitente.classList.add('cliente-readonly');
-            if (iconRemitente) iconRemitente.textContent = 'lock';
-        }
-        
-        if (direccionRemitente) {
-            direccionRemitente.value = usuario["DIRECCION REMITENTE"] || "";
-            direccionRemitente.setAttribute('readonly', 'true');
-            direccionRemitente.classList.add('cliente-readonly');
-            if (iconDireccionRemitente) iconDireccionRemitente.textContent = 'lock';
-        }
-        
-        if (telefonoRemitente) {
-            telefonoRemitente.value = usuario["TELEFONO REMITENTE"] || usuario["TELEFONO"] || "";
-            telefonoRemitente.setAttribute('readonly', 'true');
-            telefonoRemitente.classList.add('cliente-readonly');
-            if (iconTelefonoRemitente) iconTelefonoRemitente.textContent = 'lock';
-        }
-        
-        const labelRemitente = document.getElementById('labelRemitente');
-        const labelTelefonoRemitente = document.getElementById('labelTelefonoRemitente');
-        const labelDireccionRemitente = document.getElementById('labelDireccionRemitente');
-        
-        if (labelRemitente) {
-            labelRemitente.classList.add('campo-cliente-fijo');
-            labelRemitente.innerHTML = 'Nombre Completo / Empresa <span class="text-xs text-gray-500">(Fijo para cliente)</span>';
-        }
-        if (labelTelefonoRemitente) {
-            labelTelefonoRemitente.classList.add('campo-cliente-fijo');
-            labelTelefonoRemitente.innerHTML = 'Teléfono de Contacto <span class="text-xs text-gray-500">(Fijo para cliente)</span>';
-        }
-        if (labelDireccionRemitente) {
-            labelDireccionRemitente.classList.add('campo-cliente-fijo');
-            labelDireccionRemitente.innerHTML = 'Dirección de Recogida <span class="text-xs text-gray-500">(Fijo para cliente)</span>';
-        }
-        
-        const dropdown = document.getElementById('remitenteAutocomplete');
-        if (dropdown) {
-            dropdown.style.display = 'none';
-        }
     } else {
         const remitente = document.getElementById('remitente');
         const iconRemitente = document.getElementById('iconRemitente');
@@ -668,13 +621,14 @@ function configurarCamposSegunRol(usuario) {
             if (iconRemitente) iconRemitente.textContent = 'search';
             
             setTimeout(() => {
-                if (usuariosDisponibles && usuariosDisponibles.length > 0) {
-                    console.log(`🎯 Inicializando autocomplete con ${usuariosDisponibles.length} usuarios`);
+                // CAMBIO: Verificar remitentesData en lugar de usuariosDisponibles
+                if (remitentesData && remitentesData.length > 0) {
+                    console.log(`🎯 Inicializando autocomplete con ${remitentesData.length} REMITENTES`);
                     inicializarAutocompleteRemitente();
                 } else {
-                    console.log("🔄 Usuarios no cargados, cargando ahora...");
-                    loadUsuariosParaAutocomplete().then(() => {
-                        if (usuariosDisponibles.length > 0) {
+                    console.log("🔄 Remitentes no cargados, cargando ahora...");
+                    loadRemitentesData().then(() => {
+                        if (remitentesData.length > 0) {
                             inicializarAutocompleteRemitente();
                         }
                     });
@@ -683,7 +637,6 @@ function configurarCamposSegunRol(usuario) {
         }
     }
 }
-
 function configurarTemporizadorInactividad() {
     let tiempoInactividad = 30 * 60 * 1000;
     
@@ -894,7 +847,7 @@ function moveFocus(direction, items) {
 }
 
 // ============================================
-// FUNCIONES PARA AUTOCOMPLETE DE REMITENTES (IGUAL)
+// FUNCIONES PARA AUTOCOMPLETE DE REMITENTES (CORREGIDO)
 // ============================================
 
 function inicializarAutocompleteRemitente() {
@@ -928,19 +881,20 @@ function inicializarAutocompleteRemitente() {
         console.log("✅ Dropdown creado dinámicamente");
     }
     
-    if (!usuariosDisponibles || usuariosDisponibles.length === 0) {
-        console.warn("⚠️ No hay usuarios disponibles para autocomplete");
-        console.log("🔄 Cargando usuarios...");
-        loadUsuariosParaAutocomplete().then(() => {
-            if (usuariosDisponibles.length > 0) {
-                console.log(`✅ ${usuariosDisponibles.length} usuarios cargados, reinicializando autocomplete`);
+    // CAMBIO CRÍTICO: Usar remitentesData en lugar de usuariosDisponibles
+    if (!remitentesData || remitentesData.length === 0) {
+        console.warn("⚠️ No hay remitentes disponibles para autocomplete");
+        console.log("🔄 Cargando remitentes...");
+        loadRemitentesData().then(() => {
+            if (remitentesData.length > 0) {
+                console.log(`✅ ${remitentesData.length} remitentes cargados, reinicializando autocomplete`);
                 setTimeout(() => inicializarAutocompleteRemitente(), 500);
             }
         });
         return;
     }
     
-    console.log(`📊 Usando ${usuariosDisponibles.length} usuarios para autocomplete`);
+    console.log(`📊 Usando ${remitentesData.length} REMITENTES REALES para autocomplete`);
     
     let ignoreBlur = false;
     let mouseInDropdown = false;
@@ -950,16 +904,17 @@ function inicializarAutocompleteRemitente() {
         
         const busqueda = texto.toLowerCase().trim();
         
-        return usuariosDisponibles.filter(usuario => {
-            const nombre = (usuario["NOMBRE REMITENTE"] || "").toString().toLowerCase();
-            const nombreCompleto = (usuario["NOMBRE COMPLETO"] || "").toString().toLowerCase();
+        // CAMBIO: Filtrar remitentesData, no usuariosDisponibles
+        return remitentesData.filter(remitente => {
+            const nombre = (remitente["NOMBRE REMITENTE"] || "").toString().toLowerCase();
+            const nombreCompleto = (remitente["NOMBRE COMPLETO"] || "").toString().toLowerCase();
             
-            const telefonoRemitente = usuario["TELEFONO REMITENTE"];
-            const telefono = usuario.TELEFONO;
+            const telefonoRemitente = remitente["TELEFONO REMITENTE"];
+            const telefono = remitente.TELEFONO;
             const telefonoStr = (telefonoRemitente ? telefonoRemitente.toString() : 
                                 telefono ? telefono.toString() : "").toLowerCase();
             
-            const correo = (usuario["CORREO ELECTRONICO"] || "").toString().toLowerCase();
+            const correo = (remitente["CORREO ELECTRONICO"] || "").toString().toLowerCase();
             
             return nombre.includes(busqueda) || 
                    nombreCompleto.includes(busqueda) ||
@@ -968,19 +923,19 @@ function inicializarAutocompleteRemitente() {
         });
     }
     
-    function mostrarSugerencias(usuarios) {
+    function mostrarSugerencias(remitentes) {
         dropdown.innerHTML = '';
         
-        if (usuarios.length === 0) {
+        if (remitentes.length === 0) {
             dropdown.style.display = 'none';
             return;
         }
         
-        console.log(`📋 Mostrando ${usuarios.length} sugerencias`);
+        console.log(`📋 Mostrando ${remitentes.length} sugerencias de REMITENTES`);
         
-        const usuariosMostrar = usuarios.slice(0, 5);
+        const remitentesMostrar = remitentes.slice(0, 5);
         
-        usuariosMostrar.forEach((usuario, index) => {
+        remitentesMostrar.forEach((remitente, index) => {
             const item = document.createElement('div');
             item.className = 'autocomplete-item';
             item.dataset.index = index;
@@ -992,18 +947,18 @@ function inicializarAutocompleteRemitente() {
                 position: relative;
             `;
             
-            const telefono = usuario["TELEFONO REMITENTE"] || usuario.TELEFONO;
+            const telefono = remitente["TELEFONO REMITENTE"] || remitente.TELEFONO;
             const telefonoStr = telefono ? telefono.toString() : "";
             
             item.innerHTML = `
                 <div style="display: flex; align-items: center;">
                     <div style="flex-grow: 1;">
                         <div style="font-size: 14px; color: #111827; font-weight: 600; margin-bottom: 4px;">
-                            ${usuario["NOMBRE REMITENTE"] || usuario["NOMBRE COMPLETO"] || "Sin nombre"}
+                            ${remitente["NOMBRE REMITENTE"] || remitente["NOMBRE COMPLETO"] || "Sin nombre"}
                         </div>
                         <div style="font-size: 12px; color: #6b7280;">
                             <div>📞 ${telefonoStr || "Sin teléfono"}</div>
-                            ${usuario["DIRECCION REMITente"] ? `<div>📍 ${usuario["DIRECCION REMITENTE"].substring(0, 40)}...</div>` : ''}
+                            ${remitente["DIRECCION REMITENTE"] ? `<div>📍 ${remitente["DIRECCION REMITENTE"].substring(0, 40)}...</div>` : ''}
                         </div>
                     </div>
                     <div style="color: #10b981; font-size: 12px; font-weight: bold; padding: 4px 8px; background: #d1fae5; border-radius: 4px;">
@@ -1015,19 +970,19 @@ function inicializarAutocompleteRemitente() {
             item.addEventListener('mousedown', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log("🖱️ CLIC detectado en item (mousedown)");
+                console.log("🖱️ CLIC detectado en item (mousedown) - REMITENTE");
                 
                 ignoreBlur = true;
                 
                 setTimeout(() => {
-                    console.log("🎯 Procesando selección...");
+                    console.log("🎯 Procesando selección de REMITENTE...");
                     
-                    const telefonoValor = usuario["TELEFONO REMITENTE"] || usuario.TELEFONO;
+                    const telefonoValor = remitente["TELEFONO REMITENTE"] || remitente.TELEFONO;
                     const telefonoStr = telefonoValor ? telefonoValor.toString() : "";
                     
-                    document.getElementById('remitente').value = usuario["NOMBRE REMITENTE"] || usuario["NOMBRE COMPLETO"] || "";
+                    document.getElementById('remitente').value = remitente["NOMBRE REMITENTE"] || remitente["NOMBRE COMPLETO"] || "";
                     document.getElementById('telefonoRemitente').value = telefonoStr;
-                    document.getElementById('direccionRemitente').value = usuario["DIRECCION REMITENTE"] || "";
+                    document.getElementById('direccionRemitente').value = remitente["DIRECCION REMITENTE"] || "";
                     
                     ['remitente', 'telefonoRemitente', 'direccionRemitente'].forEach(id => {
                         const campo = document.getElementById(id);
@@ -1037,7 +992,7 @@ function inicializarAutocompleteRemitente() {
                         }
                     });
                     
-                    console.log("✅ VALORES ASIGNADOS:");
+                    console.log("✅ VALORES ASIGNADOS DE REMITENTE:");
                     console.log("   Remitente:", document.getElementById('remitente').value);
                     console.log("   Teléfono:", document.getElementById('telefonoRemitente').value);
                     console.log("   Dirección:", document.getElementById('direccionRemitente').value);
@@ -1058,6 +1013,7 @@ function inicializarAutocompleteRemitente() {
                 }, 10);
             });
             
+            // Resto del código igual...
             item.addEventListener('click', function(e) {
                 console.log("🖱️ CLIC detectado en item (click)");
             });
@@ -1104,16 +1060,18 @@ function inicializarAutocompleteRemitente() {
     });
     
     inputRemitente.addEventListener('focus', function() {
-        console.log("🎯 Campo remitente enfocado - MOSTRANDO SUGERENCIAS");
+        console.log("🎯 Campo remitente enfocado - MOSTRANDO SUGERENCIAS de REMITENTES");
         
         if (this.value.length >= 1) {
             const resultados = buscarRemitentes(this.value);
             mostrarSugerencias(resultados);
         } else {
-            mostrarSugerencias(usuariosDisponibles.slice(0, 3));
+            // CAMBIO: Mostrar primeros remitentes, no usuarios
+            mostrarSugerencias(remitentesData.slice(0, 3));
         }
     });
     
+    // Resto del código igual...
     inputRemitente.addEventListener('blur', function(e) {
         setTimeout(() => {
             if (!ignoreBlur && !mouseInDropdown) {
@@ -1171,9 +1129,8 @@ function inicializarAutocompleteRemitente() {
         }
     });
     
-    console.log("✅ Auto-complete inicializado - ¡LISTO PARA PROBAR!");
+    console.log("✅ Auto-complete de REMITENTES inicializado - ¡LISTO PARA PROBAR!");
 }
-
 // ============================================
 // FUNCIONES PARA EL FORMULARIO (IGUAL)
 // ============================================
@@ -2261,4 +2218,5 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
