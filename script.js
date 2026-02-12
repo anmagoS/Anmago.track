@@ -18,8 +18,8 @@ let formularioEnviandose = false;
 
 // Variables para precios por ciudad
 const PRECIOS_CIUDAD = {
-    "Bogotá D.C.": 10000,
-    "Soacha": 12000
+    "Bogotá D.C.": 12000,
+    "Soacha": 14000
 };
 
 // Elementos del DOM
@@ -1226,9 +1226,9 @@ function manejarValorRecaudar(formaPago) {
         if (formaPago === 'contraentrega') {
             let valorAuto = 0;
             if (ciudadDestino.includes("Bogotá")) {
-                valorAuto = 10000;
-            } else if (ciudadDestino.includes("Soacha")) {
                 valorAuto = 12000;
+            } else if (ciudadDestino.includes("Soacha")) {
+                valorAuto = 14000;
             }
             
             valorRecaudarInput.value = valorAuto;
@@ -1278,9 +1278,9 @@ function calcularValorARecaudar() {
     let valorRecaudar = 0;
     
     if (ciudadDestino.includes("Bogotá")) {
-        valorRecaudar = 10000;
-    } else if (ciudadDestino.includes("Soacha")) {
         valorRecaudar = 12000;
+    } else if (ciudadDestino.includes("Soacha")) {
+        valorRecaudar = 14000;
     }
     
     const valorRecaudarInput = document.getElementById('valorRecaudar');
@@ -1327,9 +1327,9 @@ function setupEventListeners() {
             if (formaPago === 'contraentrega') {
                 let valorAuto = 0;
                 if (ciudad.includes("Bogotá")) {
-                    valorAuto = 10000;
-                } else if (ciudad.includes("Soacha")) {
                     valorAuto = 12000;
+                } else if (ciudad.includes("Soacha")) {
+                    valorAuto = 14000;
                 }
                 
                 document.getElementById('valorRecaudar').value = valorAuto;
@@ -1613,9 +1613,9 @@ function actualizarResumen() {
     if (ciudadDestino) {
         let tarifaCiudad = 0;
         if (ciudadDestino.includes("Bogotá")) {
-            tarifaCiudad = 10000;
-        } else if (ciudadDestino.includes("Soacha")) {
             tarifaCiudad = 12000;
+        } else if (ciudadDestino.includes("Soacha")) {
+            tarifaCiudad = 14000;
         }
         
         if (formaPago === 'contado') {
@@ -1711,9 +1711,9 @@ async function manejarEnvioFormulario(e) {
         
         if (formaPago === 'contraentrega') {
             if (ciudadDestino.includes("Bogotá")) {
-                valorRecaudar = 10000;
-            } else if (ciudadDestino.includes("Soacha")) {
                 valorRecaudar = 12000;
+            } else if (ciudadDestino.includes("Soacha")) {
+                valorRecaudar = 14000;
             }
             document.getElementById('valorRecaudar').value = valorRecaudar;
         } else if (formaPago === 'contraentrega_recaudo') {
@@ -2239,6 +2239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
 
 
