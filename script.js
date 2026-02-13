@@ -1302,9 +1302,9 @@ function calcularTotalAPagar() {
     
     if (formaPago === 'contraentrega_recaudo') {
         if (ciudadDestino.includes("Bogotá")) {
-            totalAPagar = Math.max(0, valorRecaudar - 10000);
-        } else if (ciudadDestino.includes("Soacha")) {
             totalAPagar = Math.max(0, valorRecaudar - 12000);
+        } else if (ciudadDestino.includes("Soacha")) {
+            totalAPagar = Math.max(0, valorRecaudar - 14000);
         }
     }
     
@@ -2239,6 +2239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarBotonesAdmin();
     configurarBotonHistorial();
 });
+
 
 
 
