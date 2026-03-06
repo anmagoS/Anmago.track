@@ -1,577 +1,747 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" name="viewport"/>
-    <title>ESP · Nueva Guía</title>
-    <!-- Google Maps API (solo para destino) -->
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Sistema de Envíos - Contraentrega</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO"></script>
-    <!-- Fuentes y estilos base -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-    <!-- Tailwind (compacto) - SIN MODO OSCURO -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Icono -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
-    <style>
-        /* === ESTILOS ESENCIALES === */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: #f6f6f8; color: #1e293b; }
-
-        /* contenedor para autocompletados (móvil amigable) */
-        .autocomplete-dropdown {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; border-radius: 20px 20px 0 0;
-            box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
-            max-height: 60vh; overflow-y: auto;
-            z-index: 10000; display: none;
-            -webkit-overflow-scrolling: touch;
-            border-top: 1px solid #e2e8f0;
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚚</text></svg>">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "primary-dark": "#0f4bc4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a202c",
+                        "input-light": "#e7ebf3",
+                        "input-dark": "#2d3748",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "danger": "#ef4444"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
         }
-        @media (min-width: 768px) {
-            .autocomplete-dropdown {
-                position: absolute; top: 100%; bottom: auto;
-                border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                max-height: 300px; border: 1px solid #e2e8f0;
+    </script>
+    <style>
+        /* ============================================
+           ESTILOS MEJORADOS - MÁS COMPACTOS Y PROFESIONALES
+           ============================================ */
+
+        /* Reset y base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f6f6f8;
+            color: #0d121b;
+        }
+
+        /* ============================================
+           MEJORAS VISUALES GENERALES
+           ============================================ */
+        .form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #edf2f7;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #eef2f6;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+
+        .section-title .material-symbols-outlined {
+            color: #135bec;
+            font-size: 1.5rem;
+        }
+
+        /* Campos de formulario más compactos */
+        input, select, textarea {
+            height: 44px !important;
+            font-size: 0.95rem !important;
+            border-radius: 10px !important;
+            border: 1.5px solid #e2e8f0 !important;
+            background-color: #fafbfc !important;
+            transition: all 0.15s !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #135bec !important;
+            box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.1) !important;
+            background-color: white !important;
+            outline: none !important;
+        }
+
+        input[readonly] {
+            background-color: #f1f4f9 !important;
+            border-color: #d0d9e6 !important;
+            color: #4a5568 !important;
+            cursor: not-allowed;
+        }
+
+        /* Labels más compactos */
+        label {
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            color: #4b5565 !important;
+            margin-bottom: 0.25rem !important;
+            display: block;
+        }
+
+        /* Grid mejorado */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
-        .autocomplete-dropdown .item {
-            padding: 16px; border-bottom: 1px solid #f1f5f9;
-            cursor: pointer; transition: background 0.2s; min-height: 60px;
-            display: flex; align-items: center; gap: 12px;
+
+        @media (min-width: 1024px) {
+            .form-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
-        .autocomplete-dropdown .item:active { background: #f1f5f9; }
-        .autocomplete-dropdown .item:hover { background: #f8fafc; }
 
-        /* mejoras táctiles */
-        input, select, button, .item { min-height: 48px; font-size: 16px; }
-        
-        /* campos readonly */
-        input:read-only { background-color: #f1f5f9 !important; color: #475569; cursor: not-allowed; }
-
-        /* animación intro */
-        #intro {
-            position: fixed; inset: 0;
-            background: linear-gradient(145deg, #1b4557, #ffffff);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999;
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1rem;
         }
-        #intro img { width: 280px; animation: bounce 1s infinite; }
-        @keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-15px); } }
 
-        /* resaltado para opción de pago seleccionada */
+        @media (min-width: 640px) {
+            .form-grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Opciones de pago mejoradas */
+        .payment-option {
+            height: 48px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: white;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .payment-option:hover {
+            border-color: #135bec;
+            background-color: #f0f7ff;
+            transform: translateY(-1px);
+        }
+
         .payment-option.selected {
-            background-color: #e6f0ff;
-            border-color: #2563eb !important;
-            border-width: 2px;
+            border-color: #135bec;
+            background-color: #e8f0fe;
+            box-shadow: 0 2px 8px rgba(19, 91, 236, 0.15);
+        }
+
+        .payment-option .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        /* Dropdowns de autocomplete mejorados */
+        .autocomplete-dropdown {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            background: white !important;
+            border-radius: 20px 20px 0 0 !important;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12) !important;
+            max-height: 60vh !important;
+            overflow-y: auto !important;
+            z-index: 10001 !important;
+            display: none;
+            border: none !important;
+        }
+
+        @media (min-width: 768px) {
+            .autocomplete-dropdown {
+                position: absolute !important;
+                top: calc(100% + 4px) !important;
+                bottom: auto !important;
+                border-radius: 16px !important;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+                max-height: 280px !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+        }
+
+        .autocomplete-item {
+            padding: 1rem !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .autocomplete-item:active {
+            background-color: #f1f5f9 !important;
+        }
+
+        /* Botones más profesionales */
+        .btn-primary {
+            height: 48px;
+            padding: 0 2rem;
+            border-radius: 12px;
+            background-color: #135bec;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(19, 91, 236, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: #0f4bc4;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(19, 91, 236, 0.25);
+        }
+
+        .btn-secondary {
+            height: 48px;
+            padding: 0 1.5rem;
+            border-radius: 12px;
+            background-color: white;
+            color: #4b5565;
+            font-weight: 600;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: #135bec;
+            color: #135bec;
+            background-color: #f8fafc;
+        }
+
+        /* Header más compacto */
+        .app-header {
+            background: white;
+            border-bottom: 1px solid #eef2f6;
+            padding: 0.75rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        /* Tarjeta de resumen más elegante */
+        .summary-card {
+            background: linear-gradient(145deg, #f8fbff, #f0f5ff);
+            border: 1px solid #d9e9ff;
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        /* Resultado más atractivo */
+        .result-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Ajustes responsive */
+        @media (max-width: 767px) {
+            .form-section {
+                padding: 1.25rem;
+                border-radius: 20px;
+            }
+            
+            input, select, button {
+                height: 50px !important;
+                font-size: 16px !important;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+            
+            .app-header {
+                padding: 0.5rem 1rem;
+            }
+            
+            .payment-option {
+                height: 52px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Scroll suave */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Animaciones suaves */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        /* Estilo para el campo ID */
+        .id-field {
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border: 1px dashed #cbd5e1;
+            color: #1e293b;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Mejora para los íconos dentro de inputs */
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.25rem;
+        }
+
+        .input-with-icon {
+            padding-left: 3rem !important;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
 
-    <!-- INTRO (se oculta a los 2s) -->
-    <div id="intro">
-        <img src="logo envios.jpg" alt="ANMAGO">
+<body class="bg-background-light dark:bg-background-dark font-display flex flex-col min-h-screen text-[#0d121b] dark:text-white transition-colors duration-200">
+    
+    <!-- Intro animada -->
+    <div id="intro" style="
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, #1b4557, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      ">
+      <img src="logo envios.jpg" alt="ANMAGO Store" style="width: 500px; animation: bounce 1s infinite;">
     </div>
 
-    <!-- CARGA INICIAL -->
-    <div id="loadingScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+    <!-- Pantalla de carga -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-gray-900">
         <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mb-4"></div>
-            <p class="text-gray-600">cargando...</p>
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mb-6"></div>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Verificando acceso</h2>
+            <p class="text-gray-600 dark:text-gray-400">Por favor espera mientras validamos tu sesión...</p>
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div id="mainContent" class="hidden flex-1 w-full">
+    <!-- Contenido principal -->
+    <div id="mainContent" class="hidden">
+        <!-- Header mejorado -->
+        <header class="app-header">
+            <div class="mx-auto max-w-7xl flex items-center justify-between">
+                <!-- Logo y título -->
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 text-primary">
+                        <span class="material-symbols-outlined text-2xl">local_shipping</span>
+                    </div>
+                    <h2 class="text-[#0d121b] dark:text-white text-lg font-bold">E.S.P</h2>
+                </div>
 
-        <!-- HEADER SIMPLE -->
-        <header class="sticky top-0 z-40 bg-white border-b px-4 py-2 flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-blue-600 text-3xl">local_shipping</span>
-                <h2 class="font-bold text-lg">E.S.P</h2>
-            </div>
-            <div class="flex items-center gap-3">
-                <button id="historialButton" class="p-2 rounded-full hover:bg-gray-100">
-                    <span class="material-symbols-outlined text-gray-600">history</span>
-                </button>
-                <button id="logoutButton" class="p-2 rounded-full hover:bg-gray-100">
-                    <span class="material-symbols-outlined text-gray-600">logout</span>
-                </button>
-                <!-- avatar -->
-                <div class="w-9 h-9 rounded-full bg-blue-100 bg-cover border border-blue-200" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp');"></div>
+                <!-- Sección derecha -->
+                <div class="flex items-center gap-3">
+                    <div class="hidden md:flex flex-col items-end mr-2">
+                        <span class="text-sm font-semibold text-[#0d121b]" id="nombreUsuario">Cargando...</span>
+                        <span class="text-xs text-[#4c669a]" id="rolUsuario">Verificando...</span>
+                    </div>
+                    
+                    <div class="bg-center bg-no-repeat bg-cover rounded-full w-10 h-10 border-2 border-primary" 
+                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
+                    </div>
+                    
+                    <button id="adminPlanillaButton" 
+                            class="hidden w-10 h-10 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-purple-600">assignment</span>
+                    </button>
+                    
+                    <button id="historialButton" 
+                            class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                            title="Ver mi historial">
+                        <span class="material-symbols-outlined text-[#4c669a]">history</span>
+                    </button>
+                    
+                    <button id="logoutButton" 
+                            class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                            title="Cerrar sesión">
+                        <span class="material-symbols-outlined text-[#4c669a]">logout</span>
+                    </button>
+                </div>
             </div>
         </header>
-
-        <!-- FORMULARIO PRINCIPAL -->
-        <main class="p-4 max-w-3xl mx-auto w-full">
-            <h1 class="text-2xl font-bold mb-1">📋 Nueva guía</h1>
-            <p class="text-sm text-gray-500 mb-6">completa los datos del envío</p>
-
-            <form id="deliveryForm" class="bg-white rounded-2xl shadow-md border p-5 space-y-6">
-
-                <!-- FORMA DE PAGO -->
-                <div>
-                    <label class="block text-sm font-medium mb-2">Forma de pago</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="payment-option border rounded-xl p-3 text-center cursor-pointer transition" data-value="contado">
-                            <span class="material-symbols-outlined text-green-600 block mx-auto">payments</span>
-                            <span class="text-xs font-medium">Contado</span>
-                        </div>
-                        <div class="payment-option border rounded-xl p-3 text-center cursor-pointer transition" data-value="contraentrega">
-                            <span class="material-symbols-outlined text-blue-600 block mx-auto">package</span>
-                            <span class="text-xs font-medium">Contraentrega</span>
-                        </div>
-                        <div class="payment-option border rounded-xl p-3 text-center cursor-pointer transition" data-value="contraentrega_recaudo">
-                            <span class="material-symbols-outlined text-orange-600 block mx-auto">savings</span>
-                            <span class="text-xs font-medium">Con recaudo</span>
-                        </div>
-                    </div>
-                    <input type="hidden" id="formaPago" name="formaPago" value="contado">
+        
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full px-4 py-6 md:px-8 lg:px-12 flex justify-center">
+            <div class="w-full max-w-5xl">
+                <!-- Page Heading -->
+                <div class="mb-6">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Nueva Entrega</h1>
+                    <p class="text-sm text-gray-500 mt-1">Complete el formulario para generar la guía de envío</p>
                 </div>
 
-                <!-- REMITENTE -->
-                <div class="space-y-4">
-                    <h3 class="font-semibold flex items-center gap-2 text-blue-600"><span class="material-symbols-outlined">person_pin_circle</span> Remitente</h3>
+                <!-- Form Card -->
+                <form id="deliveryForm" class="space-y-5">
+                    <!-- Section: Order Info -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                            <h3>Información del Pedido</h3>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <!-- ID Field -->
+                            <div>
+                                <label>ID de Guía</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">qr_code_2</span>
+                                    <input id="envioId" class="w-full pl-10 pr-4 id-field" readonly type="text" value="Por generar (servidor)"/>
+                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">AUTO</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Forma de Pago -->
+                            <div class="md:col-span-2">
+                                <label>Forma de Pago</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div class="payment-option selected" data-value="contado">
+                                        <span class="material-symbols-outlined text-green-600">payments</span>
+                                        <span>Contado</span>
+                                    </div>
+                                    <div class="payment-option" data-value="contraentrega">
+                                        <span class="material-symbols-outlined text-blue-600">package</span>
+                                        <span>Contraentrega</span>
+                                    </div>
+                                    <div class="payment-option" data-value="contraentrega_recaudo">
+                                        <span class="material-symbols-outlined text-orange-600">savings</span>
+                                        <span>Con Recaudo</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="formaPago" name="formaPago" value="contado">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Sender Info -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span class="material-symbols-outlined">person_pin_circle</span>
+                            <h3>Datos del Remitente</h3>
+                        </div>
+                        
+                        <div class="form-grid-2">
+                            <!-- Nombre remitente -->
+                            <div class="relative">
+                                <label>Nombre / Empresa</label>
+                                <div class="relative">
+                                    <input id="remitente" name="remitente" 
+                                           class="w-full pl-4 pr-10" 
+                                           placeholder="Ej. Distribuidora Central S.A." 
+                                           type="text" 
+                                           autocomplete="off"
+                                           required/>
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                                </div>
+                                <div id="remitenteAutocomplete" class="autocomplete-dropdown"></div>
+                            </div>
+                            
+                            <!-- Teléfono remitente -->
+                            <div>
+                                <label>Teléfono de Contacto</label>
+                                <div class="relative">
+                                    <input id="telefonoRemitente" name="telefonoRemitente" 
+                                           class="w-full pl-4 pr-10" 
+                                           placeholder="+57 300 123 4567" 
+                                           type="tel" 
+                                           required/>
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">phone</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Dirección remitente -->
+                            <div class="md:col-span-2">
+                                <label>Dirección de Recogida</label>
+                                <div class="relative">
+                                    <input id="direccionRemitente" name="direccionRemitente"
+                                           class="w-full pl-4 pr-10" 
+                                           placeholder="Calle 123 # 45 - 67, Oficina 202" 
+                                           type="text" 
+                                           required/>
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">my_location</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Ciudad Origen -->
+                            <div>
+                                <label>Ciudad de Origen</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">location_city</span>
+                                    <input id="ciudadOrigen" class="w-full pl-10 pr-4" readonly type="text" value="Bogotá D.C."/>
+                                </div>
+                            </div>
+                            
+                            <!-- Campos ocultos -->
+                            <input type="hidden" id="correoRemitente" name="correoRemitente">
+                            <input type="hidden" id="usuarioId" name="usuarioId">
+                            <input type="hidden" id="pagadoRemitente" name="pagadoRemitente" value="false">
+                        </div>
+                    </div>
+
+                    <!-- Section: Recipient Info -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span class="material-symbols-outlined">location_on</span>
+                            <h3>Datos del Destinatario</h3>
+                        </div>
+                        
+                        <div class="form-grid-2">
+                            <!-- Nombre cliente -->
+                            <div>
+                                <label>Nombre del Cliente</label>
+                                <input id="destinatario" name="destinatario" class="w-full" placeholder="Ej. Juan Pérez" type="text" required/>
+                            </div>
+                            
+                            <!-- Teléfono cliente -->
+                            <div>
+                                <label>Teléfono Cliente</label>
+                                <input id="telefonoCliente" name="telefonoCliente" class="w-full" placeholder="+57 310 987 6543" type="tel" required/>
+                            </div>
+                            
+                            <!-- Ciudad Destino -->
+                            <div>
+                                <label>Ciudad Destino</label>
+                                <select id="ciudadDestino" name="ciudadDestino" class="w-full" required>
+                                    <option value="">Seleccione ciudad</option>
+                                    <option value="Bogotá D.C.">Bogotá D.C.</option>
+                                    <option value="Soacha">Soacha</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Dirección Destino -->
+                            <div class="md:col-span-2">
+                                <label>
+                                    Dirección de Entrega 
+                                    <span class="text-xs text-green-600 font-normal ml-2">(Google Autocomplete)</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">location_on</span>
+                                    <input id="direccionDestino" name="direccionDestino" 
+                                           class="w-full pl-10 pr-10" 
+                                           placeholder="Carrera 80 # 12 - 34" 
+                                           type="text" 
+                                           autocomplete="off"
+                                           required/>
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-sm">pin_drop</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Complemento -->
+                            <div>
+                                <label>Complemento</label>
+                                <input id="complementoDireccion" name="complementoDireccion" class="w-full" placeholder="Apto 501, Torre 2" type="text"/>
+                            </div>
+                            
+                            <!-- Barrio -->
+                            <div class="relative">
+                                <label>Barrio y Localidad</label>
+                                <div class="relative">
+                                    <input id="barrioLocalidad" name="barrioLocalidad" class="w-full pr-10" placeholder="Buscar barrio..." type="text" autocomplete="off" required/>
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                                    <input type="hidden" id="barrioId" name="barrioId">
+                                </div>
+                                <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Payment Info -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <span class="material-symbols-outlined">monetization_on</span>
+                            <h3>Información de Pago</h3>
+                        </div>
+                        
+                        <div class="form-grid-2">
+                            <!-- Valor a Recaudar -->
+                            <div id="valorRecaudarContainer">
+                                <label>Valor a Recaudar ($)</label>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">attach_money</span>
+                                    <input id="valorRecaudar" name="valorRecaudar" class="w-full pl-10 pr-4" placeholder="0.00" type="number" min="0" step="100" disabled/>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" id="valorRecaudarHelp"></p>
+                            </div>
+                            
+                            <!-- Summary Card -->
+                            <div class="md:col-span-1">
+                                <div class="summary-card">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="material-symbols-outlined text-blue-600">info</span>
+                                        <h4 class="font-semibold text-blue-800">Resumen de Pago</h4>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <span class="text-xs text-gray-500">Forma:</span>
+                                            <div class="font-semibold" id="resumenFormaPago">Contado</div>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs text-gray-500">Recaudo:</span>
+                                            <div class="font-semibold" id="resumenValorRecaudar">$0</div>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <span class="text-xs text-gray-500">Estado:</span>
+                                            <div class="font-semibold text-green-600" id="resumenEstado">Por confirmar</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+                        <button class="btn-secondary w-full sm:w-auto" type="button" id="cancelButton">
+                            Cancelar
+                        </button>
+                        <button class="btn-primary w-full sm:w-auto" type="submit" id="submitButton">
+                            <span>Registrar Envío</span>
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Sección de Resultado -->
+                <div id="resultSection" class="hidden mt-6 result-card">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
+                                <span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+                            </div>
+                            <div>
+                                <h3 class="text-green-800 text-lg font-bold">¡Envío Registrado Exitosamente!</h3>
+                                <p class="text-green-600 text-sm mt-1" id="resultMessage">Guía generada exitosamente.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button type="button" id="printGuideBtn" class="btn-primary !h-10 !min-w-[140px]">
+                                <span class="material-symbols-outlined">print</span>
+                                Imprimir Guía
+                            </button>
+                            <button type="button" id="newDeliveryBtn" class="btn-secondary !h-10 !min-w-[120px]">
+                                Nuevo Envío
+                            </button>
+                        </div>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Campo de búsqueda de remitente -->
-                        <div class="relative">
-                            <input id="remitente" type="text" placeholder="Buscar o escribir nombre" class="w-full px-4 py-3 border rounded-xl bg-gray-50" autocomplete="off" required>
-                            <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">search</span>
-                            <!-- Dropdown de remitentes -->
-                            <div id="remitenteAutocomplete" class="autocomplete-dropdown"></div>
+                    <!-- Detalles -->
+                    <div class="mt-6 pt-6 border-t border-green-200">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <span class="text-sm text-green-700">Número de Guía:</span>
+                                <div class="font-mono font-bold text-lg" id="resultGuideNumber">ABC12345</div>
+                            </div>
+                            <div>
+                                <span class="text-sm text-green-700">Destinatario:</span>
+                                <div class="font-semibold" id="resultDestinatario">Juan Pérez</div>
+                            </div>
+                            <div>
+                                <span class="text-sm text-green-700">Valor:</span>
+                                <div class="font-bold text-green-600" id="resultValor">$10,000</div>
+                            </div>
                         </div>
-                        <div class="relative">
-                            <input id="telefonoRemitente" type="tel" placeholder="Teléfono" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
-                            <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">call</span>
-                        </div>
                     </div>
-
-                    <div class="relative">
-                        <input id="direccionRemitente" type="text" placeholder="Dirección de recogida" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
-                        <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">my_location</span>
-                    </div>
-
-                    <div>
-                        <input type="text" value="Bogotá D.C." class="w-full px-4 py-3 border rounded-xl bg-gray-200 text-gray-600" readonly>
-                    </div>
-                    
-                    <!-- Campos ocultos que se llenan con el autocomplete -->
-                    <input type="hidden" id="correoRemitente">
-                    <input type="hidden" id="usuarioId">
-                    <input type="hidden" id="pagadoRemitente" value="false">
-                </div>
-
-                <!-- DESTINATARIO -->
-                <div class="space-y-4">
-                    <h3 class="font-semibold flex items-center gap-2 text-blue-600"><span class="material-symbols-outlined">location_on</span> Destinatario</h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input id="destinatario" type="text" placeholder="Nombre completo" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
-                        <input id="telefonoCliente" type="tel" placeholder="Teléfono" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
-                    </div>
-
-                    <select id="ciudadDestino" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
-                        <option value="">Seleccionar ciudad</option>
-                        <option value="Bogotá D.C.">Bogotá D.C.</option>
-                        <option value="Soacha">Soacha</option>
-                    </select>
-
-                    <div class="relative">
-                        <input id="direccionDestino" type="text" placeholder="Dirección (ej: Carrera 80 #12-34)" class="w-full px-4 py-3 border rounded-xl bg-gray-50" autocomplete="off" required>
-                        <span class="material-symbols-outlined absolute right-3 top-3 text-green-600">pin_drop</span>
-                    </div>
-
-                    <input id="complementoDireccion" type="text" placeholder="Apto, oficina, etc (opcional)" class="w-full px-4 py-3 border rounded-xl bg-gray-50">
-
-                    <!-- Barrio con autocomplete -->
-                    <div class="relative">
-                        <input id="barrioLocalidad" type="text" placeholder="Barrio / localidad" class="w-full px-4 py-3 border rounded-xl bg-gray-50" autocomplete="off" required>
-                        <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">search</span>
-                        <input type="hidden" id="barrioId">
-                        <div id="barrioDropdown" class="autocomplete-dropdown"></div>
-                    </div>
-                </div>
-
-                <!-- VALOR A RECAUDAR (oculto por defecto) -->
-                <div id="valorRecaudarContainer" class="hidden">
-                    <label class="block text-sm font-medium mb-1">💰 Valor a recaudar ($)</label>
-                    <input id="valorRecaudar" type="number" min="0" step="100" placeholder="0" class="w-full px-4 py-3 border rounded-xl bg-gray-50" disabled>
-                    <p class="text-xs text-gray-500 mt-1" id="valorRecaudarHelp"></p>
-                </div>
-
-                <!-- RESUMEN RÁPIDO -->
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm">
-                    <div class="grid grid-cols-2 gap-2">
-                        <span class="text-gray-600">Forma de pago:</span>
-                        <span class="font-semibold" id="resumenFormaPago">Contado</span>
-                        <span class="text-gray-600">Valor recaudar:</span>
-                        <span class="font-semibold" id="resumenValorRecaudar">$0</span>
-                    </div>
-                </div>
-
-                <!-- BOTONES -->
-                <div class="flex flex-col-reverse sm:flex-row gap-3 pt-2">
-                    <button type="button" id="cancelButton" class="w-full py-4 border rounded-xl font-medium text-gray-600">Cancelar</button>
-                    <button type="submit" id="submitButton" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
-                        <span>Registrar envío</span>
-                        <span class="material-symbols-outlined">send</span>
-                    </button>
-                </div>
-            </form>
-
-            <!-- RESULTADO (guía generada) -->
-            <div id="resultSection" class="hidden mt-6 bg-green-50 border border-green-200 rounded-2xl p-5">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
-                    <div>
-                        <h3 class="font-bold text-green-800">¡Guía generada!</h3>
-                        <p class="text-sm text-green-600" id="resultMessage"></p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3 text-sm mb-4">
-                    <span class="text-gray-500">N° guía:</span><span class="font-mono font-bold" id="resultGuideNumber">---</span>
-                    <span class="text-gray-500">Destinatario:</span><span id="resultDestinatario">---</span>
-                    <span class="text-gray-500">Valor:</span><span id="resultValor">$0</span>
-                </div>
-                <div class="flex gap-3">
-                    <button id="printGuideBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined">print</span> Imprimir
-                    </button>
-                    <button id="newDeliveryBtn" class="flex-1 py-3 border border-green-600 text-green-600 rounded-xl font-semibold">Nuevo</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- SCRIPT PRINCIPAL -->
+    <!-- Script principal (sin cambios funcionales) -->
+    <script src="script.js"></script>
+    
     <script>
-        (function() {
-            // Ocultar intro y loading
-            setTimeout(() => document.getElementById('intro')?.remove(), 2000);
-            setTimeout(() => document.getElementById('loadingScreen')?.classList.add('hidden'), 500);
-            setTimeout(() => document.getElementById('mainContent')?.classList.remove('hidden'), 600);
-
-            // --- Elementos del DOM ---
-            const formaPagoInput = document.getElementById('formaPago');
-            const valorRecaudarContainer = document.getElementById('valorRecaudarContainer');
-            const valorRecaudar = document.getElementById('valorRecaudar');
-            const resumenForma = document.getElementById('resumenFormaPago');
-            const resumenValor = document.getElementById('resumenValorRecaudar');
-            const valorHelp = document.getElementById('valorRecaudarHelp');
-            
-            // Elementos de remitente
-            const remitenteInput = document.getElementById('remitente');
-            const telefonoRemitente = document.getElementById('telefonoRemitente');
-            const direccionRemitente = document.getElementById('direccionRemitente');
-            const correoRemitente = document.getElementById('correoRemitente');
-            const usuarioId = document.getElementById('usuarioId');
-            const remitenteAutocomplete = document.getElementById('remitenteAutocomplete');
-            
-            // Elementos de barrio
-            const barrioInput = document.getElementById('barrioLocalidad');
-            const barrioId = document.getElementById('barrioId');
-            const barrioDropdown = document.getElementById('barrioDropdown');
-
-            // --- BASE DE DATOS MOCK (más completa para remitentes) ---
-            const remitentesMock = [
-                { 
-                    nombre: 'DISTRIBUIDORA CENTRAL S.A.', 
-                    telefono: '3112223344', 
-                    direccion: 'Calle 50 #20-30, Bogotá', 
-                    correo: 'central@distribuidora.com', 
-                    usuarioId: 'USR001' 
-                },
-                { 
-                    nombre: 'JUAN PABLO GONZALEZ', 
-                    telefono: '3154001122', 
-                    direccion: 'Av. Carrera 45 #89-12, Bogotá', 
-                    correo: 'juan.gonzalez@email.com', 
-                    usuarioId: 'USR002' 
-                },
-                { 
-                    nombre: 'ALMACENES ÉXITO', 
-                    telefono: '6014445566', 
-                    direccion: 'Calle 100 #11-22, Bogotá', 
-                    correo: 'logistica@exito.co', 
-                    usuarioId: 'USR003' 
-                },
-                { 
-                    nombre: 'MARÍA FERNANDA LÓPEZ', 
-                    telefono: '3207654321', 
-                    direccion: 'Carrera 15 #85-64, Bogotá', 
-                    correo: 'maria.lopez@email.com', 
-                    usuarioId: 'USR004' 
-                },
-                { 
-                    nombre: 'DROGUERÍA LA PAZ', 
-                    telefono: '6012345678', 
-                    direccion: 'Calle 45 #18-20, Bogotá', 
-                    correo: 'ventas@droguerialapaz.com', 
-                    usuarioId: 'USR005' 
-                }
-            ];
-
-            const barriosMock = [
-                { id: 101, nombre: 'CHAPINERO' }, 
-                { id: 102, nombre: 'CHAPINERO ALTO' },
-                { id: 201, nombre: 'SUBA' }, 
-                { id: 202, nombre: 'SUBA LAURELES' },
-                { id: 301, nombre: 'KENNEDY' }, 
-                { id: 302, nombre: 'KENNEDY TIMIZA' },
-                { id: 401, nombre: 'USAQUÉN' }, 
-                { id: 402, nombre: 'USAQUÉN SANTA BÁRBARA' },
-                { id: 501, nombre: 'FONTIBÓN' },
-                { id: 601, nombre: 'ENGATIVÁ' }
-            ];
-
-            // --- 1. SELECCIÓN DE FORMA DE PAGO ---
-            document.querySelectorAll('.payment-option').forEach(opt => {
-                opt.addEventListener('click', function() {
-                    // Quitar selección de todos
-                    document.querySelectorAll('.payment-option').forEach(o => {
-                        o.classList.remove('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
-                    });
-                    // Añadir selección al actual
-                    this.classList.add('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
-                    
-                    const value = this.dataset.value;
-                    formaPagoInput.value = value;
-                    
-                    // Mostrar/ocultar campo de recaudo
-                    const esRecaudo = (value === 'contraentrega' || value === 'contraentrega_recaudo');
-                    valorRecaudarContainer.classList.toggle('hidden', !esRecaudo);
-                    valorRecaudar.disabled = !esRecaudo;
-                    
-                    if (esRecaudo) {
-                        valorHelp.innerText = value === 'contraentrega' 
-                            ? 'Valor a cobrar contra entrega' 
-                            : 'Incluye recaudo bancario';
-                        if (!valorRecaudar.value) valorRecaudar.value = 0;
-                    }
-                    
-                    // Actualizar resumen
-                    const textoForma = this.querySelector('span:last-child')?.innerText || value;
-                    resumenForma.innerText = textoForma;
-                    actualizarResumenValor();
-                });
-            });
-
-            // Actualizar resumen cuando cambia el valor
-            valorRecaudar.addEventListener('input', actualizarResumenValor);
-            function actualizarResumenValor() {
-                const valor = valorRecaudar.disabled ? 0 : (Number(valorRecaudar.value) || 0);
-                resumenValor.innerText = '$' + valor.toLocaleString('es-CO');
-            }
-
-            // --- 2. AUTOCOMPLETADO DE REMITENTES (versión completa) ---
-            remitenteInput.addEventListener('input', function(e) {
-                const texto = this.value.toLowerCase().trim();
-                
-                if (texto.length < 2) {
-                    remitenteAutocomplete.style.display = 'none';
-                    return;
-                }
-                
-                // Filtrar remitentes
-                const filtrados = remitentesMock.filter(r => 
-                    r.nombre.toLowerCase().includes(texto) || 
-                    r.telefono.includes(texto)
-                );
-                
-                if (filtrados.length === 0) {
-                    remitenteAutocomplete.style.display = 'none';
-                    return;
-                }
-                
-                // Mostrar resultados
-                remitenteAutocomplete.innerHTML = filtrados.map(r => 
-                    `<div class="item" 
-                         data-nombre="${r.nombre}" 
-                         data-telefono="${r.telefono}" 
-                         data-direccion="${r.direccion}" 
-                         data-correo="${r.correo}" 
-                         data-usuario="${r.usuarioId}">
-                        <span class="material-symbols-outlined text-gray-500">business</span>
-                        <div>
-                            <strong>${r.nombre}</strong><br>
-                            <small class="text-gray-500">📞 ${r.telefono} | ${r.direccion.substring(0, 20)}...</small>
-                        </div>
-                    </div>`
-                ).join('');
-                
-                remitenteAutocomplete.style.display = 'block';
-            });
-
-            // Evento para seleccionar un remitente
-            remitenteAutocomplete.addEventListener('click', function(e) {
-                const item = e.target.closest('.item');
-                if (!item) return;
-                
-                // Llenar todos los campos del remitente
-                remitenteInput.value = item.dataset.nombre;
-                telefonoRemitente.value = item.dataset.telefono;
-                direccionRemitente.value = item.dataset.direccion;
-                correoRemitente.value = item.dataset.correo || '';
-                usuarioId.value = item.dataset.usuario || '';
-                
-                // Ocultar dropdown
-                remitenteAutocomplete.style.display = 'none';
-                
-                // Opcional: feedback visual
-                remitenteInput.classList.add('bg-green-50');
-                setTimeout(() => remitenteInput.classList.remove('bg-green-50'), 500);
-            });
-
-            // --- 3. AUTOCOMPLETADO DE BARRIOS ---
-            barrioInput.addEventListener('input', function(e) {
-                const texto = this.value.toLowerCase().trim();
-                
-                if (texto.length < 2) {
-                    barrioDropdown.style.display = 'none';
-                    return;
-                }
-                
-                const filtrados = barriosMock.filter(b => 
-                    b.nombre.toLowerCase().includes(texto)
-                );
-                
-                if (filtrados.length === 0) {
-                    barrioDropdown.style.display = 'none';
-                    return;
-                }
-                
-                barrioDropdown.innerHTML = filtrados.map(b => 
-                    `<div class="item" data-id="${b.id}" data-nombre="${b.nombre}">
-                        <span class="material-symbols-outlined text-gray-400">location_city</span>
-                        <span class="font-medium">${b.nombre}</span>
-                    </div>`
-                ).join('');
-                
-                barrioDropdown.style.display = 'block';
-            });
-
-            barrioDropdown.addEventListener('click', function(e) {
-                const item = e.target.closest('.item');
-                if (!item) return;
-                
-                barrioInput.value = item.dataset.nombre;
-                barrioId.value = item.dataset.id;
-                barrioDropdown.style.display = 'none';
-            });
-
-            // --- 4. CERRAR DROPDOWNS AL HACER CLIC FUERA ---
-            document.addEventListener('click', function(e) {
-                if (!remitenteInput.contains(e.target)) {
-                    remitenteAutocomplete.style.display = 'none';
-                }
-                if (!barrioInput.contains(e.target)) {
-                    barrioDropdown.style.display = 'none';
-                }
-            });
-
-            // --- 5. GOOGLE PLACES PARA DIRECCIÓN DESTINO ---
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                const autocomplete = new google.maps.places.Autocomplete(
-                    document.getElementById('direccionDestino'), 
-                    { 
-                        componentRestrictions: { country: 'co' },
-                        fields: ['formatted_address', 'address_components']
-                    }
-                );
-                
-                autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
-                    if (place.formatted_address) {
-                        // Opcional: aquí podrías extraer la ciudad y llenar el select automáticamente
-                        console.log('Dirección seleccionada:', place.formatted_address);
-                    }
-                });
-            }
-
-            // --- 6. ENVÍO DEL FORMULARIO ---
-            document.getElementById('deliveryForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Validar campos obligatorios
-                const destinatario = document.getElementById('destinatario').value;
-                const telefonoCliente = document.getElementById('telefonoCliente').value;
-                const ciudadDestino = document.getElementById('ciudadDestino').value;
-                const direccionDestino = document.getElementById('direccionDestino').value;
-                
-                if (!destinatario || !telefonoCliente || !ciudadDestino || !direccionDestino) {
-                    alert('Por favor completa todos los campos obligatorios');
-                    return;
-                }
-                
-                // Generar número de guía
-                const guia = 'G-' + Math.floor(Math.random() * 90000 + 10000);
-                const valor = valorRecaudar.disabled ? 0 : (Number(valorRecaudar.value) || 0);
-                
-                // Mostrar resultado
-                document.getElementById('resultGuideNumber').innerText = guia;
-                document.getElementById('resultDestinatario').innerText = destinatario;
-                document.getElementById('resultValor').innerText = '$' + valor.toLocaleString('es-CO');
-                document.getElementById('resultMessage').innerText = `Guía ${guia} generada correctamente.`;
-                document.getElementById('resultSection').classList.remove('hidden');
-                
-                // Scroll suave al resultado
-                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
-            });
-
-            // --- 7. NUEVO ENVÍO ---
-            document.getElementById('newDeliveryBtn').addEventListener('click', function() {
-                document.getElementById('deliveryForm').reset();
-                document.getElementById('resultSection').classList.add('hidden');
-                document.getElementById('valorRecaudarContainer').classList.add('hidden');
-                
-                // Resetear selección de pago
-                document.querySelectorAll('.payment-option').forEach(o => {
-                    o.classList.remove('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
-                });
-                document.querySelector('.payment-option[data-value="contado"]').classList.add('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
-                
-                formaPagoInput.value = 'contado';
-                resumenForma.innerText = 'Contado';
-                resumenValor.innerText = '$0';
-                valorRecaudar.disabled = true;
-                
-                // Limpiar campos ocultos
-                correoRemitente.value = '';
-                usuarioId.value = '';
-                barrioId.value = '';
-            });
-
-            // --- 8. CANCELAR ---
-            document.getElementById('cancelButton').addEventListener('click', function() {
-                if (confirm('¿Cancelar el registro?')) {
-                    document.getElementById('deliveryForm').reset();
-                }
-            });
-
-            // --- 9. IMPRIMIR ---
-            document.getElementById('printGuideBtn').addEventListener('click', function() {
-                const guia = document.getElementById('resultGuideNumber').innerText;
-                alert(`Imprimiendo guía: ${guia}`);
-                // Aquí iría la lógica real de impresión
-            });
-
-            // --- 10. HISTORIAL Y LOGOUT (simulados) ---
-            document.getElementById('historialButton').addEventListener('click', () => {
-                alert('Ver historial de envíos');
-            });
-            
-            document.getElementById('logoutButton').addEventListener('click', () => {
-                if (confirm('¿Cerrar sesión?')) {
-                    alert('Sesión cerrada');
-                    location.reload(); // Simulación
-                }
-            });
-
-            // Inicializar selección de pago por defecto
-            document.querySelector('.payment-option[data-value="contado"]').classList.add('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
-        })();
+        // Ocultar la intro después de 2 segundos
+        setTimeout(() => {
+            const intro = document.getElementById('intro');
+            if (intro) intro.style.display = 'none';
+        }, 2000);
     </script>
 </body>
 </html>
