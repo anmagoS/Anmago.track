@@ -35,11 +35,7 @@
             },
         }
     </script>
-   <style>
-        /* ============================================
-           ESTILOS COMBINADOS Y OPTIMIZADOS
-           ============================================ */
-
+    <style>
         /* ============================================
            ESTILOS PARA GOOGLE PLACES AUTOCOMPLETE
            ============================================ */
@@ -146,165 +142,84 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* ============================================
-           MEJORAS VISUALES - INPUTS MÁS COMPACTOS
-        ============================================ */
-        
-        /* Inputs más compactos y elegantes */
-        input, select, textarea {
-            height: 44px !important;
-            font-size: 0.95rem !important;
-            border-radius: 12px !important;
-            border: 1.5px solid #e2e8f0 !important;
-            background-color: #fafbfc !important;
-            transition: all 0.15s !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #135bec !important;
-            box-shadow: 0 0 0 3px rgba(19, 91, 236, 0.1) !important;
-            background-color: white !important;
-            outline: none !important;
-        }
-
-        input[readonly] {
-            background-color: #f1f4f9 !important;
-            border-color: #d0d9e6 !important;
-            color: #4a5568 !important;
-            cursor: not-allowed;
-        }
-
-        /* Labels más compactos */
-        label, .flex-col span {
-            font-size: 0.8rem !important;
-            font-weight: 600 !important;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #4b5565 !important;
-            margin-bottom: 0.25rem !important;
-            display: block;
-        }
-
-        /* Opciones de pago mejoradas */
-        .payment-option {
-            height: 48px !important;
-            border-radius: 14px !important;
-            border: 2px solid #e2e8f0 !important;
-            background-color: white !important;
-            font-weight: 500 !important;
-            font-size: 0.95rem !important;
-            transition: all 0.2s !important;
-        }
-
-        .payment-option:hover {
-            border-color: #135bec !important;
-            background-color: #f0f7ff !important;
-            transform: translateY(-1px);
-        }
-
-        .payment-option.selected {
-            border-color: #135bec !important;
-            background-color: #e8f0fe !important;
-            box-shadow: 0 2px 8px rgba(19, 91, 236, 0.15) !important;
-        }
-
-        /* ============================================
-           AUTOCOMPLETE PARA BARRAS Y REMITENTES - MEJORADO
+           AUTOCOMPLETE PARA BARRAS - MEJORADO RESPONSIVE
            ============================================ */
-        
-        /* Estilos base para ambos dropdowns */
-        #remitenteAutocomplete, #autocompleteDropdown {
+        #autocompleteDropdown {
             position: fixed !important;
+            top: auto !important;
             bottom: 0 !important;
             left: 0 !important;
             right: 0 !important;
             width: 100vw !important;
             max-height: 50vh !important;
+            z-index: 10000 !important;
             background: white !important;
-            border-radius: 20px 20px 0 0 !important;
-            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2) !important;
-            z-index: 2147483647 !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 12px 12px 0 0 !important;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
             overflow-y: auto !important;
-            -webkit-overflow-scrolling: touch !important;
-            overscroll-behavior: contain !important;
             display: none;
-            border: 1px solid #e2e8f0 !important;
-            border-bottom: none !important;
-            transform: translate3d(0,0,0) !important;
-            -webkit-transform: translate3d(0,0,0) !important;
+            animation: fadeIn 0.3s ease-out;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         /* En tablets y desktop */
         @media (min-width: 768px) {
-            #remitenteAutocomplete, #autocompleteDropdown {
+            #autocompleteDropdown {
                 position: absolute !important;
                 top: 100% !important;
                 bottom: auto !important;
                 width: 100% !important;
-                max-height: 300px !important;
-                border-radius: 12px !important;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
-                border: 1px solid #e2e8f0 !important;
-                z-index: 1000 !important;
+                max-height: 250px !important;
+                border-radius: 8px !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
             }
         }
 
-        /* Items del dropdown - unificados */
-        #remitenteAutocomplete .autocomplete-item,
         #autocompleteDropdown .autocomplete-item {
-            padding: 18px 16px !important;
+            padding: 14px 16px !important;
             cursor: pointer !important;
-            border-bottom: 1px solid #f1f5f9 !important;
+            border-bottom: 1px solid #f3f4f6 !important;
             font-size: 16px !important;
             transition: all 0.2s ease !important;
             touch-action: manipulation;
-            min-height: 60px !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-            background: white !important;
-            color: #1e293b !important;
-            -webkit-tap-highlight-color: rgba(19,91,236,0.1) !important;
-            user-select: none !important;
-            -webkit-user-select: none !important;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
         }
 
         /* Último item sin borde */
-        #remitenteAutocomplete .autocomplete-item:last-child,
         #autocompleteDropdown .autocomplete-item:last-child {
             border-bottom: none !important;
         }
 
         /* Efecto hover y active */
-        #remitenteAutocomplete .autocomplete-item:hover,
-        #remitenteAutocomplete .autocomplete-item:active,
         #autocompleteDropdown .autocomplete-item:hover,
         #autocompleteDropdown .autocomplete-item:active {
-            background: #f1f5f9 !important;
+            background: #f3f4f6 !important;
         }
 
         /* Para móviles con hover forzado */
         @media (hover: none) and (pointer: coarse) {
-            #remitenteAutocomplete .autocomplete-item:active,
             #autocompleteDropdown .autocomplete-item:active {
                 background: #e5e7eb !important;
-                transform: scale(0.98) !important;
+                transform: scale(0.98);
             }
         }
 
-        /* Ocultar IDs en barrios */
+        /* Ocultar IDs */
         #autocompleteDropdown .barrio-id {
             display: none !important;
         }
 
-        /* Estilo del nombre en barrios */
+        /* Estilo del nombre */
         #autocompleteDropdown .barrio-nombre {
             font-weight: 500 !important;
             color: #1f2937 !important;
@@ -313,10 +228,65 @@
         }
 
         /* Indicador de selección */
-        #remitenteAutocomplete .autocomplete-item.selected,
         #autocompleteDropdown .autocomplete-item.selected {
             background: #eff6ff !important;
             border-left: 4px solid #3b82f6 !important;
+        }
+
+        /* ============================================
+           AUTOCOMPLETE PARA REMITENTES
+           ============================================ */
+        #remitenteAutocomplete {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            max-height: 60vh !important;
+            z-index: 10001 !important;
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 16px 16px 0 0 !important;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2) !important;
+            overflow-y: auto !important;
+            display: none;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        @media (min-width: 768px) {
+            #remitenteAutocomplete {
+                position: absolute !important;
+                top: 100% !important;
+                bottom: auto !important;
+                width: 100% !important;
+                max-height: 300px !important;
+                border-radius: 12px !important;
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
+            }
+        }
+
+        /* Items del dropdown de remitentes */
+        #remitenteAutocomplete .autocomplete-item {
+            padding: 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 64px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            position: relative;
+        }
+
+        #remitenteAutocomplete .autocomplete-item:active {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        #remitenteAutocomplete .autocomplete-item.highlighted {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 4px solid #3b82f6;
         }
 
         /* ============================================
@@ -331,117 +301,34 @@
         }
 
         /* ============================================
-           BOTONES MEJORADOS
-           ============================================ */
-        #submitButton {
-            height: 48px !important;
-            padding: 0 2rem !important;
-            border-radius: 14px !important;
-            background-color: #135bec !important;
-            color: white !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            border: none !important;
-            cursor: pointer !important;
-            transition: all 0.2s !important;
-            box-shadow: 0 4px 12px rgba(19, 91, 236, 0.2) !important;
-        }
-
-        #submitButton:hover {
-            background-color: #0f4bc4 !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 6px 16px rgba(19, 91, 236, 0.25) !important;
-        }
-
-        #cancelButton {
-            height: 48px !important;
-            padding: 0 1.5rem !important;
-            border-radius: 14px !important;
-            background-color: white !important;
-            color: #4b5565 !important;
-            font-weight: 600 !important;
-            border: 2px solid #e2e8f0 !important;
-            cursor: pointer !important;
-            transition: all 0.2s !important;
-        }
-
-        #cancelButton:hover {
-            border-color: #135bec !important;
-            color: #135bec !important;
-            background-color: #f8fafc !important;
-        }
-
-        /* ============================================
-           TARJETAS DE RESUMEN MEJORADAS
-           ============================================ */
-        .bg-blue-50 {
-            background: linear-gradient(145deg, #f8fbff, #f0f5ff) !important;
-            border: 1px solid #d9e9ff !important;
-            border-radius: 16px !important;
-            padding: 1.25rem !important;
-        }
-
-        .bg-green-50 {
-            background: #f0fdf4 !important;
-            border: 1px solid #bbf7d0 !important;
-            border-radius: 20px !important;
-            padding: 1.5rem !important;
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1) !important;
-        }
-
-        /* Estilo para el campo ID */
-        #envioId {
-            background: linear-gradient(145deg, #f8fafc, #f1f5f9) !important;
-            border: 1px dashed #cbd5e1 !important;
-            color: #1e293b !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.5px;
-        }
-
-        /* ============================================
-           HEADER MÁS COMPACTO
-           ============================================ */
-        header.sticky {
-            background: white !important;
-            border-bottom: 1px solid #eef2f6 !important;
-            padding: 0.75rem 1.5rem !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important;
-        }
-
-        /* ============================================
-           MEJORAS RESPONSIVE MÓVIL
+           ESTILOS PARA MÓVIL - MEJORAS TÁCTILES
            ============================================ */
         @media (max-width: 767px) {
             input, select, button, .autocomplete-item {
-                min-height: 50px !important;
+                min-height: 44px !important;
+            }
+            
+            .form-group, .form-control {
+                margin-bottom: 16px !important;
+            }
+            
+            input, select, .autocomplete-item {
                 font-size: 16px !important;
             }
             
-            .payment-option {
-                height: 52px !important;
+            .autocomplete-dropdown {
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-y: contain;
             }
             
-            #submitButton, #cancelButton {
-                width: 100% !important;
-            }
-            
-            header.sticky {
-                padding: 0.5rem 1rem !important;
-            }
-            
-            #remitenteAutocomplete, #autocompleteDropdown {
-                max-height: 60vh !important;
-                border-radius: 24px 24px 0 0 !important;
-            }
-            
-            /* Prevenir zoom en iOS */
-            input, select, textarea {
-                font-size: 16px !important;
+            .autocomplete-item {
+                user-select: none;
+                -webkit-user-select: none;
             }
         }
 
         /* ============================================
-           MODOS OSCURO (unificado)
+           MODOS OSCURO
            ============================================ */
         @media (prefers-color-scheme: dark) {
             .dark #autocompleteDropdown,
@@ -453,7 +340,6 @@
             
             .dark #autocompleteDropdown .autocomplete-item,
             .dark #remitenteAutocomplete .autocomplete-item {
-                background: #1e293b !important;
                 border-bottom-color: #334155 !important;
                 color: #f1f5f9 !important;
             }
@@ -470,58 +356,6 @@
                 border-color: #475569 !important;
                 color: #94a3b8 !important;
             }
-
-            .dark #envioId {
-                background: #1e293b !important;
-                border-color: #475569 !important;
-                color: #f1f5f9 !important;
-            }
-
-            .dark header.sticky {
-                background: #1e293b !important;
-                border-color: #334155 !important;
-            }
-
-            .dark .bg-blue-50 {
-                background: #1e2b3a !important;
-                border-color: #2d4b6e !important;
-            }
-        }
-
-        /* ============================================
-           ESPACIADO MEJORADO
-           ============================================ */
-        .gap-6 {
-            gap: 1.25rem !important;
-        }
-
-        .p-6 {
-            padding: 1.5rem !important;
-        }
-
-        .md\:p-8 {
-            padding: 2rem !important;
-        }
-
-        /* Animación para resultados */
-        #resultSection {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Títulos de sección */
-        .border-b {
-            border-bottom-width: 2px !important;
-            border-color: #eef2f6 !important;
-        }
-
-        .border-b span.material-symbols-outlined {
-            font-size: 1.5rem !important;
-        }
-
-        .border-b h3 {
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-            color: #1e293b !important;
         }
     </style>
 </head>
