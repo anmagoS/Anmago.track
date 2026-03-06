@@ -35,13 +35,110 @@
             },
         }
     </script>
-    <style>
+   <style>
         /* ============================================
-           ESTILOS MEJORADOS - MÁS COMPACTOS Y PROFESIONALES
-           SIN ROMPER LA FUNCIONALIDAD ORIGINAL
-        ============================================ */
+           ESTILOS COMBINADOS Y OPTIMIZADOS
+           ============================================ */
 
-        /* Reset y base */
+        /* ============================================
+           ESTILOS PARA GOOGLE PLACES AUTOCOMPLETE
+           ============================================ */
+        .pac-container {
+            z-index: 10002 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            border: 1px solid #e5e7eb !important;
+            margin-top: 4px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .pac-item {
+            padding: 10px 12px !important;
+            cursor: pointer !important;
+            border-bottom: 1px solid #f3f4f6 !important;
+            font-size: 14px !important;
+            transition: background-color 0.2s !important;
+        }
+
+        .pac-item:hover {
+            background-color: #f9fafb !important;
+        }
+
+        .pac-item-selected {
+            background-color: #eff6ff !important;
+        }
+
+        .pac-icon {
+            margin-right: 8px !important;
+        }
+
+        .pac-item-query {
+            font-size: 14px !important;
+            color: #1f2937 !important;
+        }
+
+        /* Para móvil */
+        @media (max-width: 767px) {
+            .pac-container {
+                position: fixed !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100vw !important;
+                max-height: 50vh !important;
+                border-radius: 12px 12px 0 0 !important;
+            }
+        }
+
+        /* Modo oscuro */
+        .dark .pac-container {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        }
+
+        .dark .pac-item {
+            border-bottom-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+
+        .dark .pac-item:hover {
+            background-color: #334155 !important;
+        }
+
+        .dark .pac-item-selected {
+            background-color: #2563eb !important;
+        }
+
+        .dark .pac-item-query {
+            color: #f1f5f9 !important;
+        }
+
+        /* ============================================
+           ANIMACIONES
+           ============================================ */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ============================================
+           ESTILOS BASE RESPONSIVOS
+           ============================================ */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -49,44 +146,15 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* ============================================
-           MEJORAS VISUALES - SOLO CSS, SIN CAMBIAR IDs
+           MEJORAS VISUALES - INPUTS MÁS COMPACTOS
         ============================================ */
-
-        /* Tarjetas de sección más elegantes */
-        .bg-surface-light {
-            background-color: #ffffff !important;
-            border-radius: 20px !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02) !important;
-            border: 1px solid #edf2f7 !important;
-            transition: all 0.2s ease !important;
-        }
-
-        .bg-surface-light:hover {
-            box-shadow: 0 8px 30px rgba(0,0,0,0.04) !important;
-        }
-
-        /* Títulos de sección más profesionales */
-        .border-b {
-            border-bottom-width: 2px !important;
-            border-color: #eef2f6 !important;
-        }
-
-        .border-b span.material-symbols-outlined {
-            font-size: 1.5rem !important;
-        }
-
-        .border-b h3 {
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-            color: #1e293b !important;
-        }
-
+        
         /* Inputs más compactos y elegantes */
         input, select, textarea {
             height: 44px !important;
@@ -113,14 +181,15 @@
             cursor: not-allowed;
         }
 
-        /* Labels más compactos (los spans dentro de labels) */
-        label span, .flex-col span {
+        /* Labels más compactos */
+        label, .flex-col span {
             font-size: 0.8rem !important;
             font-weight: 600 !important;
             text-transform: uppercase;
             letter-spacing: 0.3px;
             color: #4b5565 !important;
             margin-bottom: 0.25rem !important;
+            display: block;
         }
 
         /* Opciones de pago mejoradas */
@@ -140,58 +209,130 @@
             transform: translateY(-1px);
         }
 
-        .payment-option[data-value="contado"]:focus,
-        .payment-option[data-value="contado"].selected {
+        .payment-option.selected {
             border-color: #135bec !important;
             background-color: #e8f0fe !important;
             box-shadow: 0 2px 8px rgba(19, 91, 236, 0.15) !important;
         }
 
-        /* Dropdowns - mantener IDs originales pero mejorar estilo */
+        /* ============================================
+           AUTOCOMPLETE PARA BARRAS Y REMITENTES - MEJORADO
+           ============================================ */
+        
+        /* Estilos base para ambos dropdowns */
         #remitenteAutocomplete, #autocompleteDropdown {
             position: fixed !important;
             bottom: 0 !important;
             left: 0 !important;
             right: 0 !important;
+            width: 100vw !important;
+            max-height: 50vh !important;
             background: white !important;
             border-radius: 20px 20px 0 0 !important;
-            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12) !important;
-            max-height: 60vh !important;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2) !important;
+            z-index: 2147483647 !important;
             overflow-y: auto !important;
-            z-index: 10001 !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
             display: none;
-            border: none !important;
+            border: 1px solid #e2e8f0 !important;
+            border-bottom: none !important;
+            transform: translate3d(0,0,0) !important;
+            -webkit-transform: translate3d(0,0,0) !important;
         }
 
+        /* En tablets y desktop */
         @media (min-width: 768px) {
             #remitenteAutocomplete, #autocompleteDropdown {
                 position: absolute !important;
-                top: calc(100% + 4px) !important;
+                top: 100% !important;
                 bottom: auto !important;
-                border-radius: 16px !important;
+                width: 100% !important;
+                max-height: 300px !important;
+                border-radius: 12px !important;
                 box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
-                max-height: 280px !important;
                 border: 1px solid #e2e8f0 !important;
+                z-index: 1000 !important;
             }
         }
 
-        .autocomplete-item {
-            padding: 1rem !important;
-            border-bottom: 1px solid #f1f5f9 !important;
+        /* Items del dropdown - unificados */
+        #remitenteAutocomplete .autocomplete-item,
+        #autocompleteDropdown .autocomplete-item {
+            padding: 18px 16px !important;
             cursor: pointer !important;
-            transition: all 0.2s !important;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.95rem;
-            min-height: 60px;
+            border-bottom: 1px solid #f1f5f9 !important;
+            font-size: 16px !important;
+            transition: all 0.2s ease !important;
+            touch-action: manipulation;
+            min-height: 60px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            background: white !important;
+            color: #1e293b !important;
+            -webkit-tap-highlight-color: rgba(19,91,236,0.1) !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
         }
 
-        .autocomplete-item:active {
-            background-color: #f1f5f9 !important;
+        /* Último item sin borde */
+        #remitenteAutocomplete .autocomplete-item:last-child,
+        #autocompleteDropdown .autocomplete-item:last-child {
+            border-bottom: none !important;
         }
 
-        /* Botones más profesionales */
+        /* Efecto hover y active */
+        #remitenteAutocomplete .autocomplete-item:hover,
+        #remitenteAutocomplete .autocomplete-item:active,
+        #autocompleteDropdown .autocomplete-item:hover,
+        #autocompleteDropdown .autocomplete-item:active {
+            background: #f1f5f9 !important;
+        }
+
+        /* Para móviles con hover forzado */
+        @media (hover: none) and (pointer: coarse) {
+            #remitenteAutocomplete .autocomplete-item:active,
+            #autocompleteDropdown .autocomplete-item:active {
+                background: #e5e7eb !important;
+                transform: scale(0.98) !important;
+            }
+        }
+
+        /* Ocultar IDs en barrios */
+        #autocompleteDropdown .barrio-id {
+            display: none !important;
+        }
+
+        /* Estilo del nombre en barrios */
+        #autocompleteDropdown .barrio-nombre {
+            font-weight: 500 !important;
+            color: #1f2937 !important;
+            flex: 1;
+            font-size: 16px;
+        }
+
+        /* Indicador de selección */
+        #remitenteAutocomplete .autocomplete-item.selected,
+        #autocompleteDropdown .autocomplete-item.selected {
+            background: #eff6ff !important;
+            border-left: 4px solid #3b82f6 !important;
+        }
+
+        /* ============================================
+           ESTILOS PARA CAMPOS DE CLIENTE
+           ============================================ */
+        .cliente-readonly {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #475569 !important;
+            cursor: not-allowed !important;
+            opacity: 0.9;
+        }
+
+        /* ============================================
+           BOTONES MEJORADOS
+           ============================================ */
         #submitButton {
             height: 48px !important;
             padding: 0 2rem !important;
@@ -230,15 +371,9 @@
             background-color: #f8fafc !important;
         }
 
-        /* Header más compacto */
-        header.sticky {
-            background: white !important;
-            border-bottom: 1px solid #eef2f6 !important;
-            padding: 0.75rem 1.5rem !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important;
-        }
-
-        /* Tarjeta de resumen mejorada */
+        /* ============================================
+           TARJETAS DE RESUMEN MEJORADAS
+           ============================================ */
         .bg-blue-50 {
             background: linear-gradient(145deg, #f8fbff, #f0f5ff) !important;
             border: 1px solid #d9e9ff !important;
@@ -246,7 +381,6 @@
             padding: 1.25rem !important;
         }
 
-        /* Resultado más atractivo */
         .bg-green-50 {
             background: #f0fdf4 !important;
             border: 1px solid #bbf7d0 !important;
@@ -255,7 +389,28 @@
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1) !important;
         }
 
-        /* Mejoras responsive */
+        /* Estilo para el campo ID */
+        #envioId {
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9) !important;
+            border: 1px dashed #cbd5e1 !important;
+            color: #1e293b !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================================
+           HEADER MÁS COMPACTO
+           ============================================ */
+        header.sticky {
+            background: white !important;
+            border-bottom: 1px solid #eef2f6 !important;
+            padding: 0.75rem 1.5rem !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important;
+        }
+
+        /* ============================================
+           MEJORAS RESPONSIVE MÓVIL
+           ============================================ */
         @media (max-width: 767px) {
             input, select, button, .autocomplete-item {
                 min-height: 50px !important;
@@ -274,14 +429,68 @@
                 padding: 0.5rem 1rem !important;
             }
             
-            /* Dropdowns a pantalla completa en móvil */
             #remitenteAutocomplete, #autocompleteDropdown {
-                max-height: 70vh !important;
+                max-height: 60vh !important;
                 border-radius: 24px 24px 0 0 !important;
+            }
+            
+            /* Prevenir zoom en iOS */
+            input, select, textarea {
+                font-size: 16px !important;
             }
         }
 
-        /* Espaciado mejorado */
+        /* ============================================
+           MODOS OSCURO (unificado)
+           ============================================ */
+        @media (prefers-color-scheme: dark) {
+            .dark #autocompleteDropdown,
+            .dark #remitenteAutocomplete {
+                background: #1e293b !important;
+                border-color: #475569 !important;
+                color: #f1f5f9 !important;
+            }
+            
+            .dark #autocompleteDropdown .autocomplete-item,
+            .dark #remitenteAutocomplete .autocomplete-item {
+                background: #1e293b !important;
+                border-bottom-color: #334155 !important;
+                color: #f1f5f9 !important;
+            }
+            
+            .dark #autocompleteDropdown .autocomplete-item:hover,
+            .dark #autocompleteDropdown .autocomplete-item:active,
+            .dark #remitenteAutocomplete .autocomplete-item:hover,
+            .dark #remitenteAutocomplete .autocomplete-item:active {
+                background: #334155 !important;
+            }
+            
+            .dark .cliente-readonly {
+                background-color: #1e293b !important;
+                border-color: #475569 !important;
+                color: #94a3b8 !important;
+            }
+
+            .dark #envioId {
+                background: #1e293b !important;
+                border-color: #475569 !important;
+                color: #f1f5f9 !important;
+            }
+
+            .dark header.sticky {
+                background: #1e293b !important;
+                border-color: #334155 !important;
+            }
+
+            .dark .bg-blue-50 {
+                background: #1e2b3a !important;
+                border-color: #2d4b6e !important;
+            }
+        }
+
+        /* ============================================
+           ESPACIADO MEJORADO
+           ============================================ */
         .gap-6 {
             gap: 1.25rem !important;
         }
@@ -294,28 +503,25 @@
             padding: 2rem !important;
         }
 
-        /* Animaciones suaves */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        /* Animación para resultados */
         #resultSection {
             animation: fadeIn 0.3s ease-out;
         }
 
-        /* Estilo para el campo ID */
-        #envioId {
-            background: linear-gradient(145deg, #f8fafc, #f1f5f9) !important;
-            border: 1px dashed #cbd5e1 !important;
-            color: #1e293b !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.5px;
+        /* Títulos de sección */
+        .border-b {
+            border-bottom-width: 2px !important;
+            border-color: #eef2f6 !important;
         }
 
-        /* Mantener todos los IDs originales para que JS funcione */
-        #remitenteAutocomplete, #autocompleteDropdown {
-            /* Los IDs se mantienen exactamente igual */
+        .border-b span.material-symbols-outlined {
+            font-size: 1.5rem !important;
+        }
+
+        .border-b h3 {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            color: #1e293b !important;
         }
     </style>
 </head>
