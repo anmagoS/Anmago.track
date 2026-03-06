@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="es">
+<html lang="es">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" name="viewport"/>
@@ -9,52 +9,45 @@
     <!-- Fuentes y estilos base -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-    <!-- Tailwind (compacto) -->
+    <!-- Tailwind (compacto) - SIN MODO OSCURO -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Icono -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     <style>
-        /* === ESTILOS ESENCIALES (autocompletados, móvil, dark) === */
+        /* === ESTILOS ESENCIALES === */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: #f6f6f8; }
-        .dark body { background: #101622; }
+        body { font-family: 'Inter', sans-serif; background: #f6f6f8; color: #1e293b; }
 
-        /* contenedor general para autocompletados (móvil amigable) */
+        /* contenedor para autocompletados (móvil amigable) */
         .autocomplete-dropdown {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; border-radius: 20px 20px 0 0;
-            box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.15);
             max-height: 60vh; overflow-y: auto;
             z-index: 10000; display: none;
             -webkit-overflow-scrolling: touch;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #e2e8f0;
         }
         @media (min-width: 768px) {
             .autocomplete-dropdown {
                 position: absolute; top: 100%; bottom: auto;
-                border-radius: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-                max-height: 300px; border: 1px solid #e5e7eb;
+                border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                max-height: 300px; border: 1px solid #e2e8f0;
             }
         }
         .autocomplete-dropdown .item {
             padding: 16px; border-bottom: 1px solid #f1f5f9;
-            cursor: pointer; transition: 0.2s; min-height: 60px;
+            cursor: pointer; transition: background 0.2s; min-height: 60px;
             display: flex; align-items: center; gap: 12px;
         }
         .autocomplete-dropdown .item:active { background: #f1f5f9; }
-        .dark .autocomplete-dropdown {
-            background: #1e293b; border-color: #334155; color: #f1f5f9;
-        }
-        .dark .autocomplete-dropdown .item { border-bottom-color: #334155; }
-        .dark .autocomplete-dropdown .item:active { background: #334155; }
-
-        /* para el campo de barrios usamos el mismo dropdown */
-        #barrioDropdown .item .nombre { font-weight: 500; }
-        #barrioDropdown .item .id { display: none; }
+        .autocomplete-dropdown .item:hover { background: #f8fafc; }
 
         /* mejoras táctiles */
         input, select, button, .item { min-height: 48px; font-size: 16px; }
-        .form-group { margin-bottom: 20px; }
+        
+        /* campos readonly */
+        input:read-only { background-color: #f1f5f9 !important; color: #475569; cursor: not-allowed; }
 
         /* animación intro */
         #intro {
@@ -66,11 +59,15 @@
         #intro img { width: 280px; animation: bounce 1s infinite; }
         @keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-15px); } }
 
-        /* modo oscuro para inputs readonly */
-        .dark input:read-only { background-color: #1e293b !important; color: #94a3b8; }
+        /* resaltado para opción de pago seleccionada */
+        .payment-option.selected {
+            background-color: #e6f0ff;
+            border-color: #2563eb !important;
+            border-width: 2px;
+        }
     </style>
 </head>
-<body class="dark:text-white transition-colors min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
 
     <!-- INTRO (se oculta a los 2s) -->
     <div id="intro">
@@ -78,42 +75,42 @@
     </div>
 
     <!-- CARGA INICIAL -->
-    <div id="loadingScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
         <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-300">cargando experiencia...</p>
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mb-4"></div>
+            <p class="text-gray-600">cargando...</p>
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL (oculto hasta verificación) -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div id="mainContent" class="hidden flex-1 w-full">
 
         <!-- HEADER SIMPLE -->
-        <header class="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b px-4 py-2 flex items-center justify-between shadow-sm">
+        <header class="sticky top-0 z-40 bg-white border-b px-4 py-2 flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-3xl">local_shipping</span>
+                <span class="material-symbols-outlined text-blue-600 text-3xl">local_shipping</span>
                 <h2 class="font-bold text-lg">E.S.P</h2>
             </div>
             <div class="flex items-center gap-3">
-                <button id="historialButton" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">history</span>
+                <button id="historialButton" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined text-gray-600">history</span>
                 </button>
-                <button id="logoutButton" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">logout</span>
+                <button id="logoutButton" class="p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined text-gray-600">logout</span>
                 </button>
-                <!-- avatar simple (opcional) -->
-                <div class="w-9 h-9 rounded-full bg-primary/20 bg-cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/...');"></div>
+                <!-- avatar -->
+                <div class="w-9 h-9 rounded-full bg-blue-100 bg-cover border border-blue-200" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp');"></div>
             </div>
         </header>
 
-        <!-- FORMULARIO PRINCIPAL (ahora más compacto y móvil-first) -->
+        <!-- FORMULARIO PRINCIPAL -->
         <main class="p-4 max-w-3xl mx-auto w-full">
             <h1 class="text-2xl font-bold mb-1">📋 Nueva guía</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">completa los datos del envío</p>
+            <p class="text-sm text-gray-500 mb-6">completa los datos del envío</p>
 
-            <form id="deliveryForm" class="bg-white dark:bg-gray-900 rounded-2xl shadow-md border p-5 space-y-6">
+            <form id="deliveryForm" class="bg-white rounded-2xl shadow-md border p-5 space-y-6">
 
-                <!-- === FORMA DE PAGO (selector horizontal simplificado) === -->
+                <!-- FORMA DE PAGO -->
                 <div>
                     <label class="block text-sm font-medium mb-2">Forma de pago</label>
                     <div class="grid grid-cols-3 gap-2">
@@ -133,106 +130,104 @@
                     <input type="hidden" id="formaPago" name="formaPago" value="contado">
                 </div>
 
-                <!-- === REMITENTE (con autocomplete y campos agrupados) === -->
+                <!-- REMITENTE -->
                 <div class="space-y-4">
-                    <h3 class="font-semibold flex items-center gap-2 text-primary"><span class="material-symbols-outlined">person_pin_circle</span> Remitente</h3>
+                    <h3 class="font-semibold flex items-center gap-2 text-blue-600"><span class="material-symbols-outlined">person_pin_circle</span> Remitente</h3>
                     
-                    <!-- nombre + teléfono en grid para desktop, columna para móvil -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Campo de búsqueda de remitente -->
                         <div class="relative">
-                            <input id="remitente" type="text" placeholder="Nombre / empresa" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700" autocomplete="off" required>
+                            <input id="remitente" type="text" placeholder="Buscar o escribir nombre" class="w-full px-4 py-3 border rounded-xl bg-gray-50" autocomplete="off" required>
                             <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">search</span>
+                            <!-- Dropdown de remitentes -->
                             <div id="remitenteAutocomplete" class="autocomplete-dropdown"></div>
                         </div>
                         <div class="relative">
-                            <input id="telefonoRemitente" type="tel" placeholder="Teléfono" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700" required>
+                            <input id="telefonoRemitente" type="tel" placeholder="Teléfono" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
                             <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">call</span>
                         </div>
                     </div>
 
-                    <!-- dirección de recogida (ocupa todo el ancho) -->
                     <div class="relative">
-                        <input id="direccionRemitente" type="text" placeholder="Dirección de recogida" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700" required>
+                        <input id="direccionRemitente" type="text" placeholder="Dirección de recogida" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
                         <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">my_location</span>
                     </div>
 
-                    <!-- ciudad origen fija (Bogotá) -->
                     <div>
-                        <input type="text" value="Bogotá D.C." class="w-full px-4 py-3 border rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300" readonly>
+                        <input type="text" value="Bogotá D.C." class="w-full px-4 py-3 border rounded-xl bg-gray-200 text-gray-600" readonly>
                     </div>
-                    <!-- campos ocultos (correo, usuarioId, pagado) se manejan desde script -->
+                    
+                    <!-- Campos ocultos que se llenan con el autocomplete -->
                     <input type="hidden" id="correoRemitente">
                     <input type="hidden" id="usuarioId">
                     <input type="hidden" id="pagadoRemitente" value="false">
                 </div>
 
-                <!-- === DESTINATARIO (compacto) === -->
+                <!-- DESTINATARIO -->
                 <div class="space-y-4">
-                    <h3 class="font-semibold flex items-center gap-2 text-primary"><span class="material-symbols-outlined">location_on</span> Destinatario</h3>
+                    <h3 class="font-semibold flex items-center gap-2 text-blue-600"><span class="material-symbols-outlined">location_on</span> Destinatario</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input id="destinatario" type="text" placeholder="Nombre completo" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800" required>
-                        <input id="telefonoCliente" type="tel" placeholder="Teléfono" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800" required>
+                        <input id="destinatario" type="text" placeholder="Nombre completo" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
+                        <input id="telefonoCliente" type="tel" placeholder="Teléfono" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
                     </div>
 
-                    <select id="ciudadDestino" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800" required>
-                        <option value="">Ciudad destino</option>
+                    <select id="ciudadDestino" class="w-full px-4 py-3 border rounded-xl bg-gray-50" required>
+                        <option value="">Seleccionar ciudad</option>
                         <option value="Bogotá D.C.">Bogotá D.C.</option>
                         <option value="Soacha">Soacha</option>
                     </select>
 
-                    <!-- dirección con autocomplete de Google -->
                     <div class="relative">
-                        <input id="direccionDestino" type="text" placeholder="Dirección (ej: Carrera 80 #12-34)" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800" autocomplete="off" required>
+                        <input id="direccionDestino" type="text" placeholder="Dirección (ej: Carrera 80 #12-34)" class="w-full px-4 py-3 border rounded-xl bg-gray-50" autocomplete="off" required>
                         <span class="material-symbols-outlined absolute right-3 top-3 text-green-600">pin_drop</span>
                     </div>
 
-                    <!-- complemento de dirección (opcional) -->
-                    <input id="complementoDireccion" type="text" placeholder="Apto, oficina, etc (opcional)" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800">
+                    <input id="complementoDireccion" type="text" placeholder="Apto, oficina, etc (opcional)" class="w-full px-4 py-3 border rounded-xl bg-gray-50">
 
-                    <!-- barrio con autocomplete propio -->
+                    <!-- Barrio con autocomplete -->
                     <div class="relative">
-                        <input id="barrioLocalidad" type="text" placeholder="Barrio / localidad" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800" autocomplete="off" required>
+                        <input id="barrioLocalidad" type="text" placeholder="Barrio / localidad" class="w-full px-4 py-3 border rounded-xl bg-gray-50" autocomplete="off" required>
                         <span class="material-symbols-outlined absolute right-3 top-3 text-gray-400">search</span>
                         <input type="hidden" id="barrioId">
                         <div id="barrioDropdown" class="autocomplete-dropdown"></div>
                     </div>
                 </div>
 
-                <!-- === VALOR A RECAUDAR (solo visible si aplica) === -->
+                <!-- VALOR A RECAUDAR (oculto por defecto) -->
                 <div id="valorRecaudarContainer" class="hidden">
                     <label class="block text-sm font-medium mb-1">💰 Valor a recaudar ($)</label>
-                    <input id="valorRecaudar" type="number" min="0" step="100" placeholder="0" class="w-full px-4 py-3 border rounded-xl bg-gray-50 dark:bg-gray-800" disabled>
+                    <input id="valorRecaudar" type="number" min="0" step="100" placeholder="0" class="w-full px-4 py-3 border rounded-xl bg-gray-50" disabled>
                     <p class="text-xs text-gray-500 mt-1" id="valorRecaudarHelp"></p>
                 </div>
 
-                <!-- === RESUMEN RÁPIDO (siempre visible) === -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-sm">
+                <!-- RESUMEN RÁPIDO -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm">
                     <div class="grid grid-cols-2 gap-2">
-                        <span class="text-gray-600 dark:text-gray-300">Forma:</span>
+                        <span class="text-gray-600">Forma de pago:</span>
                         <span class="font-semibold" id="resumenFormaPago">Contado</span>
-                        <span class="text-gray-600 dark:text-gray-300">Recaudo:</span>
+                        <span class="text-gray-600">Valor recaudar:</span>
                         <span class="font-semibold" id="resumenValorRecaudar">$0</span>
                     </div>
                 </div>
 
-                <!-- === BOTONES ACCIÓN === -->
+                <!-- BOTONES -->
                 <div class="flex flex-col-reverse sm:flex-row gap-3 pt-2">
-                    <button type="button" id="cancelButton" class="w-full py-4 border rounded-xl font-medium text-gray-600 dark:text-gray-300">Cancelar</button>
-                    <button type="submit" id="submitButton" class="w-full py-4 bg-primary text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+                    <button type="button" id="cancelButton" class="w-full py-4 border rounded-xl font-medium text-gray-600">Cancelar</button>
+                    <button type="submit" id="submitButton" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
                         <span>Registrar envío</span>
                         <span class="material-symbols-outlined">send</span>
                     </button>
                 </div>
             </form>
 
-            <!-- === RESULTADO (guía generada) === -->
-            <div id="resultSection" class="hidden mt-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-5">
+            <!-- RESULTADO (guía generada) -->
+            <div id="resultSection" class="hidden mt-6 bg-green-50 border border-green-200 rounded-2xl p-5">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
                     <div>
-                        <h3 class="font-bold text-green-800 dark:text-green-300">¡Guía generada!</h3>
-                        <p class="text-sm text-green-600 dark:text-green-400" id="resultMessage"></p>
+                        <h3 class="font-bold text-green-800">¡Guía generada!</h3>
+                        <p class="text-sm text-green-600" id="resultMessage"></p>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-sm mb-4">
@@ -241,7 +236,7 @@
                     <span class="text-gray-500">Valor:</span><span id="resultValor">$0</span>
                 </div>
                 <div class="flex gap-3">
-                    <button id="printGuideBtn" class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold flex items-center justify-center gap-2">
+                    <button id="printGuideBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined">print</span> Imprimir
                     </button>
                     <button id="newDeliveryBtn" class="flex-1 py-3 border border-green-600 text-green-600 rounded-xl font-semibold">Nuevo</button>
@@ -250,7 +245,7 @@
         </main>
     </div>
 
-    <!-- SCRIPT UNIFICADO (misma funcionalidad pero más ligero) -->
+    <!-- SCRIPT PRINCIPAL -->
     <script>
         (function() {
             // Ocultar intro y loading
@@ -258,177 +253,324 @@
             setTimeout(() => document.getElementById('loadingScreen')?.classList.add('hidden'), 500);
             setTimeout(() => document.getElementById('mainContent')?.classList.remove('hidden'), 600);
 
-            // --- Elementos del DOM (referencias rápidas) ---
+            // --- Elementos del DOM ---
             const formaPagoInput = document.getElementById('formaPago');
             const valorRecaudarContainer = document.getElementById('valorRecaudarContainer');
             const valorRecaudar = document.getElementById('valorRecaudar');
             const resumenForma = document.getElementById('resumenFormaPago');
             const resumenValor = document.getElementById('resumenValorRecaudar');
             const valorHelp = document.getElementById('valorRecaudarHelp');
+            
+            // Elementos de remitente
             const remitenteInput = document.getElementById('remitente');
             const telefonoRemitente = document.getElementById('telefonoRemitente');
-            const direccionDestino = document.getElementById('direccionDestino');
+            const direccionRemitente = document.getElementById('direccionRemitente');
+            const correoRemitente = document.getElementById('correoRemitente');
+            const usuarioId = document.getElementById('usuarioId');
+            const remitenteAutocomplete = document.getElementById('remitenteAutocomplete');
+            
+            // Elementos de barrio
             const barrioInput = document.getElementById('barrioLocalidad');
             const barrioId = document.getElementById('barrioId');
             const barrioDropdown = document.getElementById('barrioDropdown');
 
-            // --- Mock de datos (para simular el backend) ---
+            // --- BASE DE DATOS MOCK (más completa para remitentes) ---
             const remitentesMock = [
-                { nombre: 'DISTRIBUIDORA CENTRAL', telefono: '3112223344', direccion: 'Calle 50 #20-30', correo: 'central@mail.com', usuarioId: 'USR001' },
-                { nombre: 'JUAN PABLO GONZALEZ', telefono: '3154001122', direccion: 'Av. Carrera 45 #89-12', correo: 'juan@mail.com', usuarioId: 'USR002' },
-                { nombre: 'ALMACENES ÉXITO', telefono: '6014445566', direccion: 'Calle 100 #11-22', correo: 'exito@mail.com', usuarioId: 'USR003' },
+                { 
+                    nombre: 'DISTRIBUIDORA CENTRAL S.A.', 
+                    telefono: '3112223344', 
+                    direccion: 'Calle 50 #20-30, Bogotá', 
+                    correo: 'central@distribuidora.com', 
+                    usuarioId: 'USR001' 
+                },
+                { 
+                    nombre: 'JUAN PABLO GONZALEZ', 
+                    telefono: '3154001122', 
+                    direccion: 'Av. Carrera 45 #89-12, Bogotá', 
+                    correo: 'juan.gonzalez@email.com', 
+                    usuarioId: 'USR002' 
+                },
+                { 
+                    nombre: 'ALMACENES ÉXITO', 
+                    telefono: '6014445566', 
+                    direccion: 'Calle 100 #11-22, Bogotá', 
+                    correo: 'logistica@exito.co', 
+                    usuarioId: 'USR003' 
+                },
+                { 
+                    nombre: 'MARÍA FERNANDA LÓPEZ', 
+                    telefono: '3207654321', 
+                    direccion: 'Carrera 15 #85-64, Bogotá', 
+                    correo: 'maria.lopez@email.com', 
+                    usuarioId: 'USR004' 
+                },
+                { 
+                    nombre: 'DROGUERÍA LA PAZ', 
+                    telefono: '6012345678', 
+                    direccion: 'Calle 45 #18-20, Bogotá', 
+                    correo: 'ventas@droguerialapaz.com', 
+                    usuarioId: 'USR005' 
+                }
             ];
 
             const barriosMock = [
-                { id: 101, nombre: 'CHAPINERO CENTRAL' }, { id: 102, nombre: 'CHAPINERO ALTO' },
-                { id: 201, nombre: 'SUBA LAURELES' }, { id: 202, nombre: 'SUBA COMPARTIR' },
-                { id: 301, nombre: 'KENNEDY TIMIZA' }, { id: 302, nombre: 'KENNEDY CENTRO' },
-                { id: 401, nombre: 'USAQUÉN SANTA BÁRBARA' }, { id: 402, nombre: 'USAQUÉN CEDRITOS' },
+                { id: 101, nombre: 'CHAPINERO' }, 
+                { id: 102, nombre: 'CHAPINERO ALTO' },
+                { id: 201, nombre: 'SUBA' }, 
+                { id: 202, nombre: 'SUBA LAURELES' },
+                { id: 301, nombre: 'KENNEDY' }, 
+                { id: 302, nombre: 'KENNEDY TIMIZA' },
+                { id: 401, nombre: 'USAQUÉN' }, 
+                { id: 402, nombre: 'USAQUÉN SANTA BÁRBARA' },
+                { id: 501, nombre: 'FONTIBÓN' },
+                { id: 601, nombre: 'ENGATIVÁ' }
             ];
 
-            // --- 1. PAGO: selección de opción ---
+            // --- 1. SELECCIÓN DE FORMA DE PAGO ---
             document.querySelectorAll('.payment-option').forEach(opt => {
-                opt.addEventListener('click', () => {
-                    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('bg-primary/10', 'border-primary', 'border-2'));
-                    opt.classList.add('bg-primary/10', 'border-primary', 'border-2');
-                    const value = opt.dataset.value;
+                opt.addEventListener('click', function() {
+                    // Quitar selección de todos
+                    document.querySelectorAll('.payment-option').forEach(o => {
+                        o.classList.remove('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
+                    });
+                    // Añadir selección al actual
+                    this.classList.add('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
+                    
+                    const value = this.dataset.value;
                     formaPagoInput.value = value;
                     
-                    // mostrar/ocultar recaudo
+                    // Mostrar/ocultar campo de recaudo
                     const esRecaudo = (value === 'contraentrega' || value === 'contraentrega_recaudo');
                     valorRecaudarContainer.classList.toggle('hidden', !esRecaudo);
                     valorRecaudar.disabled = !esRecaudo;
+                    
                     if (esRecaudo) {
-                        valorRecaudarHelp.innerText = value === 'contraentrega' ? 'Contraentrega simple (valor declarado)' : 'Incluye recaudo bancario';
+                        valorHelp.innerText = value === 'contraentrega' 
+                            ? 'Valor a cobrar contra entrega' 
+                            : 'Incluye recaudo bancario';
+                        if (!valorRecaudar.value) valorRecaudar.value = 0;
                     }
                     
-                    // actualizar resumen
-                    const textoForma = opt.querySelector('span:last-child')?.innerText || value;
+                    // Actualizar resumen
+                    const textoForma = this.querySelector('span:last-child')?.innerText || value;
                     resumenForma.innerText = textoForma;
+                    actualizarResumenValor();
                 });
             });
 
-            // al cambiar valorRecaudar, actualizar resumen
-            valorRecaudar.addEventListener('input', () => {
-                resumenValor.innerText = '$' + (Number(valorRecaudar.value) || 0).toLocaleString('es-CO');
-            });
+            // Actualizar resumen cuando cambia el valor
+            valorRecaudar.addEventListener('input', actualizarResumenValor);
+            function actualizarResumenValor() {
+                const valor = valorRecaudar.disabled ? 0 : (Number(valorRecaudar.value) || 0);
+                resumenValor.innerText = '$' + valor.toLocaleString('es-CO');
+            }
 
-            // --- 2. AUTOCOMPLETE REMITENTE (sencillo) ---
-            const remitenteAutocomplete = document.getElementById('remitenteAutocomplete');
-            remitenteInput.addEventListener('input', (e) => {
-                const val = e.target.value.toLowerCase();
-                if (val.length < 2) { remitenteAutocomplete.style.display = 'none'; return; }
-                const filtrados = remitentesMock.filter(r => r.nombre.toLowerCase().includes(val));
-                if (filtrados.length === 0) { remitenteAutocomplete.style.display = 'none'; return; }
+            // --- 2. AUTOCOMPLETADO DE REMITENTES (versión completa) ---
+            remitenteInput.addEventListener('input', function(e) {
+                const texto = this.value.toLowerCase().trim();
                 
+                if (texto.length < 2) {
+                    remitenteAutocomplete.style.display = 'none';
+                    return;
+                }
+                
+                // Filtrar remitentes
+                const filtrados = remitentesMock.filter(r => 
+                    r.nombre.toLowerCase().includes(texto) || 
+                    r.telefono.includes(texto)
+                );
+                
+                if (filtrados.length === 0) {
+                    remitenteAutocomplete.style.display = 'none';
+                    return;
+                }
+                
+                // Mostrar resultados
                 remitenteAutocomplete.innerHTML = filtrados.map(r => 
-                    `<div class="item" data-nombre="${r.nombre}" data-tel="${r.telefono}" data-dir="${r.direccion}" data-correo="${r.correo}" data-usuario="${r.usuarioId}">
+                    `<div class="item" 
+                         data-nombre="${r.nombre}" 
+                         data-telefono="${r.telefono}" 
+                         data-direccion="${r.direccion}" 
+                         data-correo="${r.correo}" 
+                         data-usuario="${r.usuarioId}">
                         <span class="material-symbols-outlined text-gray-500">business</span>
-                        <span><strong>${r.nombre}</strong><br><small>${r.telefono}</small></span>
+                        <div>
+                            <strong>${r.nombre}</strong><br>
+                            <small class="text-gray-500">📞 ${r.telefono} | ${r.direccion.substring(0, 20)}...</small>
+                        </div>
                     </div>`
                 ).join('');
+                
                 remitenteAutocomplete.style.display = 'block';
             });
 
-            remitenteAutocomplete.addEventListener('click', (e) => {
+            // Evento para seleccionar un remitente
+            remitenteAutocomplete.addEventListener('click', function(e) {
                 const item = e.target.closest('.item');
                 if (!item) return;
+                
+                // Llenar todos los campos del remitente
                 remitenteInput.value = item.dataset.nombre;
-                telefonoRemitente.value = item.dataset.tel;
-                document.getElementById('direccionRemitente').value = item.dataset.dir;
-                document.getElementById('correoRemitente').value = item.dataset.correo || '';
-                document.getElementById('usuarioId').value = item.dataset.usuario || '';
+                telefonoRemitente.value = item.dataset.telefono;
+                direccionRemitente.value = item.dataset.direccion;
+                correoRemitente.value = item.dataset.correo || '';
+                usuarioId.value = item.dataset.usuario || '';
+                
+                // Ocultar dropdown
                 remitenteAutocomplete.style.display = 'none';
+                
+                // Opcional: feedback visual
+                remitenteInput.classList.add('bg-green-50');
+                setTimeout(() => remitenteInput.classList.remove('bg-green-50'), 500);
             });
 
-            // cerrar dropdown al hacer clic fuera
-            document.addEventListener('click', (e) => {
-                if (!remitenteInput.contains(e.target)) remitenteAutocomplete.style.display = 'none';
-                if (!barrioInput.contains(e.target)) barrioDropdown.style.display = 'none';
-            });
-
-            // --- 3. GOOGLE PLACES para dirección destino ---
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                const autocomplete = new google.maps.places.Autocomplete(direccionDestino, { 
-                    componentRestrictions: { country: 'co' },
-                    fields: ['formatted_address', 'address_components']
-                });
-                autocomplete.addListener('place_changed', () => {
-                    const place = autocomplete.getPlace();
-                    if (!place.formatted_address) return;
-                    // opcional: extraer ciudad y llenar select? lo dejamos simple
-                });
-            }
-
-            // --- 4. AUTOCOMPLETE DE BARRIOS (mock) ---
-            barrioInput.addEventListener('input', (e) => {
-                const val = e.target.value.toLowerCase();
-                if (val.length < 2) { barrioDropdown.style.display = 'none'; return; }
-                const filtrados = barriosMock.filter(b => b.nombre.toLowerCase().includes(val));
-                if (filtrados.length === 0) { barrioDropdown.style.display = 'none'; return; }
+            // --- 3. AUTOCOMPLETADO DE BARRIOS ---
+            barrioInput.addEventListener('input', function(e) {
+                const texto = this.value.toLowerCase().trim();
+                
+                if (texto.length < 2) {
+                    barrioDropdown.style.display = 'none';
+                    return;
+                }
+                
+                const filtrados = barriosMock.filter(b => 
+                    b.nombre.toLowerCase().includes(texto)
+                );
+                
+                if (filtrados.length === 0) {
+                    barrioDropdown.style.display = 'none';
+                    return;
+                }
                 
                 barrioDropdown.innerHTML = filtrados.map(b => 
                     `<div class="item" data-id="${b.id}" data-nombre="${b.nombre}">
                         <span class="material-symbols-outlined text-gray-400">location_city</span>
-                        <span class="nombre">${b.nombre}</span>
-                        <span class="id">${b.id}</span>
+                        <span class="font-medium">${b.nombre}</span>
                     </div>`
                 ).join('');
+                
                 barrioDropdown.style.display = 'block';
             });
 
-            barrioDropdown.addEventListener('click', (e) => {
+            barrioDropdown.addEventListener('click', function(e) {
                 const item = e.target.closest('.item');
                 if (!item) return;
-                barrioInput.value = item.querySelector('.nombre')?.innerText || '';
+                
+                barrioInput.value = item.dataset.nombre;
                 barrioId.value = item.dataset.id;
                 barrioDropdown.style.display = 'none';
             });
 
-            // --- 5. ENVÍO DEL FORM (simulado) ---
-            document.getElementById('deliveryForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                // aquí iría la lógica real de guardado (fetch a backend)
-                const destinatario = document.getElementById('destinatario').value;
-                const guia = 'G-' + Math.floor(Math.random()*100000);
-                const valor = valorRecaudar.disabled ? 0 : (Number(valorRecaudar.value) || 0);
+            // --- 4. CERRAR DROPDOWNS AL HACER CLIC FUERA ---
+            document.addEventListener('click', function(e) {
+                if (!remitenteInput.contains(e.target)) {
+                    remitenteAutocomplete.style.display = 'none';
+                }
+                if (!barrioInput.contains(e.target)) {
+                    barrioDropdown.style.display = 'none';
+                }
+            });
 
-                // mostrar resultado
+            // --- 5. GOOGLE PLACES PARA DIRECCIÓN DESTINO ---
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                const autocomplete = new google.maps.places.Autocomplete(
+                    document.getElementById('direccionDestino'), 
+                    { 
+                        componentRestrictions: { country: 'co' },
+                        fields: ['formatted_address', 'address_components']
+                    }
+                );
+                
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    if (place.formatted_address) {
+                        // Opcional: aquí podrías extraer la ciudad y llenar el select automáticamente
+                        console.log('Dirección seleccionada:', place.formatted_address);
+                    }
+                });
+            }
+
+            // --- 6. ENVÍO DEL FORMULARIO ---
+            document.getElementById('deliveryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validar campos obligatorios
+                const destinatario = document.getElementById('destinatario').value;
+                const telefonoCliente = document.getElementById('telefonoCliente').value;
+                const ciudadDestino = document.getElementById('ciudadDestino').value;
+                const direccionDestino = document.getElementById('direccionDestino').value;
+                
+                if (!destinatario || !telefonoCliente || !ciudadDestino || !direccionDestino) {
+                    alert('Por favor completa todos los campos obligatorios');
+                    return;
+                }
+                
+                // Generar número de guía
+                const guia = 'G-' + Math.floor(Math.random() * 90000 + 10000);
+                const valor = valorRecaudar.disabled ? 0 : (Number(valorRecaudar.value) || 0);
+                
+                // Mostrar resultado
                 document.getElementById('resultGuideNumber').innerText = guia;
                 document.getElementById('resultDestinatario').innerText = destinatario;
                 document.getElementById('resultValor').innerText = '$' + valor.toLocaleString('es-CO');
-                document.getElementById('resultMessage').innerText = 'Guía ' + guia + ' generada correctamente.';
+                document.getElementById('resultMessage').innerText = `Guía ${guia} generada correctamente.`;
                 document.getElementById('resultSection').classList.remove('hidden');
                 
-                // opcional: scroll al resultado
+                // Scroll suave al resultado
                 document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
             });
 
-            // botón nuevo envío
-            document.getElementById('newDeliveryBtn').addEventListener('click', () => {
+            // --- 7. NUEVO ENVÍO ---
+            document.getElementById('newDeliveryBtn').addEventListener('click', function() {
                 document.getElementById('deliveryForm').reset();
                 document.getElementById('resultSection').classList.add('hidden');
                 document.getElementById('valorRecaudarContainer').classList.add('hidden');
-                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('bg-primary/10', 'border-primary', 'border-2'));
+                
+                // Resetear selección de pago
+                document.querySelectorAll('.payment-option').forEach(o => {
+                    o.classList.remove('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
+                });
+                document.querySelector('.payment-option[data-value="contado"]').classList.add('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
+                
                 formaPagoInput.value = 'contado';
                 resumenForma.innerText = 'Contado';
                 resumenValor.innerText = '$0';
+                valorRecaudar.disabled = true;
+                
+                // Limpiar campos ocultos
+                correoRemitente.value = '';
+                usuarioId.value = '';
+                barrioId.value = '';
             });
 
-            // cancelar (limpia campos)
-            document.getElementById('cancelButton').addEventListener('click', () => {
-                if(confirm('¿Cancelar el registro?')) document.getElementById('deliveryForm').reset();
+            // --- 8. CANCELAR ---
+            document.getElementById('cancelButton').addEventListener('click', function() {
+                if (confirm('¿Cancelar el registro?')) {
+                    document.getElementById('deliveryForm').reset();
+                }
             });
 
-            // print (simulado)
-            document.getElementById('printGuideBtn').addEventListener('click', () => {
-                alert('Imprimiendo guía: ' + document.getElementById('resultGuideNumber').innerText);
+            // --- 9. IMPRIMIR ---
+            document.getElementById('printGuideBtn').addEventListener('click', function() {
+                const guia = document.getElementById('resultGuideNumber').innerText;
+                alert(`Imprimiendo guía: ${guia}`);
+                // Aquí iría la lógica real de impresión
             });
 
-            // historial / logout (solo demo)
-            document.getElementById('historialButton').addEventListener('click', () => alert('Ver historial'));
-            document.getElementById('logoutButton').addEventListener('click', () => alert('Sesión cerrada'));
+            // --- 10. HISTORIAL Y LOGOUT (simulados) ---
+            document.getElementById('historialButton').addEventListener('click', () => {
+                alert('Ver historial de envíos');
+            });
+            
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                if (confirm('¿Cerrar sesión?')) {
+                    alert('Sesión cerrada');
+                    location.reload(); // Simulación
+                }
+            });
 
+            // Inicializar selección de pago por defecto
+            document.querySelector('.payment-option[data-value="contado"]').classList.add('selected', 'bg-blue-50', 'border-blue-600', 'border-2');
         })();
     </script>
 </body>
