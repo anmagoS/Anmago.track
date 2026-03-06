@@ -2,7 +2,7 @@
 <html class="light" lang="es">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" name="viewport"/>
     <title>Sistema de Envíos - Contraentrega</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -35,9 +35,9 @@
             },
         }
     </script>
-   <style>
+    <style>
         /* ============================================
-           ESTILOS COMPACTOS Y PROFESIONALES
+           ESTILOS ULTRA COMPACTOS - MÁXIMO AHORRO DE ESPACIO
            ============================================ */
 
         /* Reset y base */
@@ -53,176 +53,135 @@
         }
 
         /* ============================================
-           REDUCCIÓN DE ESPACIOS - LO MÁS IMPORTANTE
+           REDUCCIÓN EXTREMA DE ESPACIOS
            ============================================ */
         
-        /* Reducir padding del header */
+        /* Header más pequeño */
         header.sticky {
-            padding: 0.5rem 1rem !important;
+            padding: 0.35rem 0.75rem !important;
         }
 
-        /* Reducir padding del main */
+        /* Eliminar título "Nueva Entrega" */
+        .flex-col.gap-1 {
+            display: none !important;
+        }
+
+        /* Reducir padding del main al mínimo */
         main.px-4.py-8 {
-            padding: 1rem !important;
+            padding: 0.5rem !important;
         }
 
-        /* Reducir gap entre elementos */
-        .gap-6 {
-            gap: 1rem !important;
-        }
-
-        .gap-8 {
-            gap: 1.25rem !important;
-        }
-
-        .gap-4 {
-            gap: 0.75rem !important;
-        }
-
-        .gap-3 {
+        /* Máxima compactación de gaps */
+        .gap-6, .gap-8 {
             gap: 0.5rem !important;
         }
 
-        /* Reducir padding de las tarjetas */
+        .gap-4 {
+            gap: 0.35rem !important;
+        }
+
+        .gap-3 {
+            gap: 0.25rem !important;
+        }
+
+        /* Padding mínimo en tarjetas */
         .p-6 {
-            padding: 1.25rem !important;
+            padding: 0.75rem !important;
         }
 
         .md\:p-8 {
-            padding: 1.5rem !important;
-        }
-
-        .p-4 {
             padding: 1rem !important;
         }
 
-        /* Reducir márgenes de secciones */
+        .p-4 {
+            padding: 0.5rem !important;
+        }
+
+        /* Márgenes al mínimo */
         .mb-6 {
-            margin-bottom: 1rem !important;
+            margin-bottom: 0.35rem !important;
         }
 
         .mt-6 {
-            margin-top: 1rem !important;
+            margin-top: 0.35rem !important;
         }
 
         .pt-6 {
-            padding-top: 1rem !important;
+            padding-top: 0.35rem !important;
         }
 
         .pb-2 {
-            padding-bottom: 0.5rem !important;
+            padding-bottom: 0.25rem !important;
         }
 
         /* ============================================
-           INPUTS MÁS COMPACTOS Y CON ÍCONOS BIEN UBICADOS
+           INPUTS ULTRA COMPACTOS
            ============================================ */
         
         input, select, textarea {
-            height: 40px !important;
-            font-size: 0.95rem !important;
-            border-radius: 8px !important;
+            height: 36px !important;
+            font-size: 0.85rem !important;
+            border-radius: 6px !important;
             border: 1px solid #e2e8f0 !important;
             background-color: #fafbfc !important;
-            transition: all 0.15s !important;
         }
 
         input:focus, select:focus, textarea:focus {
             border-color: #135bec !important;
             box-shadow: 0 0 0 2px rgba(19, 91, 236, 0.1) !important;
-            background-color: white !important;
-            outline: none !important;
         }
 
         input[readonly] {
             background-color: #f1f4f9 !important;
-            border-color: #d0d9e6 !important;
-            color: #4a5568 !important;
         }
 
-        /* CORRECCIÓN DE ÍCONOS - AHORA NO SE SOBREPONEN */
-        .relative {
-            position: relative;
-        }
-
-        /* Íconos a la izquierda */
+        /* Íconos más pequeños y bien posicionados */
         .absolute.left-4, .absolute.left-3 {
-            left: 0.75rem !important;
-            font-size: 1.25rem !important;
-            color: #94a3b8 !important;
+            left: 0.5rem !important;
+            font-size: 1rem !important;
         }
 
-        /* Inputs con ícono izquierdo */
-        .pl-12 {
-            padding-left: 2.5rem !important;
-        }
-
-        .pl-4 {
-            padding-left: 1rem !important;
-        }
-
-        /* Íconos a la derecha */
         .absolute.right-3, .absolute.right-4 {
-            right: 0.75rem !important;
-            font-size: 1.25rem !important;
-            color: #94a3b8 !important;
+            right: 0.5rem !important;
+            font-size: 1rem !important;
         }
 
-        /* Inputs con ícono derecho */
+        .pl-12 {
+            padding-left: 2rem !important;
+        }
+
         .pr-10, .pr-4 {
-            padding-right: 2.5rem !important;
+            padding-right: 2rem !important;
         }
 
-        /* Ajuste específico para el campo ID */
-        #envioId {
-            background-color: #f1f4f9 !important;
-            border: 1px dashed #cbd5e1 !important;
-            font-weight: 600 !important;
-        }
-
-        /* ============================================
-           LABELS MÁS COMPACTOS
-           ============================================ */
-        
+        /* Labels ultra compactos */
         label, .flex-col span {
-            font-size: 0.75rem !important;
+            font-size: 0.65rem !important;
             font-weight: 600 !important;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #4b5565 !important;
-            margin-bottom: 0.15rem !important;
+            margin-bottom: 0.1rem !important;
         }
 
         /* ============================================
-           OPCIONES DE PAGO MÁS COMPACTAS
+           BOTONES DE PAGO MÁS PEQUEÑOS
            ============================================ */
         
         .payment-option {
-            height: 44px !important;
-            border-radius: 8px !important;
+            height: 36px !important;
+            border-radius: 6px !important;
             border: 1px solid #e2e8f0 !important;
-            background-color: white !important;
             font-weight: 500 !important;
-            font-size: 0.9rem !important;
-        }
-
-        .payment-option:hover {
-            border-color: #135bec !important;
-            background-color: #f0f7ff !important;
-        }
-
-        .payment-option.selected {
-            border-color: #135bec !important;
-            background-color: #e8f0fe !important;
-            border-width: 1px !important;
+            font-size: 0.75rem !important;
+            padding: 0 0.25rem !important;
         }
 
         .payment-option .material-symbols-outlined {
-            font-size: 1.25rem !important;
-            margin-right: 0.25rem !important;
+            font-size: 1rem !important;
+            margin-right: 0.15rem !important;
         }
 
         /* ============================================
-           DROPDOWNS DE AUTOCOMPLETE - FIJOS EN MÓVIL
+           AUTOCOMPLETE - VISIBLE SIN SCROLL EN MÓVIL
            ============================================ */
         
         #remitenteAutocomplete, #autocompleteDropdown {
@@ -231,11 +190,11 @@
             left: 0 !important;
             right: 0 !important;
             background: white !important;
-            border-radius: 16px 16px 0 0 !important;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15) !important;
-            max-height: 40vh !important;
+            border-radius: 12px 12px 0 0 !important;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+            max-height: 50vh !important;
             overflow-y: auto !important;
-            z-index: 1000000 !important;
+            z-index: 2147483647 !important;
             display: none;
             border: 1px solid #e2e8f0 !important;
             border-bottom: none !important;
@@ -246,9 +205,8 @@
                 position: absolute !important;
                 top: 100% !important;
                 bottom: auto !important;
-                border-radius: 8px !important;
-                max-height: 250px !important;
-                border: 1px solid #e2e8f0 !important;
+                border-radius: 6px !important;
+                max-height: 200px !important;
             }
         }
 
@@ -256,71 +214,76 @@
         #autocompleteDropdown .autocomplete-item {
             padding: 12px 16px !important;
             border-bottom: 1px solid #f1f5f9 !important;
-            cursor: pointer !important;
-            font-size: 0.95rem !important;
+            font-size: 0.9rem !important;
             min-height: 44px !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-
-        #remitenteAutocomplete .autocomplete-item:active,
-        #autocompleteDropdown .autocomplete-item:active {
-            background-color: #f1f5f9 !important;
         }
 
         /* ============================================
-           BOTONES MÁS COMPACTOS
+           BOTONES PRINCIPALES MÁS COMPACTOS
            ============================================ */
         
         #submitButton {
-            height: 44px !important;
-            padding: 0 1.5rem !important;
-            border-radius: 8px !important;
-            background-color: #135bec !important;
-            color: white !important;
-            font-weight: 600 !important;
-            font-size: 0.95rem !important;
-            border: none !important;
-            box-shadow: 0 2px 8px rgba(19, 91, 236, 0.2) !important;
+            height: 36px !important;
+            padding: 0 1rem !important;
+            border-radius: 6px !important;
+            font-size: 0.85rem !important;
+            min-width: 140px !important;
         }
 
         #cancelButton {
-            height: 44px !important;
-            padding: 0 1.25rem !important;
-            border-radius: 8px !important;
-            background-color: white !important;
-            color: #4b5565 !important;
-            font-weight: 600 !important;
-            border: 1px solid #e2e8f0 !important;
+            height: 36px !important;
+            padding: 0 1rem !important;
+            border-radius: 6px !important;
+            font-size: 0.85rem !important;
+            min-width: 120px !important;
         }
 
         /* ============================================
-           TARJETA DE RESUMEN MÁS COMPACTA
+           TARJETA DE RESUMEN COMPACTA
            ============================================ */
         
         .bg-blue-50 {
-            background: #f0f5ff !important;
-            border: 1px solid #d9e9ff !important;
-            border-radius: 8px !important;
-            padding: 1rem !important;
+            padding: 0.5rem !important;
+            border-radius: 6px !important;
         }
 
         .bg-blue-50 .text-lg {
-            font-size: 1rem !important;
+            font-size: 0.9rem !important;
+        }
+
+        .bg-blue-50 .text-sm {
+            font-size: 0.7rem !important;
         }
 
         /* ============================================
-           RESULTADO MÁS COMPACTO
+           RESULTADO COMPACTO
            ============================================ */
         
         .bg-green-50 {
-            padding: 1.25rem !important;
-            border-radius: 12px !important;
+            padding: 0.75rem !important;
+            border-radius: 8px !important;
         }
 
         .size-12 {
-            width: 2.5rem !important;
-            height: 2.5rem !important;
+            width: 2rem !important;
+            height: 2rem !important;
+        }
+
+        /* ============================================
+           GOOGLE PLACES
+           ============================================ */
+        
+        .pac-container {
+            z-index: 2147483647 !important;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        @media (max-width: 767px) {
+            .pac-container {
+                position: fixed !important;
+                bottom: 0 !important;
+                max-height: 50vh !important;
+            }
         }
 
         /* ============================================
@@ -329,196 +292,101 @@
         
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-5px); }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        #intro {
-            animation: bounce 1s infinite;
-        }
-
-        #resultSection {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* ============================================
-           GOOGLE PLACES - IGUAL QUE ANTES
-           ============================================ */
-        
-        .pac-container {
-            z-index: 1000001 !important;
-            border-radius: 8px !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-
-        @media (max-width: 767px) {
-            .pac-container {
-                position: fixed !important;
-                bottom: 0 !important;
-                border-radius: 16px 16px 0 0 !important;
-                max-height: 40vh !important;
-            }
-        }
-
-        /* ============================================
-           MODO OSCURO (MANTENIDO)
-           ============================================ */
-        
-        .dark input, .dark select, .dark textarea {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            color: #f1f5f9 !important;
-        }
-
-        .dark .payment-option {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            color: #f1f5f9 !important;
-        }
-
-        .dark #remitenteAutocomplete, .dark #autocompleteDropdown {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-        }
-
-        .dark .autocomplete-item {
-            background-color: #1e293b !important;
-            color: #f1f5f9 !important;
-            border-bottom-color: #334155 !important;
+        #intro img {
+            width: 200px !important;
         }
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display flex flex-col min-h-screen text-[#0d121b] dark:text-white transition-colors duration-200">
+<body class="bg-background-light dark:bg-background-dark font-display flex flex-col min-h-screen text-[#0d121b] dark:text-white">
     
-    <!-- Intro animada tipo persiana con degradado -->
-    <div id="intro" style="
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: linear-gradient(to bottom, #1b4557, #ffffff);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      ">
-      <img src="logo envios.jpg" alt="ANMAGO Store" style="width: 500px; animation: bounce 1s infinite;">
+    <!-- Intro -->
+    <div id="intro" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(to bottom, #1b4557, #ffffff);display:flex;justify-content:center;align-items:center;z-index:9999;">
+        <img src="logo envios.jpg" alt="ANMAGO Store" style="width:200px;animation:bounce 1s infinite;">
     </div>
 
-    <!-- Pantalla de carga para verificar login -->
+    <!-- Loading -->
     <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-gray-900">
         <div class="text-center">
-            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mb-6"></div>
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Verificando acceso</h2>
-            <p class="text-gray-600 dark:text-gray-400">Por favor espera mientras validamos tu sesión...</p>
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary mb-4"></div>
+            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200">Verificando acceso</h2>
         </div>
     </div>
 
-    <!-- Contenido principal (oculto inicialmente) -->
+    <!-- Contenido principal -->
     <div id="mainContent" class="hidden">
-        <!-- Top Navigation Bar -->
-        <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
-            <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
-                <!-- Logo y título -->
-                <div class="flex items-center gap-4 text-[#0d121b] dark:text-white">
-                    <div class="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
-                        <span class="material-symbols-outlined text-2xl">local_shipping</span>
+        <!-- Header -->
+        <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-[#e7ebf3] dark:border-gray-800 px-4 py-1 shadow-sm">
+            <div class="mx-auto max-w-7xl flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary">
+                        <span class="material-symbols-outlined text-xl">local_shipping</span>
                     </div>
-                    <h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">E.S.P</h2>
+                    <h2 class="text-[#0d121b] dark:text-white font-bold">E.S.P</h2>
                 </div>
 
-                <!-- Sección derecha: usuario y botones -->
-                <div class="flex items-center gap-4">
-                    <!-- Información del usuario (solo desktop) -->
-                    <div class="hidden md:flex flex-col items-end mr-2">
-                        <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Cargando...</span>
-                        <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Verificando...</span>
+                <div class="flex items-center gap-2">
+                    <div class="hidden md:flex flex-col items-end mr-1">
+                        <span class="text-xs font-semibold" id="nombreUsuario">Cargando...</span>
                     </div>
                     
-                    <!-- Avatar del usuario -->
-                    <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
-                         data-alt="User profile avatar" 
+                    <div class="bg-center bg-no-repeat bg-cover rounded-full size-8 border border-primary" 
                          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
                     </div>
                     
-                    <!-- Botón de Planillas Mensajeros (solo visible para ADMIN) -->
-                    <button id="adminPlanillaButton" 
-                            class="hidden flex items-center justify-center size-10 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 transition-colors group relative"
-                            title="Planillas de mensajeros (Admin)">
-                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">assignment</span>
-                        <!-- Tooltip para móviles -->
-                        <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                            Planillas Mensajeros
-                        </div>
+                    <button id="historialButton" class="size-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-[#4c669a]">history</span>
                     </button>
                     
-                    
-                    <!-- Botón de historial -->
-                    <button id="historialButton" 
-                            class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title="Ver mi historial de envíos">
-                        <span class="material-symbols-outlined text-[#4c669a]">history</span>
-                    </button>
-                    
-                    <!-- Botón de logout -->
-                    <button id="logoutButton" 
-                            class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title="Cerrar sesión">
-                        <span class="material-symbols-outlined text-[#4c669a]">logout</span>
+                    <button id="logoutButton" class="size-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-[#4c669a]">logout</span>
                     </button>
                 </div>
             </div>
         </header>
         
-        <!-- Main Content Area -->
-        <main class="flex-1 w-full px-4 py-8 md:px-8 lg:px-12 flex justify-center">
-            <div class="w-full max-w-[1024px] flex flex-col gap-6">
-                <!-- Page Heading -->
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div class="flex flex-col gap-1">
-                        <h1 class="text-[#0d121b] dark:text-white text-3xl font-bold leading-tight tracking-tight">Nueva Entrega</h1>
-                        <p class="text-[#4c669a] dark:text-gray-400 text-sm font-normal">Complete el formulario para registrar y generar la guía de envío.</p>
-                    </div>
-                </div>
+        <!-- Main Content (sin título) -->
+        <main class="flex-1 w-full px-2 py-1 flex justify-center">
+            <div class="w-full max-w-[1024px] flex flex-col gap-1">
 
                 <!-- Form Card -->
-                <form id="deliveryForm" class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-[#e7ebf3] dark:border-gray-800 p-6 md:p-8 flex flex-col gap-8">
-                    <!-- Section: Order Info -->
+                <form id="deliveryForm" class="bg-surface-light dark:bg-surface-dark rounded-lg shadow-sm border border-[#e7ebf3] dark:border-gray-800 p-3 flex flex-col gap-2">
+                    
+                    <!-- Order Info (solo ID y pago) -->
                     <div>
-                        <div class="flex items-center gap-3 mb-6 pb-2 border-b border-[#e7ebf3] dark:border-gray-800">
-                            <span class="material-symbols-outlined text-primary">inventory_2</span>
-                            <h3 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight">Información del Pedido</h3>
+                        <div class="flex items-center gap-1 mb-1 pb-1 border-b border-[#e7ebf3] dark:border-gray-800">
+                            <span class="material-symbols-outlined text-primary text-base">inventory_2</span>
+                            <h3 class="text-[#0d121b] dark:text-white text-sm font-bold">Pedido</h3>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <!-- Generated ID Field -->
-                            <div class="flex flex-col gap-2">
-                                <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">ID de Guía (Generado)</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-1">
+                            <!-- ID Field -->
+                            <div class="flex flex-col gap-0">
+                                <label class="text-[0.6rem] font-medium">ID GUÍA</label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#4c669a]">qr_code_2</span>
-                                    <input id="envioId" class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-gray-500 dark:text-gray-400 font-mono font-bold tracking-wider cursor-not-allowed focus:ring-0" readonly type="text" value="Por generar (servidor)"/>
-                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded font-bold">AUTO</div>
+                                    <span class="absolute left-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-xs text-[#4c669a]">qr_code_2</span>
+                                    <input id="envioId" class="w-full h-7 pl-6 pr-6 text-xs bg-gray-100 dark:bg-gray-800 rounded" readonly type="text" value="Por generar"/>
+                                    <div class="absolute right-1 top-1/2 -translate-y-1/2 px-1 text-[0.5rem] bg-green-100 text-green-700 rounded font-bold">AUTO</div>
                                 </div>
                             </div>
                             
-                            <!-- Forma de Pago Field -->
-                            <div class="flex flex-col gap-2 md:col-span-2">
-                                <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Forma de Pago</label>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div class="payment-option h-12 rounded-lg border border-[#e7ebf3] dark:border-gray-700 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800" data-value="contado">
-                                        <span class="material-symbols-outlined text-lg mr-2 text-green-600">payments</span>
-                                        <span class="font-medium">Contado</span>
+                            <!-- Forma de Pago -->
+                            <div class="flex flex-col gap-0 md:col-span-2">
+                                <label class="text-[0.6rem] font-medium">FORMA DE PAGO</label>
+                                <div class="grid grid-cols-3 gap-1">
+                                    <div class="payment-option h-7 rounded border flex items-center justify-center cursor-pointer" data-value="contado">
+                                        <span class="material-symbols-outlined text-xs text-green-600 mr-0.5">payments</span>
+                                        <span class="text-[0.65rem]">Contado</span>
                                     </div>
-                                    <div class="payment-option h-12 rounded-lg border border-[#e7ebf3] dark:border-gray-700 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800" data-value="contraentrega">
-                                        <span class="material-symbols-outlined text-lg mr-2 text-blue-600">package</span>
-                                        <span class="font-medium">Contraentrega</span>
+                                    <div class="payment-option h-7 rounded border flex items-center justify-center cursor-pointer" data-value="contraentrega">
+                                        <span class="material-symbols-outlined text-xs text-blue-600 mr-0.5">package</span>
+                                        <span class="text-[0.65rem]">C/entrega</span>
                                     </div>
-                                    <div class="payment-option h-12 rounded-lg border border-[#e7ebf3] dark:border-gray-700 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800" data-value="contraentrega_recaudo">
-                                        <span class="material-symbols-outlined text-lg mr-2 text-orange-600">savings</span>
-                                        <span class="font-medium">Con Recaudo</span>
+                                    <div class="payment-option h-7 rounded border flex items-center justify-center cursor-pointer" data-value="contraentrega_recaudo">
+                                        <span class="material-symbols-outlined text-xs text-orange-600 mr-0.5">savings</span>
+                                        <span class="text-[0.65rem]">Recaudo</span>
                                     </div>
                                 </div>
                                 <input type="hidden" id="formaPago" name="formaPago" value="contado">
@@ -526,175 +394,145 @@
                         </div>
                     </div>
 
-                    <!-- Section: Sender Info -->
+                    <!-- Remitente -->
                     <div>
-                        <div class="flex items-center gap-3 mb-6 pb-2 border-b border-[#e7ebf3] dark:border-gray-800">
-                            <span class="material-symbols-outlined text-primary">person_pin_circle</span>
-                            <h3 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight">Datos del Remitente</h3>
+                        <div class="flex items-center gap-1 mb-1 pb-1 border-b border-[#e7ebf3] dark:border-gray-800">
+                            <span class="material-symbols-outlined text-primary text-base">person_pin_circle</span>
+                            <h3 class="text-[#0d121b] dark:text-white text-sm font-bold">Remitente</h3>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- 1. Campo de NOMBRE del remitente con autocomplete -->
-                            <label class="flex flex-col gap-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium" id="labelRemitente">Nombre Completo / Empresa</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
+                            <!-- Nombre -->
+                            <label class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">NOMBRE</span>
                                 <div class="relative">
-                                    <input id="remitente" name="remitente" 
-                                           class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" 
-                                           placeholder="Ej. Distribuidora Central S.A." 
-                                           type="text" 
-                                           autocomplete="off"
-                                           required/>
-                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#4c669a]" id="iconRemitente">search</span>
-                                    <!-- Dropdown para autocomplete -->
+                                    <input id="remitente" name="remitente" class="w-full h-7 px-2 pr-7 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Nombre" type="text" autocomplete="off" required/>
+                                    <span class="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-xs text-[#4c669a]">search</span>
                                     <div id="remitenteAutocomplete" class="autocomplete-dropdown"></div>
                                 </div>
                             </label>
                             
-                            <!-- 2. Campo de TELÉFONO del remitente -->
-                            <label class="flex flex-col gap-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium" id="labelTelefonoRemitente">Teléfono de Contacto</span>
+                            <!-- Teléfono -->
+                            <label class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">TELÉFONO</span>
                                 <div class="relative">
-                                    <input id="telefonoRemitente" name="telefonoRemitente" 
-                                           class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" 
-                                           placeholder="+57 300 123 4567" 
-                                           type="tel" 
-                                           required/>
-                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#4c669a]" id="iconTelefonoRemitente">phone</span>
+                                    <input id="telefonoRemitente" name="telefonoRemitente" class="w-full h-7 px-2 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Teléfono" type="tel" required/>
+                                    <span class="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-xs text-[#4c669a]">phone</span>
                                 </div>
                             </label>
                             
-                            <!-- 3. Campo de DIRECCIÓN del remitente -->
-                            <label class="flex flex-col gap-2 md:col-span-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium" id="labelDireccionRemitente">Dirección de Recogida</span>
+                            <!-- Dirección -->
+                            <label class="flex flex-col gap-0 md:col-span-2">
+                                <span class="text-[0.6rem] font-medium">DIRECCIÓN RECOGIDA</span>
                                 <div class="relative">
-                                    <input id="direccionRemitente" name="direccionRemitente"
-                                           class="w-full h-12 pl-4 pr-10 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" 
-                                           placeholder="Calle 123 # 45 - 67, Oficina 202" 
-                                           type="text" 
-                                           required/>
-                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#4c669a]" id="iconDireccionRemitente">my_location</span>
+                                    <input id="direccionRemitente" name="direccionRemitente" class="w-full h-7 px-2 pr-7 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Dirección" type="text" required/>
+                                    <span class="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-xs text-[#4c669a]">my_location</span>
                                 </div>
                             </label>
                             
-                            <!-- Ciudad de Origen Fija -->
-                            <div class="flex flex-col gap-2">
-                                <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Ciudad de Origen</label>
+                            <!-- Ciudad Origen -->
+                            <div class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">CIUDAD ORIGEN</span>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#4c669a]">location_city</span>
-                                    <input id="ciudadOrigen" class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-gray-700 dark:text-gray-300 font-medium cursor-not-allowed focus:ring-0" readonly type="text" value="Bogotá D.C."/>
+                                    <span class="absolute left-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-xs text-[#4c669a]">location_city</span>
+                                    <input id="ciudadOrigen" class="w-full h-7 pl-6 pr-2 text-xs bg-gray-100 dark:bg-gray-800 rounded" readonly type="text" value="Bogotá D.C."/>
                                 </div>
                             </div>
                             
-                            <!-- Campos ocultos -->
-                            <input type="hidden" id="correoRemitente" name="correoRemitente">
-                            <input type="hidden" id="usuarioId" name="usuarioId">
-                            <input type="hidden" id="pagadoRemitente" name="pagadoRemitente" value="false">
+                            <input type="hidden" id="correoRemitente">
+                            <input type="hidden" id="usuarioId">
+                            <input type="hidden" id="pagadoRemitente" value="false">
                         </div>
                     </div>
 
-                    <!-- Section: Recipient Info -->
+                    <!-- Destinatario -->
                     <div>
-                        <div class="flex items-center gap-3 mb-6 pb-2 border-b border-[#e7ebf3] dark:border-gray-800">
-                            <span class="material-symbols-outlined text-primary">location_on</span>
-                            <h3 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight">Datos del Destinatario</h3>
+                        <div class="flex items-center gap-1 mb-1 pb-1 border-b border-[#e7ebf3] dark:border-gray-800">
+                            <span class="material-symbols-outlined text-primary text-base">location_on</span>
+                            <h3 class="text-[#0d121b] dark:text-white text-sm font-bold">Destinatario</h3>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <label class="flex flex-col gap-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Nombre del Cliente</span>
-                                <input id="destinatario" name="destinatario" class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="Ej. Juan Pérez" type="text" required/>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
+                            <!-- Nombre -->
+                            <label class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">NOMBRE</span>
+                                <input id="destinatario" name="destinatario" class="w-full h-7 px-2 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Nombre" type="text" required/>
                             </label>
                             
-                            <label class="flex flex-col gap-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Teléfono Cliente</span>
-                                <input id="telefonoCliente" name="telefonoCliente" class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="+57 310 987 6543" type="tel" required/>
+                            <!-- Teléfono -->
+                            <label class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">TELÉFONO</span>
+                                <input id="telefonoCliente" name="telefonoCliente" class="w-full h-7 px-2 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Teléfono" type="tel" required/>
                             </label>
                             
-                            <label class="flex flex-col gap-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Ciudad Destino</span>
-                                <select id="ciudadDestino" name="ciudadDestino" class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white transition-all appearance-none" required>
-                                    <option value="">Seleccione ciudad</option>
+                            <!-- Ciudad Destino -->
+                            <label class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">CIUDAD DESTINO</span>
+                                <select id="ciudadDestino" name="ciudadDestino" class="w-full h-7 px-2 text-xs bg-input-light dark:bg-input-dark border rounded" required>
+                                    <option value="">Seleccione</option>
                                     <option value="Bogotá D.C.">Bogotá D.C.</option>
                                     <option value="Soacha">Soacha</option>
                                 </select>
                             </label>
                             
-                            <label class="flex flex-col gap-2 md:col-span-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">
-                                    Dirección de Entrega 
-                                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(Google Autocomplete)</span>
-                                </span>
+                            <!-- Dirección -->
+                            <label class="flex flex-col gap-0 md:col-span-2">
+                                <span class="text-[0.6rem] font-medium">DIRECCIÓN ENTREGA</span>
                                 <div class="relative">
-                                    <input id="direccionDestino" name="direccionDestino" 
-                                           class="w-full h-12 pl-12 pr-10 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" 
-                                           placeholder="Escriba dirección (Carrera 80 # 12 - 34)" 
-                                           type="text" 
-                                           autocomplete="off"
-                                           required/>
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#4c669a]">location_on</span>
-                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-sm" title="Autocompletado con Google">pin_drop</span>
+                                    <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[#4c669a]">location_on</span>
+                                    <input id="direccionDestino" name="direccionDestino" class="w-full h-7 pl-6 pr-7 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Dirección" type="text" autocomplete="off" required/>
+                                    <span class="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-xs text-green-600">pin_drop</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-xs">info</span>
-                                    Comience a escribir para ver sugerencias de Google Maps
-                                </p>
                             </label>
                             
-                            <label class="flex flex-col gap-2">
-                                <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Complemento de Dirección</span>
-                                <input id="complementoDireccion" name="complementoDireccion" class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="Apto 501, Torre 2" type="text"/>
+                            <!-- Complemento -->
+                            <label class="flex flex-col gap-0">
+                                <span class="text-[0.6rem] font-medium">COMPLEMENTO</span>
+                                <input id="complementoDireccion" name="complementoDireccion" class="w-full h-7 px-2 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Apto, oficina" type="text"/>
                             </label>
                             
-                            <!-- Barrio y Localidad con Autocomplete -->
-                            <div class="flex flex-col gap-2 relative">
-                                <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Barrio y Localidad</label>
+                            <!-- Barrio -->
+                            <div class="flex flex-col gap-0 relative">
+                                <span class="text-[0.6rem] font-medium">BARRIO</span>
                                 <div class="relative">
-                                    <input id="barrioLocalidad" name="barrioLocalidad" class="w-full h-12 px-4 pr-10 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="Escriba para buscar barrio..." type="text" autocomplete="off" required/>
-                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#4c669a] pointer-events-none">search</span>
+                                    <input id="barrioLocalidad" name="barrioLocalidad" class="w-full h-7 px-2 pr-7 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="Buscar barrio" type="text" autocomplete="off" required/>
+                                    <span class="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-xs text-[#4c669a]">search</span>
                                     <input type="hidden" id="barrioId" name="barrioId">
                                 </div>
-                                <!-- Dropdown de autocomplete -->
                                 <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Escriba las primeras letras para buscar el barrio</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section: Payment Info -->
+                    <!-- Payment Info -->
                     <div>
-                        <div class="flex items-center gap-3 mb-6 pb-2 border-b border-[#e7ebf3] dark:border-gray-800">
-                            <span class="material-symbols-outlined text-primary">monetization_on</span>
-                            <h3 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight">Información de Pago</h3>
+                        <div class="flex items-center gap-1 mb-1 pb-1 border-b border-[#e7ebf3] dark:border-gray-800">
+                            <span class="material-symbols-outlined text-primary text-base">monetization_on</span>
+                            <h3 class="text-[#0d121b] dark:text-white text-sm font-bold">Pago</h3>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <!-- Valor a Recaudar Field (Conditional) -->
-                            <div class="flex flex-col gap-2" id="valorRecaudarContainer">
-                                <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Valor a Recaudar ($)</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-1">
+                            <!-- Valor a Recaudar -->
+                            <div class="flex flex-col gap-0" id="valorRecaudarContainer">
+                                <label class="text-[0.6rem] font-medium">VALOR A RECAUDAR ($)</label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#4c669a]">attach_money</span>
-                                    <input id="valorRecaudar" name="valorRecaudar" class="w-full h-12 pl-12 pr-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="0.00" type="number" min="0" step="100" disabled/>
-                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded font-bold hidden" id="autoRecaudoLabel">AUTO</div>
+                                    <span class="absolute left-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-xs text-[#4c669a]">attach_money</span>
+                                    <input id="valorRecaudar" name="valorRecaudar" class="w-full h-7 pl-6 pr-2 text-xs bg-input-light dark:bg-input-dark border rounded" placeholder="0" type="number" min="0" step="100" disabled/>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="valorRecaudarHelp"></p>
                             </div>
                             
                             <!-- Summary Card -->
                             <div class="md:col-span-2">
-                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">info</span>
-                                        <h4 class="text-blue-800 dark:text-blue-300 font-semibold">Resumen de Pago</h4>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div class="flex flex-col">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">Forma de Pago:</span>
-                                            <span class="font-semibold text-lg" id="resumenFormaPago">Contado</span>
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-1">
+                                    <div class="grid grid-cols-3 gap-1 text-center">
+                                        <div>
+                                            <span class="text-[0.5rem] text-gray-600">FORMA</span>
+                                            <div class="font-semibold text-xs" id="resumenFormaPago">Contado</div>
                                         </div>
-                                        <div class="flex flex-col">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">Valor a Recaudar:</span>
-                                            <span class="font-semibold text-lg" id="resumenValorRecaudar">$0</span>
+                                        <div>
+                                            <span class="text-[0.5rem] text-gray-600">RECAUDO</span>
+                                            <div class="font-semibold text-xs" id="resumenValorRecaudar">$0</div>
                                         </div>
-                                        <div class="flex flex-col">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">Estado:</span>
-                                            <span class="font-semibold text-green-600 dark:text-green-400" id="resumenEstado">Por confirmar</span>
+                                        <div>
+                                            <span class="text-[0.5rem] text-gray-600">ESTADO</span>
+                                            <div class="font-semibold text-xs text-green-600" id="resumenEstado">Listo</div>
                                         </div>
                                     </div>
                                 </div>
@@ -703,58 +541,54 @@
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6 mt-2 border-t border-[#e7ebf3] dark:border-gray-800">
-                        <button class="w-full sm:w-auto min-w-[140px] h-12 rounded-lg border border-[#e7ebf3] dark:border-gray-600 bg-transparent text-[#4c669a] dark:text-gray-400 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" type="button" id="cancelButton">
+                    <div class="flex flex-row items-center justify-end gap-1 pt-1 mt-1 border-t border-[#e7ebf3] dark:border-gray-800">
+                        <button class="h-7 px-3 rounded border border-[#e7ebf3] bg-transparent text-[#4c669a] text-xs font-bold" type="button" id="cancelButton">
                             Cancelar
                         </button>
-                        <button class="w-full sm:w-auto min-w-[180px] h-12 rounded-lg bg-primary hover:bg-primary-dark text-white font-bold shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 group" type="submit" id="submitButton">
-                            <span id="submitText">Registrar Envío</span>
-                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform text-lg" id="submitIcon">arrow_forward</span>
+                        <button class="h-7 px-4 rounded bg-primary hover:bg-primary-dark text-white text-xs font-bold shadow-sm flex items-center gap-1" type="submit" id="submitButton">
+                            <span>Registrar</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
                         </button>
                     </div>
                 </form>
 
-                <!-- Sección de Resultado (oculta inicialmente) -->
+                <!-- Resultado -->
                 <div id="resultSection" class="hidden">
-                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
-                        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center justify-center size-12 rounded-full bg-green-100 dark:bg-green-900/30">
-                                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
+                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center justify-center size-7 rounded-full bg-green-100">
+                                    <span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
                                 </div>
                                 <div>
-                                    <h3 class="text-green-800 dark:text-green-300 text-lg font-bold">¡Envío Registrado Exitosamente!</h3>
-                                    <p class="text-green-600 dark:text-green-400 text-sm mt-1" id="resultMessage">Guía generada exitosamente. Puedes imprimir la guía para el mensajero.</p>
+                                    <h3 class="text-green-800 text-xs font-bold">¡Registrado!</h3>
+                                    <p class="text-green-600 text-[0.6rem]" id="resultMessage">Guía generada</p>
                                 </div>
                             </div>
                             
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <button type="button" id="printGuideBtn" 
-                                        class="min-w-[180px] h-12 rounded-lg bg-primary hover:bg-primary-dark text-white font-bold px-6 flex items-center justify-center gap-2 transition-all">
-                                    <span class="material-symbols-outlined">print</span>
-                                    Imprimir Guía
+                            <div class="flex gap-1">
+                                <button type="button" id="printGuideBtn" class="h-6 px-2 rounded bg-primary text-white text-[0.6rem] font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">print</span> Imprimir
                                 </button>
-                                <button type="button" id="newDeliveryBtn"
-                                        class="min-w-[140px] h-12 rounded-lg border border-green-600 text-green-600 dark:text-green-400 font-bold hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors">
-                                    Nuevo Envío
+                                <button type="button" id="newDeliveryBtn" class="h-6 px-2 rounded border border-green-600 text-green-600 text-[0.6rem] font-bold">
+                                    Nuevo
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- Detalles del envío registrado -->
-                        <div class="mt-6 pt-6 border-t border-green-200 dark:border-green-800">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="mt-2 pt-2 border-t border-green-200">
+                            <div class="grid grid-cols-3 gap-1 text-xs">
                                 <div>
-                                    <span class="text-sm text-green-700 dark:text-green-500">Número de Guía:</span>
-                                    <div class="font-mono font-bold text-lg" id="resultGuideNumber">ABC12345</div>
+                                    <span class="text-[0.5rem] text-green-700">GUÍA</span>
+                                    <div class="font-mono font-bold text-xs" id="resultGuideNumber">ABC123</div>
                                 </div>
                                 <div>
-                                    <span class="text-sm text-green-700 dark:text-green-500">Destinatario:</span>
-                                    <div class="font-semibold" id="resultDestinatario">Juan Pérez</div>
+                                    <span class="text-[0.5rem] text-green-700">DESTINATARIO</span>
+                                    <div class="font-semibold text-xs" id="resultDestinatario">---</div>
                                 </div>
                                 <div>
-                                    <span class="text-sm text-green-700 dark:text-green-500">Valor:</span>
-                                    <div class="font-bold text-green-600 dark:text-green-400" id="resultValor">$10,000</div>
+                                    <span class="text-[0.5rem] text-green-700">VALOR</span>
+                                    <div class="font-bold text-green-600 text-xs" id="resultValor">$0</div>
                                 </div>
                             </div>
                         </div>
@@ -764,11 +598,8 @@
         </main>
     </div>
 
-    <!-- Script principal unificado -->
     <script src="script.js"></script>
-    
     <script>
-        // Ocultar la intro después de 2 segundos
         setTimeout(() => {
             const intro = document.getElementById('intro');
             if (intro) intro.style.display = 'none';
