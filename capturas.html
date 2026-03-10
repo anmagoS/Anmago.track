@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>📸 Captura Rótulo - Múltiple</title>
+    <title>📸 Captura Múltiple - Mensajeros</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -65,12 +65,14 @@
             padding: 30px;
             text-align: center;
             cursor: pointer;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
             background: #f0f8ff;
+            margin-bottom: 20px;
         }
         
         .file-input:hover {
             background: #e3f2fd;
+            border-color: #006699;
         }
         
         .preview-grid {
@@ -101,7 +103,7 @@
         }
         
         .preview-item .id-preview {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #0088cc;
             margin: 5px 0;
@@ -124,6 +126,11 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .preview-item .remove-btn:hover {
+            background: #d32f2f;
         }
         
         .stats {
@@ -150,16 +157,16 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
         
         .btn-enviar {
-            background: #0088cc;
+            background: #25D366;
             color: white;
         }
         
         .btn-enviar:hover {
-            background: #006699;
+            background: #128C7E;
         }
         
         .btn-limpiar {
@@ -169,15 +176,6 @@
         
         .btn-limpiar:hover {
             background: #d32f2f;
-        }
-        
-        .btn-agregar {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-agregar:hover {
-            background: #45a049;
         }
         
         .btn:disabled {
@@ -214,6 +212,23 @@
             font-size: 12px;
             display: none;
         }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -227,28 +242,29 @@
             <div id="telefonoGuardadoMsg" class="telefono-guardado"></div>
         </div>
         
-        <div class="form-group">
-            <label>📸 Agregar Fotos del Rótulo</label>
-            <div class="file-input" onclick="document.getElementById('fotos').click()">
-                <span>➕ Haz clic para agregar fotos (puedes seleccionar varias)</span>
-                <input type="file" id="fotos" accept="image/*" capture="environment" multiple style="display: none;">
-            </div>
+        <div class="file-input" onclick="document.getElementById('fotos').click()">
+            <span>➕ Haz clic para agregar fotos (puedes seleccionar varias)</span>
+            <input type="file" id="fotos" accept="image/*" capture="environment" multiple style="display: none;">
         </div>
         
         <div class="stats">
             <span>📸 Fotos: <span id="totalFotos">0</span></span>
-            <span>🆔 IDs generados</span>
+            <span>🆔 Último ID: <span id="ultimoID">-</span></span>
         </div>
         
         <div id="previewContainer" class="preview-grid"></div>
         
-        <div class="button-group">
-            <button onclick="enviarTodoATelegram()" class="btn-enviar" id="btnEnviar">📤 Enviar Todo a Telegram</button>
-            <button onclick="limpiarTodo()" class="btn-limpiar" id="btnLimpiar">🗑️ Limpiar Todo</button>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
         </div>
         
         <div class="button-group">
-            <button onclick="enviarWhatsAppCliente()" class="btn-agregar" id="btnWhatsApp">📲 Enviar WhatsApp al Cliente</button>
+            <button onclick="finalizarEnvio()" class="btn-enviar" id="btnFinalizar">
+                📲 FINALIZAR Y ENVIAR
+            </button>
+            <button onclick="limpiarTodo()" class="btn-limpiar" id="btnLimpiar">
+                🗑️ LIMPIAR
+            </button>
         </div>
         
         <div id="estado" class="estado"></div>
@@ -261,17 +277,20 @@
             PREFIJO_ID: 'ENV'
         };
         
-        // Array para almacenar las fotos con sus IDs
+        // Array para almacenar las fotos
         let fotosArray = [];
         
+        // Elementos DOM
         const telefonoInput = document.getElementById('telefonoCliente');
         const fotosInput = document.getElementById('fotos');
         const previewContainer = document.getElementById('previewContainer');
         const totalFotosSpan = document.getElementById('totalFotos');
-        const btnEnviar = document.getElementById('btnEnviar');
-        const btnWhatsApp = document.getElementById('btnWhatsApp');
+        const ultimoIDSpan = document.getElementById('ultimoID');
+        const btnFinalizar = document.getElementById('btnFinalizar');
         const estadoDiv = document.getElementById('estado');
         const telefonoGuardadoMsg = document.getElementById('telefonoGuardadoMsg');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
         
         // Generar ID único
         function generarID() {
@@ -301,7 +320,7 @@
                 if (part.type === 'second') segundo = part.value;
             });
             
-            return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}`;
+            return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundos}`;
         }
         
         // Obtener fecha formateada
@@ -322,22 +341,19 @@
             return fecha.toLocaleString('es-CO', opciones).replace(',', '');
         }
         
-        // Agregar fotos al array
+        // Agregar fotos
         fotosInput.addEventListener('change', async function(e) {
             const files = Array.from(e.target.files);
             
             for (const file of files) {
-                // Generar ID único para esta foto
                 const id = generarID();
                 
-                // Crear URL de preview
                 const reader = new FileReader();
                 const imageUrl = await new Promise((resolve) => {
                     reader.onload = (e) => resolve(e.target.result);
                     reader.readAsDataURL(file);
                 });
                 
-                // Agregar al array
                 fotosArray.push({
                     file: file,
                     id: id,
@@ -346,7 +362,7 @@
             }
             
             actualizarPreview();
-            fotosInput.value = ''; // Limpiar input para poder seleccionar más
+            fotosInput.value = '';
         });
         
         // Actualizar vista previa
@@ -367,9 +383,12 @@
             });
             
             totalFotosSpan.textContent = fotosArray.length;
+            if (fotosArray.length > 0) {
+                ultimoIDSpan.textContent = fotosArray[fotosArray.length - 1].id;
+            }
         }
         
-        // Eliminar foto del array
+        // Eliminar foto
         function eliminarFoto(index) {
             fotosArray.splice(index, 1);
             actualizarPreview();
@@ -377,13 +396,17 @@
         
         // Limpiar todo
         function limpiarTodo() {
+            if (fotosArray.length > 0 && !confirm('¿Eliminar todas las fotos?')) {
+                return;
+            }
             fotosArray = [];
             actualizarPreview();
             mostrarEstado('🧹 Todo limpiado', 'success');
         }
         
-        // Enviar todas las fotos a Telegram
-        async function enviarTodoATelegram() {
+        // Función principal - FINALIZAR Y ENVIAR
+        async function finalizarEnvio() {
+            // Validaciones
             const telefono = telefonoInput.value.trim();
             
             if (!telefono) {
@@ -401,15 +424,37 @@
                 return;
             }
             
-            btnEnviar.disabled = true;
-            btnEnviar.textContent = '⏫ Enviando...';
+            // Confirmar
+            if (!confirm(`¿Finalizar envío de ${fotosArray.length} paquete(s)?`)) {
+                return;
+            }
             
+            // Deshabilitar botón
+            btnFinalizar.disabled = true;
+            btnFinalizar.textContent = '⏫ PROCESANDO...';
+            progressBar.style.display = 'block';
+            
+            // Guardar teléfono
+            localStorage.setItem('ultimoTelefono', telefono);
+            telefonoGuardadoMsg.textContent = `📌 Teléfono guardado: ${telefono}`;
+            telefonoGuardadoMsg.style.display = 'block';
+            
+            const fechaHora = obtenerFechaHoraColombia();
             let enviadas = 0;
             let errores = 0;
             
-            for (const foto of fotosArray) {
+            // ============================================
+            // PASO 1: ENVIAR CADA FOTO A TELEGRAM
+            // ============================================
+            for (let i = 0; i < fotosArray.length; i++) {
+                const foto = fotosArray[i];
+                
+                // Actualizar progreso
+                const progreso = ((i + 1) / fotosArray.length) * 100;
+                progressFill.style.width = progreso + '%';
+                
                 try {
-                    await enviarATelegram(foto.file, foto.id, telefono, obtenerFechaHoraColombia());
+                    await enviarATelegram(foto.file, foto.id, telefono, fechaHora);
                     enviadas++;
                 } catch (error) {
                     console.error('Error:', error);
@@ -417,39 +462,11 @@
                 }
             }
             
-            // Guardar teléfono para próximos usos
-            localStorage.setItem('ultimoTelefono', telefono);
-            telefonoGuardadoMsg.textContent = `📌 Teléfono guardado: ${telefono}`;
-            telefonoGuardadoMsg.style.display = 'block';
-            
-            mostrarEstado(`✅ Enviadas: ${enviadas}, Errores: ${errores}`, enviadas > 0 ? 'success' : 'error');
-            
-            btnEnviar.disabled = false;
-            btnEnviar.textContent = '📤 Enviar Todo a Telegram';
-        }
-        
-        // Enviar WhatsApp al cliente
-        function enviarWhatsAppCliente() {
-            const telefono = telefonoInput.value.trim();
-            
-            if (!telefono) {
-                mostrarEstado('⚠️ Ingresa el teléfono del cliente', 'error');
-                return;
-            }
-            
-            if (!/^\d{10}$/.test(telefono)) {
-                mostrarEstado('⚠️ Teléfono debe tener 10 dígitos', 'error');
-                return;
-            }
-            
-            if (fotosArray.length === 0) {
-                mostrarEstado('⚠️ No hay fotos para este envío', 'error');
-                return;
-            }
-            
+            // ============================================
+            // PASO 2: ENVIAR WHATSAPP (UNA VEZ CON TODOS LOS IDS)
+            // ============================================
             const ids = fotosArray.map(f => f.id).join(', ');
             const telefonoCompleto = '57' + telefono;
-            const fechaHora = obtenerFechaHoraColombia();
             
             const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
                            `━━━━━━━━━━━━━━━━━━\n` +
@@ -461,9 +478,22 @@
                            `📸 Las imágenes están guardadas en nuestro sistema.`;
             
             window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            
+            // Mostrar resultado
+            mostrarEstado(`✅ PROCESO COMPLETADO: ${enviadas} enviados, ${errores} errores`, 'success');
+            
+            // Limpiar después de 3 segundos
+            setTimeout(() => {
+                fotosArray = [];
+                actualizarPreview();
+                btnFinalizar.disabled = false;
+                btnFinalizar.textContent = '📲 FINALIZAR Y ENVIAR';
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            }, 3000);
         }
         
-        // Enviar a Telegram (función auxiliar)
+        // Enviar a Telegram
         async function enviarATelegram(foto, idGuia, telefono, fechaHora) {
             const formData = new FormData();
             formData.append('chat_id', CONFIG.TELEGRAM_GRUPO_ID);
@@ -498,10 +528,10 @@
             
             setTimeout(() => {
                 estadoDiv.style.display = 'none';
-            }, 3000);
+            }, 5000);
         }
         
-        // Validar teléfono en tiempo real
+        // Validar teléfono
         telefonoInput.addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
         });
@@ -516,13 +546,13 @@
             }
         });
         
-        // Función para limpiar teléfono
-        function limpiarTelefono() {
+        // Limpiar teléfono
+        window.limpiarTelefono = function() {
             telefonoInput.value = '';
             localStorage.removeItem('ultimoTelefono');
             telefonoGuardadoMsg.style.display = 'none';
             mostrarEstado('🧹 Teléfono limpiado', 'success');
-        }
+        };
     </script>
 </body>
 </html>
