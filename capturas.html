@@ -236,24 +236,24 @@ function generarID() {
     return id;
 }
         
-        // Obtener fecha y hora formateada para Colombia
-        function obtenerFechaHoraColombia() {
-            const fecha = new Date();
-            
-            
-            const opciones = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-               
-            };
-            
-            return fecha.toLocaleString('es-CO', opciones).replace(',', '');
-        }
+       // Obtener fecha y hora formateada para Colombia con AM/PM
+function obtenerFechaHoraColombia() {
+    const fecha = new Date();
+    
+    const opciones = {
+        timeZone: 'America/Bogota',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,  // ← Esto activa AM/PM
+        timeZoneName: 'short'
+    };
+    
+    // Formato: 10/03/2026 02:30 PM
+    return fecha.toLocaleString('es-CO', opciones).replace(',', '');
+}
         
         // Generar ID al cargar la página
         window.addEventListener('load', generarID);
