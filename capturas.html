@@ -482,21 +482,35 @@
             }
             
             // ============================================
-            // PASO 2: ENVIAR WHATSAPP (UNA VEZ CON TODOS LOS IDS)
-            // ============================================
-            const ids = fotosArray.map(f => f.id).join(', ');
-            const telefonoCompleto = '57' + telefono;
-            
-            const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
-                           `━━━━━━━━━━━━━━━━━━\n` +
-                           `📞 *Cliente:* ${telefono}\n` +
-                           `📅 *Fecha:* ${fechaHora}\n` +
-                           `📦 *Total paquetes:* ${fotosArray.length}\n` +
-                           `🆔 *Guías:* ${ids}\n` +
-                           `━━━━━━━━━━━━━━━━━━\n\n` +
-                           `📸 Las imágenes están guardadas en nuestro sistema.`;
-            
-            window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+// PASO 2: ENVIAR WHATSAPP (FORZANDO APPS MÓVIL)
+// ============================================
+const ids = fotosArray.map(f => f.id).join(', ');
+const telefonoCompleto = '57' + telefono;
+
+const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
+               `━━━━━━━━━━━━━━━━━━\n` +
+               `📞 *Cliente:* ${telefono}\n` +
+               `📅 *Fecha:* ${fechaHora}\n` +
+               `📦 *Total paquetes:* ${fotosArray.length}\n` +
+               `🆔 *Guías:* ${ids}\n` +
+               `━━━━━━━━━━━━━━━━━━\n\n` +
+               `📸 Las imágenes están guardadas en nuestro sistema.`;
+
+// Detectar si es dispositivo móvil
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+if (isMobile) {
+    // Para móviles: intentar abrir la app primero
+    window.location.href = `whatsapp://send?phone=${telefonoCompleto}&text=${encodeURIComponent(mensaje)}`;
+    
+    // Fallback: si no abre la app, abrir web después de 1 segundo
+    setTimeout(() => {
+        window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    }, 1000);
+} else {
+    // Para escritorio: abrir web directamente
+    window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+}
             
             // Mostrar resultado
             mostrarEstado(`✅ PROCESO COMPLETADO: ${enviadas} enviados, ${errores} errores`, 'success');
