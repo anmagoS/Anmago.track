@@ -236,8 +236,8 @@
         <h2>📸 Captura Múltiple de Rótulos</h2>
         
         <div class="form-group">
-            <label>📞 Teléfono del Cliente (10 dígitos)</label>
-            <input type="tel" id="telefonoCliente" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric">
+            <label>📞 Teléfono del Remitente (10 dígitos)</label>
+            <input type="tel" id="telefonoRemitente" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric">
             <small style="color: #666;">Solo 10 dígitos, sin 57 ni espacios</small>
             <div id="telefonoGuardadoMsg" class="telefono-guardado"></div>
         </div>
@@ -283,7 +283,7 @@
         let fotosArray = [];
         
         // Elementos DOM
-        const telefonoInput = document.getElementById('telefonoCliente');
+        const telefonoInput = document.getElementById('telefonoRemitente');
         const fotosInput = document.getElementById('fotos');
         const previewContainer = document.getElementById('previewContainer');
         const totalFotosSpan = document.getElementById('totalFotos');
@@ -295,18 +295,16 @@
         const progressFill = document.getElementById('progressFill');
         
         // ============================================
-        // NUEVA FUNCIÓN: Pre-registrar guía en el sistema
+        // FUNCIÓN: Pre-registrar guía en el sistema (MÍNIMO)
         // ============================================
         async function preRegistrarGuia(envioId, telefono, messageId) {
             try {
-                // Crear FormData con los datos básicos
+                // Crear FormData con SOLO los datos mínimos
                 const formData = new FormData();
                 formData.append('action', 'preregistro');
                 formData.append('envioId', envioId);
-                formData.append('telefonoCliente', telefono);
+                formData.append('telefono', telefono);           // Esto irá a columna D
                 formData.append('estado', 'CAPTURADO');
-                formData.append('usuarioId', 'MENSAJERO');
-                formData.append('fechaCaptura', new Date().toISOString());
                 
                 // Guardar el link de Telegram en la columna Z
                 const telegramLink = `https://t.me/c/${CONFIG.TELEGRAM_GRUPO_ID.replace('-100', '')}/${messageId}`;
@@ -319,8 +317,7 @@
                     body: formData
                 });
                 
-                console.log(`✅ Guía pre-registrada: ${envioId} para teléfono ${telefono}`);
-                console.log(`🔗 Link Telegram: ${telegramLink}`);
+                console.log(`✅ Guía pre-registrada: ${envioId} con teléfono ${telefono}`);
                 return true;
             } catch (error) {
                 console.error('Error pre-registrando guía:', error);
@@ -328,7 +325,7 @@
             }
         }
         
-        // Generar ID único (ahora más parecido al del servidor)
+        // Generar ID único
         function generarID() {
             const fecha = new Date();
             
@@ -440,7 +437,7 @@
             const telefono = telefonoInput.value.trim();
             
             if (!telefono) {
-                mostrarEstado('⚠️ Ingresa el teléfono del cliente', 'error');
+                mostrarEstado('⚠️ Ingresa el teléfono del remitente', 'error');
                 return;
             }
             
@@ -488,7 +485,7 @@
                     // Enviar a Telegram y obtener message_id
                     const messageId = await enviarATelegram(foto.file, foto.id, telefono, fechaHora);
                     
-                    // PRE-REGISTRAR LA GUÍA CON EL LINK DE TELEGRAM
+                    // PRE-REGISTRAR LA GUÍA (SOLO ID Y TELÉFONO)
                     if (messageId) {
                         await preRegistrarGuia(foto.id, telefono, messageId);
                         preregistros++;
@@ -512,7 +509,7 @@
 
             const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
                            `━━━━━━━━━━━━━━━━━━\n` +
-                           `📞 *Cliente:* ${telefono}\n` +
+                           `📞 *Remitente:* ${telefono}\n` +
                            `📅 *Fecha:* ${fechaHora}\n` +
                            `📦 *Total paquetes:* ${fotosArray.length}\n` +
                            `🆔 *Guías:* ${ids}\n` +
@@ -554,7 +551,7 @@
             const caption = `📦 *NUEVA CAPTURA*\n` +
                           `━━━━━━━━━━━━━━\n` +
                           `🆔 *ID:* ${idGuia}\n` +
-                          `📞 *Teléfono:* ${telefono}\n` +
+                          `📞 *Remitente:* ${telefono}\n` +
                           `📅 *Fecha:* ${fechaHora}\n` +
                           `━━━━━━━━━━━━━━`;
             
@@ -572,7 +569,6 @@
                 throw new Error(data.description);
             }
             
-            // Devolver el message_id para el link de Telegram
             return data.result.message_id;
         }
         
