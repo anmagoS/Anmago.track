@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>✏️ Editor de Guías - Completar Registros</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2196F3;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 25px;
+        }
+        
+        .buscador {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #2196F3;
+        }
+        
+        .buscador h3 {
+            color: #1976D2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .buscador .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .buscador input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: monospace;
+        }
+        
+        .buscador input:focus {
+            border-color: #2196F3;
+            outline: none;
+        }
+        
+        .buscador button {
+            padding: 12px 25px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        
+        .buscador button:hover {
+            background: #1976D2;
+        }
+        
+        .info-guia {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .info-guia .label {
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        .info-guia .valor {
+            color: #856404;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        
+        .formulario {
+            display: none;
+        }
+        
+        .formulario h3 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4CAF50;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .campo {
+            margin-bottom: 5px;
+        }
+        
+        .campo label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .campo input, .campo select, .campo textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .campo input:focus, .campo select:focus, .campo textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        
+        .campo input[readonly] {
+            background-color: #f5f5f5;
+            border-color: #ddd;
+            color: #666;
+        }
+        
+        .campo-full {
+            grid-column: span 2;
+        }
+        
+        .telefono-cargado {
+            background-color: #e8f5e8 !important;
+            border-color: #4CAF50 !important;
+        }
+        
+        .acciones {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+        
+        .btn-guardar {
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        
+        .btn-guardar:hover {
+            background: #45a049;
+        }
+        
+        .btn-limpiar {
+            padding: 12px 30px;
+            background: #9e9e9e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-limpiar:hover {
+            background: #757575;
+        }
+        
+        .notificacion {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-capturado {
+            background: #ffc107;
+            color: #856404;
+        }
+        
+        .badge-completo {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .campo-full {
+                grid-column: span 1;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✏️ Editor y Completado de Guías</h1>
+            <p>Busque una guía existente (de mensajero) y complete los datos faltantes</p>
+        </div>
+        
+        <div class="content">
+            <!-- BUSCADOR -->
+            <div class="buscador">
+                <h3>
+                    <span>🔍</span>
+                    Buscar Guía Existente
+                </h3>
+                <div class="input-group">
+                    <input type="text" id="buscadorGuia" placeholder="Ej: ENV2403120011523045678">
+                    <button onclick="buscarGuia()">
+                        <span>🔍</span>
+                        Buscar y Cargar
+                    </button>
+                </div>
+                <div style="margin-top: 10px; font-size: 13px; color: #666;">
+                    💡 Si la guía fue creada por el mensajero, se cargará automáticamente el teléfono del remitente
+                </div>
+            </div>
+            
+            <!-- INFORMACIÓN DE LA GUÍA ENCONTRADA -->
+            <div class="info-guia" id="infoGuia">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span class="label">Guía:</span>
+                        <span class="valor" id="guiaEncontrada">-</span>
+                    </div>
+                    <div>
+                        <span class="label">Estado:</span>
+                        <span id="estadoGuia" class="badge badge-capturado">CAPTURADO</span>
+                    </div>
+                </div>
+                <div style="margin-top: 8px;">
+                    <span class="label">📞 Teléfono Remitente cargado:</span>
+                    <span class="valor" id="telefonoCargado">-</span>
+                </div>
+            </div>
+            
+            <!-- FORMULARIO DE EDICIÓN -->
+            <form class="formulario" id="formularioEdicion" onsubmit="return false;">
+                <h3>📝 Completar Datos de la Guía</h3>
+                
+                <div class="grid">
+                    <!-- ID (solo lectura) -->
+                    <div class="campo">
+                        <label>ID de Guía</label>
+                        <input type="text" id="envioId" readonly>
+                    </div>
+                    
+                    <!-- Fecha (solo lectura) -->
+                    <div class="campo">
+                        <label>Fecha de Creación</label>
+                        <input type="text" id="fechaCreacion" readonly>
+                    </div>
+                    
+                    <!-- Forma de Pago -->
+                    <div class="campo">
+                        <label>Forma de Pago *</label>
+                        <select id="formaPago" required>
+                            <option value="">Seleccione...</option>
+                            <option value="contado">Contado</option>
+                            <option value="contraentrega">Contraentrega</option>
+                            <option value="contraentrega_recaudo">Con Recaudo</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Teléfono Remitente (viene del mensajero) -->
+                    <div class="campo">
+                        <label>Teléfono Remitente</label>
+                        <input type="text" id="telefonoRemitente" readonly class="telefono-cargado">
+                    </div>
+                    
+                    <!-- Remitente -->
+                    <div class="campo">
+                        <label>Nombre Remitente *</label>
+                        <input type="text" id="remitente" placeholder="Ej: Distribuidora Central" required>
+                    </div>
+                    
+                    <!-- Dirección Remitente -->
+                    <div class="campo campo-full">
+                        <label>Dirección Remitente *</label>
+                        <input type="text" id="direccionRemitente" placeholder="Ej: Calle 123 #45-67" required>
+                    </div>
+                    
+                    <!-- Destinatario -->
+                    <div class="campo">
+                        <label>Nombre Destinatario *</label>
+                        <input type="text" id="destinatario" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    
+                    <!-- Teléfono Cliente (destinatario) -->
+                    <div class="campo">
+                        <label>Teléfono Destinatario *</label>
+                        <input type="text" id="telefonoCliente" placeholder="Ej: 3001234567" required>
+                    </div>
+                    
+                    <!-- Ciudad Destino -->
+                    <div class="campo">
+                        <label>Ciudad Destino *</label>
+                        <select id="ciudadDestino" required>
+                            <option value="">Seleccione...</option>
+                            <option value="Bogotá D.C.">Bogotá D.C.</option>
+                            <option value="Soacha">Soacha</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Barrio -->
+                    <div class="campo">
+                        <label>Barrio *</label>
+                        <input type="text" id="barrio" placeholder="Ej: Chapinero" required>
+                    </div>
+                    
+                    <!-- Dirección Destino -->
+                    <div class="campo campo-full">
+                        <label>Dirección Destino *</label>
+                        <input type="text" id="direccionDestino" placeholder="Ej: Carrera 80 #12-34" required>
+                    </div>
+                    
+                    <!-- Complemento -->
+                    <div class="campo">
+                        <label>Complemento</label>
+                        <input type="text" id="complemento" placeholder="Apto 501, Torre 2">
+                    </div>
+                    
+                    <!-- Valor a Recaudar -->
+                    <div class="campo">
+                        <label>Valor a Recaudar ($)</label>
+                        <input type="number" id="valorRecaudar" placeholder="0" min="0" step="100">
+                    </div>
+                    
+                    <!-- Observaciones -->
+                    <div class="campo campo-full">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="acciones">
+                    <button type="button" class="btn-limpiar" onclick="limpiarFormulario()">
+                        🗑️ Limpiar
+                    </button>
+                    <button type="button" class="btn-guardar" onclick="guardarCambios()">
+                        💾 Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="notificacion" class="notificacion"></div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_y8kiJPEe9CyUGsQHNbRPpWnZw3SSfDPjOazkwk2nx4nYwG3_yF0AhywfkV8C3aPD/exec';
+        let modoEdicion = false;
+        let filaActual = null;
+        
+        // ============================================
+        // FUNCIÓN PARA MOSTRAR NOTIFICACIONES
+        // ============================================
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notif = document.getElementById('notificacion');
+            notif.style.background = tipo === 'error' ? '#f44336' : '#4CAF50';
+            notif.textContent = mensaje;
+            notif.style.display = 'block';
+            
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+        
+        // ============================================
+        // FUNCIÓN PARA BUSCAR GUÍA
+        // ============================================
+        async function buscarGuia() {
+            const guiaId = document.getElementById('buscadorGuia').value.trim();
+            
+            if (!guiaId) {
+                mostrarNotificacion('⚠️ Ingrese un ID de guía', 'error');
+                return;
+            }
+            
+            mostrarNotificacion('🔍 Buscando guía...');
+            
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=obtenerGuia&id=${guiaId}`);
+                const data = await response.json();
+                
+                if (data.success && data.encontrado) {
+                    // Mostrar información de la guía
+                    document.getElementById('infoGuia').style.display = 'block';
+                    document.getElementById('guiaEncontrada').textContent = data["ENVIO ID"];
+                    
+                    // Verificar estado
+                    const estado = data["ESTADO"] || "CAPTURADO";
+                    const badge = document.getElementById('estadoGuia');
+                    badge.textContent = estado;
+                    badge.className = estado === 'CAPTURADO' ? 'badge badge-capturado' : 'badge badge-completo';
+                    
+                    // Cargar datos en el formulario
+                    document.getElementById('envioId').value = data["ENVIO ID"] || '';
+                    document.getElementById('fechaCreacion').value = data["FECHA DE CREACION"] || '';
+                    document.getElementById('telefonoRemitente').value = data["TELEFONO"] || '';
+                    document.getElementById('telefonoCargado').textContent = data["TELEFONO"] || 'No tiene';
+                    
+                    // Cargar otros datos si ya existen
+                    document.getElementById('formaPago').value = data["FORMA DE PAGO"] || '';
+                    document.getElementById('remitente').value = data["REMITE"] || '';
+                    document.getElementById('direccionRemitente').value = data["DIRECCION"] || '';
+                    document.getElementById('destinatario').value = data["DESTINO"] || '';
+                    document.getElementById('telefonoCliente').value = data["TELEFONOCLIENTE"] || '';
+                    document.getElementById('ciudadDestino').value = data["CIUDAD DESTINO"] || '';
+                    document.getElementById('barrio').value = data["BARRIO"] || '';
+                    document.getElementById('direccionDestino').value = data["DIRECCION DESTINO"] || '';
+                    document.getElementById('complemento').value = data["COMPLEMENTO DE DIR"] || '';
+                    document.getElementById('valorRecaudar').value = data["VALOR A RECAUDAR"] || '0';
+                    document.getElementById('observaciones').value = data["OBS"] || '';
+                    
+                    // Guardar fila para actualización
+                    filaActual = data.filaEncontrada;
+                    modoEdicion = true;
+                    
+                    // Mostrar formulario
+                    document.getElementById('formularioEdicion').style.display = 'block';
+                    
+                    mostrarNotificacion(`✅ Guía cargada correctamente`);
+                    
+                } else {
+                    mostrarNotificacion('❌ Guía no encontrada', 'error');
+                    limpiarFormulario();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error al buscar la guía', 'error');
+            }
+        }
+        
+        // ============================================
+        // FUNCIÓN PARA GUARDAR CAMBIOS
+        // ============================================
+        async function guardarCambios() {
+            // Validar campos obligatorios
+            const camposRequeridos = ['formaPago', 'remitente', 'direccionRemitente', 'destinatario', 
+                                     'telefonoCliente', 'ciudadDestino', 'barrio', 'direccionDestino'];
+            
+            for (const campo of camposRequeridos) {
+                const elemento = document.getElementById(campo);
+                if (!elemento.value.trim()) {
+                    mostrarNotificacion(`⚠️ El campo ${elemento.previousElementSibling.textContent} es obligatorio`, 'error');
+                    elemento.focus();
+                    return;
+                }
+            }
+            
+            if (!modoEdicion || !filaActual) {
+                mostrarNotificacion('❌ No hay una guía cargada para editar', 'error');
+                return;
+            }
+            
+            mostrarNotificacion('💾 Guardando cambios...');
+            
+            try {
+                const formData = new FormData();
+                
+                // Agregar todos los datos
+                formData.append('envioId', document.getElementById('envioId').value);
+                formData.append('fila', filaActual);
+                formData.append('formaPago', document.getElementById('formaPago').value);
+                formData.append('remite', document.getElementById('remitente').value);
+                formData.append('telefono', document.getElementById('telefonoRemitente').value);
+                formData.append('direccion', document.getElementById('direccionRemitente').value);
+                formData.append('destino', document.getElementById('destinatario').value);
+                formData.append('telefonoCliente', document.getElementById('telefonoCliente').value);
+                formData.append('ciudadDestino', document.getElementById('ciudadDestino').value);
+                formData.append('barrio', document.getElementById('barrio').value);
+                formData.append('direccionDestino', document.getElementById('direccionDestino').value);
+                formData.append('complementoDir', document.getElementById('complemento').value);
+                formData.append('valorRecaudar', document.getElementById('valorRecaudar').value || '0');
+                formData.append('observaciones', document.getElementById('observaciones').value);
+                formData.append('accion', 'completarGuia');
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarNotificacion('✅ Guía actualizada correctamente');
+                    
+                    // Actualizar estado en la interfaz
+                    document.getElementById('estadoGuia').textContent = 'COMPLETADO';
+                    document.getElementById('estadoGuia').className = 'badge badge-completo';
+                    
+                    setTimeout(() => {
+                        limpiarFormulario();
+                    }, 2000);
+                } else {
+                    mostrarNotificacion('❌ Error al guardar: ' + (result.error || 'Desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error al conectar con el servidor', 'error');
+            }
+        }
+        
+        // ============================================
+        // FUNCIÓN PARA LIMPIAR FORMULARIO
+        // ============================================
+        function limpiarFormulario() {
+            document.getElementById('buscadorGuia').value = '';
+            document.getElementById('infoGuia').style.display = 'none';
+            document.getElementById('formularioEdicion').style.display = 'none';
+            document.getElementById('envioId').value = '';
+            document.getElementById('fechaCreacion').value = '';
+            document.getElementById('telefonoRemitente').value = '';
+            document.getElementById('formaPago').value = '';
+            document.getElementById('remitente').value = '';
+            document.getElementById('direccionRemitente').value = '';
+            document.getElementById('destinatario').value = '';
+            document.getElementById('telefonoCliente').value = '';
+            document.getElementById('ciudadDestino').value = '';
+            document.getElementById('barrio').value = '';
+            document.getElementById('direccionDestino').value = '';
+            document.getElementById('complemento').value = '';
+            document.getElementById('valorRecaudar').value = '0';
+            document.getElementById('observaciones').value = '';
+            
+            modoEdicion = false;
+            filaActual = null;
+        }
+        
+        // ============================================
+        // BUSCAR CON ENTER
+        // ============================================
+        document.getElementById('buscadorGuia').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarGuia();
+            }
+        });
+    </script>
+</body>
+</html>
