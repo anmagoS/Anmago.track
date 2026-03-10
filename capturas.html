@@ -150,9 +150,9 @@
         </div>
         
         <div class="form-group">
-            <label>📞 Teléfono del Cliente (a quien notificar)</label>
-            <input type="tel" id="telefonoCliente" placeholder="Ej: 573001234567" maxlength="13">
-            <small style="color: #666;">Incluye código de país: 57 para Colombia</small>
+            <label>📞 Teléfono del Cliente (10 dígitos)</label>
+            <input type="tel" id="telefonoCliente" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric">
+            <small style="color: #666;">Solo 10 dígitos, sin 57 ni espacios</small>
         </div>
         
         <div class="form-group">
@@ -174,8 +174,8 @@
     <script>
         // Configuración - ¡CAMBIA ESTOS VALORES!
         const CONFIG = {
-            TELEGRAM_BOT_TOKEN: 'TU_TOKEN_DEL_BOT', // El que ya tienes
-            TELEGRAM_GRUPO_ID: 'TU_GRUPO_ID', // Donde guardas tu copia
+            TELEGRAM_BOT_TOKEN: '8320682242:AAG4h89_8WVmljeEvYHjzRxmnJDt-HoxcAY',
+            TELEGRAM_GRUPO_ID: '-1003710352002',
             PREFIJO_ID: 'ENV'
         };
         
@@ -200,7 +200,7 @@
             }
         });
         
-        // Generar ID único (mismo formato que ya tienes)
+        // Generar ID único (formato: ENV + AÑO + MES + DÍA + HORA + MINUTOS + SEGUNDOS)
         function generarID() {
             const fecha = new Date();
             
@@ -214,22 +214,41 @@
             const minutos = fecha.getMinutes().toString().padStart(2, '0');
             const segundos = fecha.getSeconds().toString().padStart(2, '0');
             
-            // ID: ENV + AÑO + MES + DÍA + HORA + MINUTOS + SEGUNDOS
             const id = `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minutos}${segundos}`;
             
             idGeneradoDiv.textContent = `🆔 ID: ${id}`;
             return id;
         }
         
+        // Obtener fecha y hora formateada para Colombia
+        function obtenerFechaHoraColombia() {
+            const fecha = new Date();
+            fecha.setHours(fecha.getHours() - 5); // Ajuste UTC-5
+            
+            const opciones = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'America/Bogota'
+            };
+            
+            return fecha.toLocaleString('es-CO', opciones).replace(',', '');
+        }
+        
         // Generar ID al cargar la página
         window.addEventListener('load', generarID);
         
-        // Función principal - ¡AHORA HACE DOS COSAS!
+        // Función principal
         async function enviarCaptura() {
             // Validar campos
             const telefono = telefonoInput.value.trim();
             const foto = fotoInput.files[0];
-            const idGuia = generarID(); // Generar ID actualizado
+            const idGuia = generarID();
+            const fechaHora = obtenerFechaHoraColombia();
             
             if (!telefono) {
                 mostrarEstado('⚠️ Ingresa el teléfono del cliente', 'error');
@@ -241,39 +260,36 @@
                 return;
             }
             
-            // Validar formato teléfono Colombia
-            if (!telefono.startsWith('57') || telefono.length < 12) {
-                mostrarEstado('⚠️ El teléfono debe comenzar con 57 (Ej: 573001234567)', 'error');
+            // Validar que sean exactamente 10 dígitos numéricos
+            if (!/^\d{10}$/.test(telefono)) {
+                mostrarEstado('⚠️ El teléfono debe tener 10 dígitos (Ej: 3001234567)', 'error');
                 return;
             }
             
             // Deshabilitar botón
             btnEnviar.disabled = true;
             btnEnviar.textContent = '⏫ Procesando...';
-            mostrarEstado('📤 Enviando copia a Telegram y preparando WhatsApp...', 'success');
+            mostrarEstado('📤 Enviando copia a Telegram...', 'success');
             
             try {
                 // ============================================
                 // ACCIÓN 1: ENVIAR A TELEGRAM (TU COPIA)
                 // ============================================
-                const telegramPromise = enviarATelegram(foto, idGuia, telefono);
+                await enviarATelegram(foto, idGuia, telefono, fechaHora);
                 
                 // ============================================
-                // ACCIÓN 2: ENVIAR A WHATSAPP CON IMAGEN ADJUNTA
+                // ACCIÓN 2: COMPARTIR IMAGEN CON TEXTO (ABRE EXPLORADOR DE APPS)
                 // ============================================
-                const whatsappPromise = enviarWhatsAppConImagen(foto, idGuia, telefono);
+                await compartirImagenConTexto(foto, idGuia, fechaHora);
                 
-                // Esperar a que ambas acciones se completen
-                await Promise.all([telegramPromise, whatsappPromise]);
-                
-                mostrarEstado('✅ ¡Listo! Imagen enviada a WhatsApp y copia guardada en Telegram', 'success');
+                mostrarEstado('✅ ¡Listo! Imagen guardada en Telegram y lista para compartir', 'success');
                 
                 // Limpiar formulario
                 setTimeout(() => {
                     telefonoInput.value = '';
                     fotoInput.value = '';
                     previewImg.style.display = 'none';
-                    generarID(); // Generar nuevo ID
+                    generarID();
                     btnEnviar.disabled = false;
                     btnEnviar.textContent = '📤 Enviar y Notificar';
                 }, 3000);
@@ -287,9 +303,9 @@
         }
         
         // ============================================
-        // FUNCIÓN 1: ENVIAR A TELEGRAM (TU COPIA DE SEGURIDAD)
+        // FUNCIÓN 1: ENVIAR A TELEGRAM
         // ============================================
-        async function enviarATelegram(foto, idGuia, telefono) {
+        async function enviarATelegram(foto, idGuia, telefono, fechaHora) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 
@@ -299,8 +315,12 @@
                         formData.append('chat_id', CONFIG.TELEGRAM_GRUPO_ID);
                         formData.append('photo', foto);
                         
-                        const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-                        const caption = `📦 *NUEVA CAPTURA*\n━━━━━━━━━━━━━━\n🆔 ID: ${idGuia}\n📞 Teléfono: ${telefono}\n📅 Fecha: ${fecha}\n━━━━━━━━━━━━━━`;
+                        const caption = `📦 *NUEVA CAPTURA*\n` +
+                                      `━━━━━━━━━━━━━━\n` +
+                                      `🆔 *ID:* ${idGuia}\n` +
+                                      `📞 *Teléfono:* ${telefono}\n` +
+                                      `📅 *Fecha:* ${fechaHora}\n` +
+                                      `━━━━━━━━━━━━━━`;
                         
                         formData.append('caption', caption);
                         formData.append('parse_mode', 'Markdown');
@@ -317,13 +337,12 @@
                             resolve(true);
                         } else {
                             console.warn('⚠️ Error en Telegram:', data.description);
-                            // No rejecteamos para que no falle todo si Telegram falla
                             resolve(false);
                         }
                         
                     } catch (error) {
                         console.warn('⚠️ Error enviando a Telegram:', error);
-                        resolve(false); // Continuamos aunque falle Telegram
+                        resolve(false);
                     }
                 };
                 
@@ -337,87 +356,54 @@
         }
         
         // ============================================
-        // FUNCIÓN 2: ENVIAR A WHATSAPP CON IMAGEN ADJUNTA
+        // FUNCIÓN 2: COMPARTIR IMAGEN CON TEXTO (ABRE EXPLORADOR DE APPS)
         // ============================================
-        async function enviarWhatsAppConImagen(foto, idGuia, telefono) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    // Verificar si el navegador soporta Web Share
-                    if (navigator.canShare && navigator.share) {
-                        // Crear archivo para compartir
-                        const file = new File([foto], `guia-${idGuia}.jpg`, {
-                            type: foto.type || 'image/jpeg'
-                        });
-                        
-                        const shareData = {
-                            title: `Guía ${idGuia}`,
-                            text: `📦 Guía ${idGuia} - Rótulo del envío`,
-                            files: [file]
-                        };
-                        
-                        // Verificar si podemos compartir la imagen
-                        if (navigator.canShare(shareData)) {
-                            await navigator.share(shareData);
-                            console.log('✅ Imagen compartida por WhatsApp');
-                            resolve(true);
-                            return;
-                        }
-                    }
-                    
-                    // Si no soporta Web Share, usamos fallback con imgbb
-                    await fallbackWhatsAppConLink(foto, idGuia, telefono);
-                    resolve(true);
-                    
-                } catch (error) {
-                    // Si el usuario cancela el compartir, no es error
-                    if (error.name === 'AbortError' || error.message.includes('cancel')) {
-                        console.log('👆 El usuario canceló el compartir');
-                        resolve(false);
-                    } else {
-                        // Si hay otro error, usamos fallback
-                        console.warn('⚠️ Error en Web Share, usando fallback:', error);
-                        await fallbackWhatsAppConLink(foto, idGuia, telefono);
-                        resolve(true);
-                    }
-                }
-            });
-        }
-        
-        // ============================================
-        // FALLBACK: Si no se puede adjuntar, usar imgbb
-        // ============================================
-        async function fallbackWhatsAppConLink(foto, idGuia, telefono) {
+        async function compartirImagenConTexto(foto, idGuia, fechaHora) {
             try {
-                // Subir a imgbb (gratis)
-                const formData = new FormData();
-                formData.append('image', foto);
-                
-                // IMPORTANTE: Regístrate gratis en imgbb.com y obtén tu API key
-                const API_KEY = 'TU_API_KEY_DE_IMGBB'; // Reemplazar con tu API key
-                
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-                    method: 'POST',
-                    body: formData
+                // Crear archivo para compartir
+                const file = new File([foto], `guia-${idGuia}.jpg`, {
+                    type: foto.type || 'image/jpeg'
                 });
                 
-                const data = await res.json();
+                // Texto para compartir
+                const textoCompartir = `📦 Guía: ${idGuia}\n📅 Fecha: ${fechaHora}`;
                 
-                if (data.success) {
-                    const urlImagen = data.data.url;
-                    const mensaje = `📦 *Guía ${idGuia}*\n📸 *Imagen del envío:*\n${urlImagen}\n\n_Haga clic en el link para ver la imagen_`;
+                // Verificar si el navegador soporta Web Share
+                if (navigator.canShare && navigator.share) {
+                    const shareData = {
+                        title: `Guía ${idGuia}`,
+                        text: textoCompartir,
+                        files: [file]
+                    };
                     
-                    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-                } else {
-                    // Si imgbb falla, enviar solo texto
-                    const mensaje = `📦 *Guía ${idGuia}*\nLa imagen está disponible en el grupo de Telegram`;
-                    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                    // Verificar si podemos compartir la imagen
+                    if (navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                        console.log('✅ Imagen compartida exitosamente');
+                        return true;
+                    }
                 }
                 
+                // Si no soporta Web Share, mostrar mensaje
+                alert('Selecciona WhatsApp en el explorador de apps para enviar la imagen');
+                
+                // Intentar con método alternativo (solo texto)
+                const telefonoCompleto = '57' + telefonoInput.value.trim();
+                const mensaje = `📦 Guía: ${idGuia}\n📅 Fecha: ${fechaHora}\n\nPor favor adjunta la imagen manualmente`;
+                window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                
+                return false;
+                
             } catch (error) {
-                console.warn('⚠️ Error en fallback:', error);
-                // Último recurso: solo texto
-                const mensaje = `📦 *Guía ${idGuia}*\nComunícate con la empresa para ver la imagen`;
-                window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                console.warn('⚠️ Error al compartir:', error);
+                
+                // Si el usuario cancela, no es error
+                if (error.name === 'AbortError' || error.message.includes('cancel')) {
+                    console.log('👆 El usuario canceló el compartir');
+                    return false;
+                }
+                
+                throw error;
             }
         }
         
@@ -426,6 +412,11 @@
             estadoDiv.textContent = mensaje;
             estadoDiv.className = `estado ${tipo}`;
         }
+        
+        // Permitir solo números en el teléfono
+        telefonoInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+        });
         
         // Permitir enter en el input
         telefonoInput.addEventListener('keypress', function(e) {
