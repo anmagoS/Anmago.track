@@ -274,7 +274,9 @@
         const CONFIG = {
             TELEGRAM_BOT_TOKEN: '8320682242:AAG4h89_8WVmljeEvYHjzRxmnJDt-HoxcAY',
             TELEGRAM_GRUPO_ID: '-1003710352002',
-            PREFIJO_ID: 'ENV'
+            PREFIJO_ID: 'ENV',
+            // IMPORTANTE: Reemplaza con TU URL de Google Apps Script
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz_y8kiJPEe9CyUGsQHNbRPpWnZw3SSfDPjOazkwk2nx4nYwG3_yF0AhywfkV8C3aPD/exec'
         };
         
         // Array para almacenar las fotos
@@ -292,35 +294,57 @@
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
         
-        // Generar ID único
+        // ============================================
+        // NUEVA FUNCIÓN: Pre-registrar guía en el sistema
+        // ============================================
+        async function preRegistrarGuia(envioId, telefono, messageId) {
+            try {
+                // Crear FormData con los datos básicos
+                const formData = new FormData();
+                formData.append('action', 'preregistro');
+                formData.append('envioId', envioId);
+                formData.append('telefonoCliente', telefono);
+                formData.append('estado', 'CAPTURADO');
+                formData.append('usuarioId', 'MENSAJERO');
+                formData.append('fechaCaptura', new Date().toISOString());
+                
+                // Guardar el link de Telegram en la columna Z
+                const telegramLink = `https://t.me/c/${CONFIG.TELEGRAM_GRUPO_ID.replace('-100', '')}/${messageId}`;
+                formData.append('telegramLink', telegramLink);
+                
+                // Enviar al servidor
+                const response = await fetch(CONFIG.SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                });
+                
+                console.log(`✅ Guía pre-registrada: ${envioId} para teléfono ${telefono}`);
+                console.log(`🔗 Link Telegram: ${telegramLink}`);
+                return true;
+            } catch (error) {
+                console.error('Error pre-registrando guía:', error);
+                return false;
+            }
+        }
+        
+        // Generar ID único (ahora más parecido al del servidor)
         function generarID() {
             const fecha = new Date();
             
-            const formatter = new Intl.DateTimeFormat('es-CO', {
-                timeZone: 'America/Bogota',
-                year: '2-digit',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
+            // Ajustar a hora Colombia
+            const options = { timeZone: 'America/Bogota' };
+            const fechaCol = new Date(fecha.toLocaleString('en-US', options));
             
-            const partes = formatter.formatToParts(fecha);
+            const año = fechaCol.getFullYear().toString().slice(-2);
+            const mes = (fechaCol.getMonth() + 1).toString().padStart(2, '0');
+            const dia = fechaCol.getDate().toString().padStart(2, '0');
+            const hora = fechaCol.getHours().toString().padStart(2, '0');
+            const minuto = fechaCol.getMinutes().toString().padStart(2, '0');
+            const segundo = fechaCol.getSeconds().toString().padStart(2, '0');
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
             
-            let año, mes, dia, hora, minuto, segundo;
-            
-            partes.forEach(part => {
-                if (part.type === 'year') año = part.value;
-                if (part.type === 'month') mes = part.value;
-                if (part.type === 'day') dia = part.value;
-                if (part.type === 'hour') hora = part.value;
-                if (part.type === 'minute') minuto = part.value;
-                if (part.type === 'second') segundo = part.value;
-            });
-            
-            return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}`;
+            return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}${random}`;
         }
         
         // Obtener fecha formateada
@@ -396,27 +420,17 @@
             actualizarPreview();
         }
         
-        // Limpiar TODO (incluye teléfono y localStorage)
+        // Limpiar TODO
         function limpiarTodo() {
             if (fotosArray.length > 0 && !confirm('¿Eliminar todas las fotos y limpiar el teléfono?')) {
                 return;
             }
             
-            // Limpiar array de fotos
             fotosArray = [];
-            
-            // Limpiar campo de teléfono
             telefonoInput.value = '';
-            
-            // Limpiar localStorage
             localStorage.removeItem('ultimoTelefono');
-            
-            // Ocultar mensaje de teléfono guardado
             telefonoGuardadoMsg.style.display = 'none';
-            
-            // Actualizar vista
             actualizarPreview();
-            
             mostrarEstado('🧹 Todo limpiado: fotos y teléfono', 'success');
         }
         
@@ -450,7 +464,7 @@
             btnFinalizar.textContent = '⏫ PROCESANDO...';
             progressBar.style.display = 'block';
             
-            // Guardar teléfono para futuros envíos del MISMO cliente
+            // Guardar teléfono
             localStorage.setItem('ultimoTelefono', telefono);
             telefonoGuardadoMsg.textContent = `📌 Teléfono guardado: ${telefono}`;
             telefonoGuardadoMsg.style.display = 'block';
@@ -458,9 +472,10 @@
             const fechaHora = obtenerFechaHoraColombia();
             let enviadas = 0;
             let errores = 0;
+            let preregistros = 0;
             
             // ============================================
-            // PASO 1: ENVIAR CADA FOTO A TELEGRAM
+            // PASO 1: ENVIAR CADA FOTO A TELEGRAM Y PRE-REGISTRAR
             // ============================================
             for (let i = 0; i < fotosArray.length; i++) {
                 const foto = fotosArray[i];
@@ -470,52 +485,56 @@
                 progressFill.style.width = progreso + '%';
                 
                 try {
-                    await enviarATelegram(foto.file, foto.id, telefono, fechaHora);
+                    // Enviar a Telegram y obtener message_id
+                    const messageId = await enviarATelegram(foto.file, foto.id, telefono, fechaHora);
+                    
+                    // PRE-REGISTRAR LA GUÍA CON EL LINK DE TELEGRAM
+                    if (messageId) {
+                        await preRegistrarGuia(foto.id, telefono, messageId);
+                        preregistros++;
+                    }
+                    
                     enviadas++;
                 } catch (error) {
                     console.error('Error:', error);
                     errores++;
                 }
                 
-                // Pequeña pausa para no saturar la API
+                // Pequeña pausa
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
             
             // ============================================
-// PASO 2: ENVIAR WHATSAPP (FORZANDO APPS MÓVIL)
-// ============================================
-const ids = fotosArray.map(f => f.id).join(', ');
-const telefonoCompleto = '57' + telefono;
+            // PASO 2: ENVIAR WHATSAPP
+            // ============================================
+            const ids = fotosArray.map(f => f.id).join(', ');
+            const telefonoCompleto = '57' + telefono;
 
-const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
-               `━━━━━━━━━━━━━━━━━━\n` +
-               `📞 *Cliente:* ${telefono}\n` +
-               `📅 *Fecha:* ${fechaHora}\n` +
-               `📦 *Total paquetes:* ${fotosArray.length}\n` +
-               `🆔 *Guías:* ${ids}\n` +
-               `━━━━━━━━━━━━━━━━━━\n\n` +
-               `📸 Las imágenes están guardadas en nuestro sistema.`;
+            const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
+                           `━━━━━━━━━━━━━━━━━━\n` +
+                           `📞 *Cliente:* ${telefono}\n` +
+                           `📅 *Fecha:* ${fechaHora}\n` +
+                           `📦 *Total paquetes:* ${fotosArray.length}\n` +
+                           `🆔 *Guías:* ${ids}\n` +
+                           `━━━━━━━━━━━━━━━━━━\n\n` +
+                           `📸 Las imágenes están guardadas en nuestro sistema.`;
 
-// Detectar si es dispositivo móvil
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            // Abrir WhatsApp
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-if (isMobile) {
-    // Para móviles: intentar abrir la app primero
-    window.location.href = `whatsapp://send?phone=${telefonoCompleto}&text=${encodeURIComponent(mensaje)}`;
-    
-    // Fallback: si no abre la app, abrir web después de 1 segundo
-    setTimeout(() => {
-        window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    }, 1000);
-} else {
-    // Para escritorio: abrir web directamente
-    window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
-}
+            if (isMobile) {
+                window.location.href = `whatsapp://send?phone=${telefonoCompleto}&text=${encodeURIComponent(mensaje)}`;
+                setTimeout(() => {
+                    window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                }, 1000);
+            } else {
+                window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            }
             
             // Mostrar resultado
-            mostrarEstado(`✅ PROCESO COMPLETADO: ${enviadas} enviados, ${errores} errores`, 'success');
+            mostrarEstado(`✅ PROCESO COMPLETADO: ${enviadas} enviados, ${preregistros} pre-registrados, ${errores} errores`, 'success');
             
-            // Limpiar fotos (pero mantener teléfono para siguientes paquetes del mismo cliente)
+            // Limpiar fotos
             setTimeout(() => {
                 fotosArray = [];
                 actualizarPreview();
@@ -526,7 +545,7 @@ if (isMobile) {
             }, 3000);
         }
         
-        // Enviar a Telegram
+        // Enviar a Telegram (modificado para devolver message_id)
         async function enviarATelegram(foto, idGuia, telefono, fechaHora) {
             const formData = new FormData();
             formData.append('chat_id', CONFIG.TELEGRAM_GRUPO_ID);
@@ -552,6 +571,9 @@ if (isMobile) {
             if (!data.ok) {
                 throw new Error(data.description);
             }
+            
+            // Devolver el message_id para el link de Telegram
+            return data.result.message_id;
         }
         
         // Mostrar estado
@@ -569,7 +591,7 @@ if (isMobile) {
             this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
         });
         
-        // Recuperar teléfono guardado al cargar
+        // Recuperar teléfono guardado
         window.addEventListener('load', function() {
             const telefonoGuardado = localStorage.getItem('ultimoTelefono');
             if (telefonoGuardado) {
