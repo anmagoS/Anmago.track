@@ -802,12 +802,106 @@
     <!-- Script principal unificado - TU MISMO SCRIPT.JS -->
     <script src="script.js"></script>
     
-    <script>
-        // Ocultar la intro después de 2 segundos
+   <script>
+    // Ocultar la intro después de 2 segundos
+    setTimeout(() => {
+        const intro = document.getElementById('intro');
+        if (intro) intro.style.display = 'none';
+    }, 2000);
+    
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+        let notif = document.getElementById('notificacion');
+        if (!notif) {
+            notif = document.createElement('div');
+            notif.id = 'notificacion';
+            notif.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 9999;
+                display: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            document.body.appendChild(notif);
+        }
+        
+        notif.style.background = tipo === 'error' ? '#f44336' : '#4CAF50';
+        notif.textContent = mensaje;
+        notif.style.display = 'block';
+        
         setTimeout(() => {
-            const intro = document.getElementById('intro');
-            if (intro) intro.style.display = 'none';
-        }, 2000);
-    </script>
+            notif.style.display = 'none';
+        }, 3000);
+    }
+    
+    // FUNCIÓN PARA BUSCAR GUÍA
+    async function buscarGuiaExistente(guiaId) {
+        try {
+            // 👇 ESTA ES LA URL QUE ME DISTE
+            const response = await fetch(`https://script.google.com/macros/s/AKfycbz_y8kiJPEe9CyUGsQHNbRPpWnZw3SSfDPjOazkwk2nx4nYwG3_yF0AhywfkV8C3aPD/exec?action=obtenerGuia&id=${guiaId}`);
+            const data = await response.json();
+            
+            if (data.success && data.encontrado) {
+                // Cargar datos
+                document.getElementById('telefonoCliente').value = data["TELEFONOCLIENTE"] || '';
+                document.getElementById('envioId').value = data["ENVIO ID"] || '';
+                
+                mostrarNotificacion(`✅ Guía encontrada - Teléfono: ${data["TELEFONOCLIENTE"]}`);
+                return true;
+            } else {
+                mostrarNotificacion('❌ Guía no encontrada', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            mostrarNotificacion('❌ Error al buscar la guía', 'error');
+            return false;
+        }
+    }
+    
+    // AGREGAR BUSCADOR AL FORMULARIO
+    function agregarBuscadorGuia() {
+        const form = document.getElementById('deliveryForm');
+        if (!form) return;
+        
+        const buscadorHTML = `
+            <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
+                <h4 class="font-bold mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-600">search</span>
+                    Buscar Guía Existente
+                </h4>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="buscadorGuia" 
+                           class="flex-1 h-12 px-4 border rounded-lg" 
+                           placeholder="Ej: ENV2403120011523045678">
+                    <button type="button" id="btnBuscarGuia"
+                            class="bg-blue-600 text-white px-6 h-12 rounded-lg hover:bg-blue-700">
+                        Buscar
+                    </button>
+                </div>
+                <p class="text-xs text-gray-600 mt-2">
+                    💡 Si la guía ya fue creada, se cargará el teléfono automáticamente
+                </p>
+            </div>
+        `;
+        
+        form.insertAdjacentHTML('afterbegin', buscadorHTML);
+        
+        document.getElementById('btnBuscarGuia').addEventListener('click', () => {
+            const guia = document.getElementById('buscadorGuia').value.trim();
+            if (guia) buscarGuiaExistente(guia);
+        });
+    }
+    
+    // INICIAR CUANDO CARGA LA PÁGINA
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(agregarBuscadorGuia, 500);
+    });
+</script>
 </body>
 </html>
