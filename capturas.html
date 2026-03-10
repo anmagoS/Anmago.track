@@ -87,8 +87,14 @@
             display: none;
         }
         
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
         button {
-            width: 100%;
+            flex: 1;
             padding: 18px;
             background: #0088cc;
             color: white;
@@ -98,7 +104,6 @@
             font-weight: bold;
             cursor: pointer;
             transition: background 0.3s;
-            margin-top: 10px;
         }
         
         button:hover {
@@ -108,6 +113,14 @@
         button:disabled {
             background: #ccc;
             cursor: not-allowed;
+        }
+        
+        .btn-limpiar {
+            background: #f44336;
+        }
+        
+        .btn-limpiar:hover {
+            background: #d32f2f;
         }
         
         .estado {
@@ -139,6 +152,16 @@
             font-weight: bold;
             color: #0088cc;
         }
+        
+        .telefono-guardado {
+            background: #fff3cd;
+            color: #856404;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 12px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +176,7 @@
             <label>📞 Teléfono del Cliente (10 dígitos)</label>
             <input type="tel" id="telefonoCliente" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric">
             <small style="color: #666;">Solo 10 dígitos, sin 57 ni espacios</small>
+            <div id="telefonoGuardadoMsg" class="telefono-guardado"></div>
         </div>
         
         <div class="form-group">
@@ -166,7 +190,10 @@
             </div>
         </div>
         
-        <button onclick="enviarCaptura()" id="btnEnviar">📤 Enviar y Notificar</button>
+        <div class="button-group">
+            <button onclick="enviarCaptura()" id="btnEnviar">📤 Enviar</button>
+            <button onclick="limpiarTelefono()" class="btn-limpiar" id="btnLimpiar" type="button">🗑️ Limpiar</button>
+        </div>
         
         <div id="estado" class="estado"></div>
     </div>
@@ -186,6 +213,7 @@
         const idGeneradoDiv = document.getElementById('idGenerado');
         const btnEnviar = document.getElementById('btnEnviar');
         const estadoDiv = document.getElementById('estado');
+        const telefonoGuardadoMsg = document.getElementById('telefonoGuardadoMsg');
         
         // Vista previa de la foto
         fotoInput.addEventListener('change', function(e) {
@@ -200,63 +228,75 @@
             }
         });
         
-       // Generar ID único usando hora Colombia (SIN ajuste manual)
-function generarID() {
-    const fecha = new Date();
-    
-    // Obtener partes de la fecha en hora Colombia
-    const formatter = new Intl.DateTimeFormat('es-CO', {
-        timeZone: 'America/Bogota',
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-    });
-    
-    const partes = formatter.formatToParts(fecha);
-    
-    // Extraer valores
-    let año, mes, dia, hora, minuto, segundo;
-    
-    partes.forEach(part => {
-        if (part.type === 'year') año = part.value;
-        if (part.type === 'month') mes = part.value;
-        if (part.type === 'day') dia = part.value;
-        if (part.type === 'hour') hora = part.value;
-        if (part.type === 'minute') minuto = part.value;
-        if (part.type === 'second') segundo = part.value;
-    });
-    
-    const id = `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}`;
-    
-    idGeneradoDiv.textContent = `🆔 ID: ${id}`;
-    return id;
-}
+        // Generar ID único usando hora Colombia
+        function generarID() {
+            const fecha = new Date();
+            
+            const formatter = new Intl.DateTimeFormat('es-CO', {
+                timeZone: 'America/Bogota',
+                year: '2-digit',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            const partes = formatter.formatToParts(fecha);
+            
+            let año, mes, dia, hora, minuto, segundo;
+            
+            partes.forEach(part => {
+                if (part.type === 'year') año = part.value;
+                if (part.type === 'month') mes = part.value;
+                if (part.type === 'day') dia = part.value;
+                if (part.type === 'hour') hora = part.value;
+                if (part.type === 'minute') minuto = part.value;
+                if (part.type === 'second') segundo = part.value;
+            });
+            
+            const id = `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}`;
+            
+            idGeneradoDiv.textContent = `🆔 ID: ${id}`;
+            return id;
+        }
         
-       // Obtener fecha y hora formateada para Colombia con AM/PM
-function obtenerFechaHoraColombia() {
-    const fecha = new Date();
-    
-    const opciones = {
-        timeZone: 'America/Bogota',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,  // ← Esto activa AM/PM
-        timeZoneName: 'short'
-    };
-    
-    // Formato: 10/03/2026 02:30 PM
-    return fecha.toLocaleString('es-CO', opciones).replace(',', '');
-}
+        // Obtener fecha y hora formateada para Colombia con AM/PM
+        function obtenerFechaHoraColombia() {
+            const fecha = new Date();
+            
+            const opciones = {
+                timeZone: 'America/Bogota',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZoneName: 'short'
+            };
+            
+            return fecha.toLocaleString('es-CO', opciones).replace(',', '');
+        }
         
-        // Generar ID al cargar la página
-        window.addEventListener('load', generarID);
+        // Recuperar teléfono guardado al cargar la página
+        function recuperarTelefonoGuardado() {
+            const telefonoGuardado = localStorage.getItem('ultimoTelefono');
+            if (telefonoGuardado) {
+                telefonoInput.value = telefonoGuardado;
+                telefonoGuardadoMsg.textContent = `📌 Usando teléfono: ${telefonoGuardado}`;
+                telefonoGuardadoMsg.style.display = 'block';
+            }
+        }
+        
+        // Limpiar teléfono guardado
+        function limpiarTelefono() {
+            telefonoInput.value = '';
+            localStorage.removeItem('ultimoTelefono');
+            telefonoGuardadoMsg.style.display = 'none';
+            mostrarEstado('🧹 Teléfono limpiado', 'success');
+        }
         
         // Función principal
         async function enviarCaptura() {
@@ -289,32 +329,46 @@ function obtenerFechaHoraColombia() {
             
             try {
                 // ============================================
-                // ACCIÓN 1: ENVIAR A TELEGRAM (TU COPIA)
+                // ACCIÓN 1: ENVIAR A TELEGRAM (TU COPIA CON IMAGEN)
                 // ============================================
                 await enviarATelegram(foto, idGuia, telefono, fechaHora);
                 
                 // ============================================
-                // ACCIÓN 2: COMPARTIR IMAGEN CON TEXTO (ABRE EXPLORADOR DE APPS)
+                // ACCIÓN 2: GUARDAR TELÉFONO PARA PRÓXIMOS ENVÍOS
                 // ============================================
-                await compartirImagenConTexto(foto, idGuia, fechaHora);
+                localStorage.setItem('ultimoTelefono', telefono);
+                telefonoGuardadoMsg.textContent = `📌 Teléfono guardado: ${telefono}`;
+                telefonoGuardadoMsg.style.display = 'block';
                 
-                mostrarEstado('✅ ¡Listo! Imagen guardada en Telegram y lista para compartir', 'success');
+                // ============================================
+                // ACCIÓN 3: ENVIAR SOLO TEXTO POR WHATSAPP (SIN IMAGEN)
+                // ============================================
+                const telefonoCompleto = '57' + telefono;
+                const mensaje = `📦 *NUEVO ENVÍO REGISTRADO*\n` +
+                               `━━━━━━━━━━━━━━━━━━\n` +
+                               `🆔 *Guía:* ${idGuia}\n` +
+                               `📅 *Fecha:* ${fechaHora}\n` +
+                               `━━━━━━━━━━━━━━━━━━\n\n` +
+                               `📸 *IMPORTANTE:* La imagen del rótulo está guardada en nuestro sistema. Si necesita verla, comuníquese con su mensajero.`;
                 
-                // Limpiar formulario
+                window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
+                
+                mostrarEstado('✅ ¡Listo! Telegram guardado y WhatsApp enviado', 'success');
+                
+                // Limpiar formulario (PERO MANTENER EL TELÉFONO)
                 setTimeout(() => {
-                    telefonoInput.value = '';
                     fotoInput.value = '';
                     previewImg.style.display = 'none';
-                    generarID();
+                    generarID(); // Generar nuevo ID para el siguiente envío
                     btnEnviar.disabled = false;
-                    btnEnviar.textContent = '📤 Enviar y Notificar';
+                    btnEnviar.textContent = '📤 Enviar';
                 }, 3000);
                 
             } catch (error) {
                 console.error('Error:', error);
                 mostrarEstado(`❌ Error: ${error.message}`, 'error');
                 btnEnviar.disabled = false;
-                btnEnviar.textContent = '📤 Enviar y Notificar';
+                btnEnviar.textContent = '📤 Enviar';
             }
         }
         
@@ -371,58 +425,6 @@ function obtenerFechaHoraColombia() {
             });
         }
         
-        // ============================================
-        // FUNCIÓN 2: COMPARTIR IMAGEN CON TEXTO (ABRE EXPLORADOR DE APPS)
-        // ============================================
-        async function compartirImagenConTexto(foto, idGuia, fechaHora) {
-            try {
-                // Crear archivo para compartir
-                const file = new File([foto], `guia-${idGuia}.jpg`, {
-                    type: foto.type || 'image/jpeg'
-                });
-                
-                // Texto para compartir
-                const textoCompartir = `📦 Guía: ${idGuia}\n📅 Fecha: ${fechaHora}`;
-                
-                // Verificar si el navegador soporta Web Share
-                if (navigator.canShare && navigator.share) {
-                    const shareData = {
-                        title: `Guía ${idGuia}`,
-                        text: textoCompartir,
-                        files: [file]
-                    };
-                    
-                    // Verificar si podemos compartir la imagen
-                    if (navigator.canShare(shareData)) {
-                        await navigator.share(shareData);
-                        console.log('✅ Imagen compartida exitosamente');
-                        return true;
-                    }
-                }
-                
-                // Si no soporta Web Share, mostrar mensaje
-                alert('Selecciona WhatsApp en el explorador de apps para enviar la imagen');
-                
-                // Intentar con método alternativo (solo texto)
-                const telefonoCompleto = '57' + telefonoInput.value.trim();
-                const mensaje = `📦 Guía: ${idGuia}\n📅 Fecha: ${fechaHora}\n\nPor favor adjunta la imagen manualmente`;
-                window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
-                
-                return false;
-                
-            } catch (error) {
-                console.warn('⚠️ Error al compartir:', error);
-                
-                // Si el usuario cancela, no es error
-                if (error.name === 'AbortError' || error.message.includes('cancel')) {
-                    console.log('👆 El usuario canceló el compartir');
-                    return false;
-                }
-                
-                throw error;
-            }
-        }
-        
         // Función para mostrar estado
         function mostrarEstado(mensaje, tipo) {
             estadoDiv.textContent = mensaje;
@@ -439,6 +441,12 @@ function obtenerFechaHoraColombia() {
             if (e.key === 'Enter') {
                 enviarCaptura();
             }
+        });
+        
+        // Inicializar: recuperar teléfono guardado
+        window.addEventListener('load', function() {
+            generarID();
+            recuperarTelefonoGuardado();
         });
     </script>
 </body>
