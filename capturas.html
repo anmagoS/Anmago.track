@@ -263,7 +263,7 @@
                 📲 FINALIZAR Y ENVIAR
             </button>
             <button onclick="limpiarTodo()" class="btn-limpiar" id="btnLimpiar">
-                🗑️ LIMPIAR
+                🗑️ LIMPIAR TODO
             </button>
         </div>
         
@@ -320,7 +320,7 @@
                 if (part.type === 'second') segundo = part.value;
             });
             
-            return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundos}`;
+            return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}`;
         }
         
         // Obtener fecha formateada
@@ -385,6 +385,8 @@
             totalFotosSpan.textContent = fotosArray.length;
             if (fotosArray.length > 0) {
                 ultimoIDSpan.textContent = fotosArray[fotosArray.length - 1].id;
+            } else {
+                ultimoIDSpan.textContent = '-';
             }
         }
         
@@ -394,14 +396,28 @@
             actualizarPreview();
         }
         
-        // Limpiar todo
+        // Limpiar TODO (incluye teléfono y localStorage)
         function limpiarTodo() {
-            if (fotosArray.length > 0 && !confirm('¿Eliminar todas las fotos?')) {
+            if (fotosArray.length > 0 && !confirm('¿Eliminar todas las fotos y limpiar el teléfono?')) {
                 return;
             }
+            
+            // Limpiar array de fotos
             fotosArray = [];
+            
+            // Limpiar campo de teléfono
+            telefonoInput.value = '';
+            
+            // Limpiar localStorage
+            localStorage.removeItem('ultimoTelefono');
+            
+            // Ocultar mensaje de teléfono guardado
+            telefonoGuardadoMsg.style.display = 'none';
+            
+            // Actualizar vista
             actualizarPreview();
-            mostrarEstado('🧹 Todo limpiado', 'success');
+            
+            mostrarEstado('🧹 Todo limpiado: fotos y teléfono', 'success');
         }
         
         // Función principal - FINALIZAR Y ENVIAR
@@ -434,7 +450,7 @@
             btnFinalizar.textContent = '⏫ PROCESANDO...';
             progressBar.style.display = 'block';
             
-            // Guardar teléfono
+            // Guardar teléfono para futuros envíos del MISMO cliente
             localStorage.setItem('ultimoTelefono', telefono);
             telefonoGuardadoMsg.textContent = `📌 Teléfono guardado: ${telefono}`;
             telefonoGuardadoMsg.style.display = 'block';
@@ -460,6 +476,9 @@
                     console.error('Error:', error);
                     errores++;
                 }
+                
+                // Pequeña pausa para no saturar la API
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
             
             // ============================================
@@ -482,7 +501,7 @@
             // Mostrar resultado
             mostrarEstado(`✅ PROCESO COMPLETADO: ${enviadas} enviados, ${errores} errores`, 'success');
             
-            // Limpiar después de 3 segundos
+            // Limpiar fotos (pero mantener teléfono para siguientes paquetes del mismo cliente)
             setTimeout(() => {
                 fotosArray = [];
                 actualizarPreview();
@@ -536,7 +555,7 @@
             this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
         });
         
-        // Recuperar teléfono guardado
+        // Recuperar teléfono guardado al cargar
         window.addEventListener('load', function() {
             const telefonoGuardado = localStorage.getItem('ultimoTelefono');
             if (telefonoGuardado) {
@@ -545,14 +564,6 @@
                 telefonoGuardadoMsg.style.display = 'block';
             }
         });
-        
-        // Limpiar teléfono
-        window.limpiarTelefono = function() {
-            telefonoInput.value = '';
-            localStorage.removeItem('ultimoTelefono');
-            telefonoGuardadoMsg.style.display = 'none';
-            mostrarEstado('🧹 Teléfono limpiado', 'success');
-        };
     </script>
 </body>
 </html>
