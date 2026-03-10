@@ -430,7 +430,7 @@
 
 <body class="bg-background-light dark:bg-background-dark font-display flex flex-col min-h-screen text-[#0d121b] dark:text-white transition-colors duration-200">
     
-    <!-- Intro animada tipo persiana con degradado (solo dura 2 segundos) -->
+    <!-- Intro animada tipo persiana con degradado -->
     <div id="intro" style="
       position: fixed;
       top: 0; left: 0;
@@ -444,8 +444,17 @@
       <img src="logo envios.jpg" alt="ANMAGO Store" style="width: 500px; animation: bounce 1s infinite;">
     </div>
 
-    <!-- Contenido principal (visible desde el inicio) -->
-    <div id="mainContent">
+    <!-- Pantalla de carga para verificar login -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-gray-900">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mb-6"></div>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Verificando acceso</h2>
+            <p class="text-gray-600 dark:text-gray-400">Por favor espera mientras validamos tu sesión...</p>
+        </div>
+    </div>
+
+    <!-- Contenido principal (oculto inicialmente) -->
+    <div id="mainContent" class="hidden">
         <!-- Top Navigation Bar -->
         <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
             <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
@@ -461,8 +470,8 @@
                 <div class="flex items-center gap-4">
                     <!-- Información del usuario (solo desktop) -->
                     <div class="hidden md:flex flex-col items-end mr-2">
-                        <span class="text-sm font-semibold text-[#0d121b] dark:text-white">Digitador</span>
-                        <span class="text-xs text-[#4c669a] dark:text-gray-400">Oficina</span>
+                        <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Cargando...</span>
+                        <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Verificando...</span>
                     </div>
                     
                     <!-- Avatar del usuario -->
@@ -471,11 +480,30 @@
                          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
                     </div>
                     
+                    <!-- Botón de Planillas Mensajeros (solo visible para ADMIN) -->
+                    <button id="adminPlanillaButton" 
+                            class="hidden flex items-center justify-center size-10 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 transition-colors group relative"
+                            title="Planillas de mensajeros (Admin)">
+                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">assignment</span>
+                        <!-- Tooltip para móviles -->
+                        <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                            Planillas Mensajeros
+                        </div>
+                    </button>
+                    
+                    
                     <!-- Botón de historial -->
                     <button id="historialButton" 
                             class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             title="Ver mi historial de envíos">
                         <span class="material-symbols-outlined text-[#4c669a]">history</span>
+                    </button>
+                    
+                    <!-- Botón de logout -->
+                    <button id="logoutButton" 
+                            class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            title="Cerrar sesión">
+                        <span class="material-symbols-outlined text-[#4c669a]">logout</span>
                     </button>
                 </div>
             </div>
@@ -593,7 +621,7 @@
                             
                             <!-- Campos ocultos -->
                             <input type="hidden" id="correoRemitente" name="correoRemitente">
-                            <input type="hidden" id="usuarioId" name="usuarioId" value="DIGITADOR_WEB">
+                            <input type="hidden" id="usuarioId" name="usuarioId">
                             <input type="hidden" id="pagadoRemitente" name="pagadoRemitente" value="false">
                         </div>
                     </div>
@@ -677,7 +705,8 @@
                                 <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Valor a Recaudar ($)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#4c669a]">attach_money</span>
-                                    <input id="valorRecaudar" name="valorRecaudar" class="w-full h-12 pl-12 pr-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="0.00" type="number" min="0" step="100"/>
+                                    <input id="valorRecaudar" name="valorRecaudar" class="w-full h-12 pl-12 pr-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="0.00" type="number" min="0" step="100" disabled/>
+                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded font-bold hidden" id="autoRecaudoLabel">AUTO</div>
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="valorRecaudarHelp"></p>
                             </div>
@@ -772,17 +801,37 @@
 
     <script>
     // ============================================
+    // SIMULACIÓN DE LOGIN (para que funcione inmediatamente)
+    // ============================================
+    
+    // Ocultar intro después de 2 segundos
+    setTimeout(() => {
+        const intro = document.getElementById('intro');
+        if (intro) intro.style.display = 'none';
+    }, 2000);
+    
+    // Simular verificación de login exitosa después de 1.5 segundos
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainContent = document.getElementById('mainContent');
+        
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (mainContent) mainContent.classList.remove('hidden');
+        
+        // Actualizar información del usuario
+        document.getElementById('nombreUsuario').textContent = 'Digitador';
+        document.getElementById('rolUsuario').textContent = 'Oficina';
+        
+        // Inicializar el resto de la aplicación
+        inicializarAplicacion();
+    }, 1500);
+    
+    // ============================================
     // VARIABLES GLOBALES
     // ============================================
     let modoEdicion = false;
     let guiaActual = '';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_y8kiJPEe9CyUGsQHNbRPpWnZw3SSfDPjOazkwk2nx4nYwG3_yF0AhywfkV8C3aPD/exec';
-
-    // Ocultar la intro después de 2 segundos
-    setTimeout(() => {
-        const intro = document.getElementById('intro');
-        if (intro) intro.style.display = 'none';
-    }, 2000);
     
     // Función para mostrar notificaciones
     function mostrarNotificacion(mensaje, tipo = 'success') {
@@ -895,92 +944,129 @@
     // ============================================
     // MANEJADOR DEL ENVÍO DEL FORMULARIO
     // ============================================
-    document.getElementById('deliveryForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Deshabilitar botón
-        const submitBtn = document.getElementById('submitButton');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Procesando...';
-        submitBtn.disabled = true;
-        
-        try {
-            const formData = new FormData();
+    function configurarFormulario() {
+        document.getElementById('deliveryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // 🔴 IMPORTANTE: Si estamos en modo edición, USAR EL MISMO ID
-            if (modoEdicion && guiaActual) {
-                formData.append('envioId', guiaActual);
-                console.log('📝 Modo edición - Usando ID existente:', guiaActual);
-            }
+            // Deshabilitar botón
+            const submitBtn = document.getElementById('submitButton');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Procesando...';
+            submitBtn.disabled = true;
             
-            // Agregar todos los campos
-            formData.append('formaPago', document.getElementById('formaPago').value);
-            formData.append('remite', document.getElementById('remitente').value);
-            formData.append('telefono', document.getElementById('telefonoRemitente').value);
-            formData.append('direccion', document.getElementById('direccionRemitente').value);
-            formData.append('ciudad', document.getElementById('ciudadOrigen').value);
-            formData.append('destino', document.getElementById('destinatario').value);
-            formData.append('telefonoCliente', document.getElementById('telefonoCliente').value);
-            formData.append('ciudadDestino', document.getElementById('ciudadDestino').value);
-            formData.append('direccionDestino', document.getElementById('direccionDestino').value);
-            formData.append('barrio', document.getElementById('barrioLocalidad').value);
-            formData.append('complementoDir', document.getElementById('complementoDireccion').value);
-            formData.append('valorRecaudar', document.getElementById('valorRecaudar').value || '0');
-            formData.append('usuarioId', 'DIGITADOR_WEB');
-            
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                if (modoEdicion) {
-                    mostrarNotificacion(`✅ Guía ${guiaActual} actualizada correctamente`);
-                } else {
-                    mostrarNotificacion(`✅ Nueva guía ${result.envioId} creada`);
-                    document.getElementById('envioId').value = result.envioId;
+            try {
+                const formData = new FormData();
+                
+                // 🔴 IMPORTANTE: Si estamos en modo edición, USAR EL MISMO ID
+                if (modoEdicion && guiaActual) {
+                    formData.append('envioId', guiaActual);
+                    console.log('📝 Modo edición - Usando ID existente:', guiaActual);
                 }
                 
-                // Mostrar resultado
-                document.getElementById('resultSection').classList.remove('hidden');
-                document.getElementById('resultGuideNumber').textContent = result.envioId || guiaActual;
-                document.getElementById('resultDestinatario').textContent = document.getElementById('destinatario').value;
-                document.getElementById('resultValor').textContent = '$' + (document.getElementById('valorRecaudar').value || '0');
+                // Agregar todos los campos
+                formData.append('formaPago', document.getElementById('formaPago').value);
+                formData.append('remite', document.getElementById('remitente').value);
+                formData.append('telefono', document.getElementById('telefonoRemitente').value);
+                formData.append('direccion', document.getElementById('direccionRemitente').value);
+                formData.append('ciudad', document.getElementById('ciudadOrigen').value);
+                formData.append('destino', document.getElementById('destinatario').value);
+                formData.append('telefonoCliente', document.getElementById('telefonoCliente').value);
+                formData.append('ciudadDestino', document.getElementById('ciudadDestino').value);
+                formData.append('direccionDestino', document.getElementById('direccionDestino').value);
+                formData.append('barrio', document.getElementById('barrioLocalidad').value);
+                formData.append('complementoDir', document.getElementById('complementoDireccion').value);
+                formData.append('valorRecaudar', document.getElementById('valorRecaudar').value || '0');
+                formData.append('usuarioId', 'DIGITADOR_WEB');
                 
-                // Resetear modo edición
-                modoEdicion = false;
-                guiaActual = '';
-            } else {
-                mostrarNotificacion('❌ Error: ' + (result.message || 'Error al guardar'), 'error');
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (modoEdicion) {
+                        mostrarNotificacion(`✅ Guía ${guiaActual} actualizada correctamente`);
+                        document.getElementById('resultMessage').textContent = `Guía ${guiaActual} actualizada exitosamente`;
+                    } else {
+                        mostrarNotificacion(`✅ Nueva guía ${result.envioId} creada`);
+                        document.getElementById('resultMessage').textContent = `Guía ${result.envioId} generada exitosamente`;
+                        document.getElementById('envioId').value = result.envioId;
+                    }
+                    
+                    // Mostrar resultado
+                    document.getElementById('resultSection').classList.remove('hidden');
+                    document.getElementById('resultGuideNumber').textContent = result.envioId || guiaActual;
+                    document.getElementById('resultDestinatario').textContent = document.getElementById('destinatario').value;
+                    document.getElementById('resultValor').textContent = '$' + (document.getElementById('valorRecaudar').value || '0');
+                    
+                    // Resetear modo edición
+                    modoEdicion = false;
+                    guiaActual = '';
+                } else {
+                    mostrarNotificacion('❌ Error: ' + (result.message || 'Error al guardar'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('❌ Error al conectar con el servidor', 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            mostrarNotificacion('❌ Error al conectar con el servidor', 'error');
-        } finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
-    });
+        });
+    }
     
     // ============================================
     // BOTÓN NUEVO ENVÍO
     // ============================================
-    document.getElementById('newDeliveryBtn')?.addEventListener('click', function() {
-        document.getElementById('deliveryForm').reset();
-        document.getElementById('resultSection').classList.add('hidden');
-        document.getElementById('envioId').value = 'Por generar (servidor)';
-        modoEdicion = false;
-        guiaActual = '';
-    });
+    function configurarBotonNuevo() {
+        document.getElementById('newDeliveryBtn')?.addEventListener('click', function() {
+            document.getElementById('deliveryForm').reset();
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('envioId').value = 'Por generar (servidor)';
+            modoEdicion = false;
+            guiaActual = '';
+        });
+    }
     
     // ============================================
-    // INICIALIZACIÓN
+    // CONFIGURAR OPCIONES DE PAGO
     // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
+    function configurarPago() {
+        const paymentOptions = document.querySelectorAll('.payment-option');
+        paymentOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.dataset.value;
+                document.getElementById('formaPago').value = value;
+                
+                paymentOptions.forEach(opt => {
+                    opt.classList.remove('bg-primary', 'text-white', 'border-primary');
+                    opt.classList.add('border-gray-200');
+                });
+                this.classList.add('bg-primary', 'text-white', 'border-primary');
+                this.classList.remove('border-gray-200');
+                
+                document.getElementById('resumenFormaPago').textContent = 
+                    value === 'contado' ? 'Contado' : 
+                    value === 'contraentrega' ? 'Contraentrega' : 'Con Recaudo';
+            });
+        });
+        
+        document.getElementById('valorRecaudar').addEventListener('input', function() {
+            document.getElementById('resumenValorRecaudar').textContent = '$' + (this.value || '0');
+        });
+    }
+    
+    // ============================================
+    // INICIALIZACIÓN PRINCIPAL
+    // ============================================
+    function inicializarAplicacion() {
         agregarBuscadorGuia();
-    });
+        configurarFormulario();
+        configurarBotonNuevo();
+        configurarPago();
+    }
     </script>
 </body>
 </html>
