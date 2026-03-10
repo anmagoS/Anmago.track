@@ -4,6 +4,7 @@
     <title>📸 Captura Múltiple - Mensajeros</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <style>
         * {
             margin: 0;
@@ -12,98 +13,293 @@
         }
         
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
-            padding: 15px;
         }
-
-        /* Estilos para el header (agregados) */
-        .header {
-            background: white;
-            border-radius: 20px;
-            padding: 15px 25px;
-            max-width: 800px;
-            margin: 0 auto 20px auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        
+        /* Estilos del header (copiados exactamente) */
+        .sticky {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e7ebf3;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .dark .sticky {
+            background: #1a202c;
+            border-color: #2d3748;
+        }
+        
+        .max-w-7xl {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        
+        .flex {
             display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
             justify-content: space-between;
-            align-items: center;
         }
         
-        .header-logo {
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .text-\[ \] {
+            color: #0d121b;
+        }
+        
+        .dark .text-\[\#0d121b\] {
+            color: white;
+        }
+        
+        .size-10 {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .bg-primary\/10 {
+            background-color: rgba(19, 91, 236, 0.1);
+        }
+        
+        .text-primary {
+            color: #135bec;
+        }
+        
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .bg-blue-50 {
+            background-color: #eff6ff;
+        }
+        
+        .dark .bg-blue-900\/20 {
+            background-color: rgba(30, 58, 138, 0.2);
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .dark .text-blue-400 {
+            color: #60a5fa;
+        }
+        
+        .bg-green-50 {
+            background-color: #f0fdf4;
+        }
+        
+        .dark .bg-green-900\/20 {
+            background-color: rgba(20, 83, 45, 0.2);
+        }
+        
+        .text-green-600 {
+            color: #16a34a;
+        }
+        
+        .dark .text-green-400 {
+            color: #4ade80;
+        }
+        
+        .w-px {
+            width: 1px;
+        }
+        
+        .h-8 {
+            height: 2rem;
+        }
+        
+        .bg-gray-300 {
+            background-color: #d1d5db;
+        }
+        
+        .dark .bg-gray-700 {
+            background-color: #374151;
+        }
+        
+        .mx-2 {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .md\:flex {
             display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
-        .header-logo span {
-            font-size: 24px;
-            color: #0088cc;
+        .md\:inline {
+            display: inline;
         }
         
-        .header-logo h2 {
-            font-size: 20px;
-            margin: 0;
-            color: #333;
-        }
-        
-        .header-nav {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 15px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .nav-btn.editor {
-            background: #e3f2fd;
-            color: #1976D2;
-        }
-        
-        .nav-btn.editor:hover {
-            background: #bbdefb;
-        }
-        
-        .nav-btn.capturas {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .nav-btn.capturas:hover {
-            background: #c8e6c9;
-        }
-        
-        .nav-btn span {
-            font-size: 18px;
-        }
-        
-        @media (max-width: 600px) {
-            .header {
-                flex-direction: column;
-                gap: 10px;
+        @media (max-width: 768px) {
+            .md\:hidden {
+                display: block;
             }
-            
-            .nav-btn span:last-child {
+            .md\:flex, .md\:inline {
                 display: none;
             }
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-end {
+            align-items: flex-end;
+        }
+        
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .text-\[\#4c669a\] {
+            color: #4c669a;
+        }
+        
+        .dark .text-gray-400 {
+            color: #9ca3af;
+        }
+        
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        
+        .border-2 {
+            border-width: 2px;
+        }
+        
+        .border-primary {
+            border-color: #135bec;
+        }
+        
+        .bg-cover {
+            background-size: cover;
+        }
+        
+        .bg-center {
+            background-position: center;
+        }
+        
+        .bg-no-repeat {
+            background-repeat: no-repeat;
+        }
+        
+        .hover\:bg-gray-100:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .dark .hover\:bg-gray-800:hover {
+            background-color: #2d3748;
+        }
+        
+        .transition-colors {
+            transition: background-color 0.3s;
+        }
+        
+        .group {
+            position: relative;
+        }
+        
+        .group-hover\:opacity-100:hover {
+            opacity: 1;
+        }
+        
+        .opacity-0 {
+            opacity: 0;
+        }
+        
+        .pointer-events-none {
+            pointer-events: none;
+        }
+        
+        .whitespace-nowrap {
+            white-space: nowrap;
+        }
+        
+        .z-50 {
+            z-index: 50;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        .absolute {
+            position: absolute;
+        }
+        
+        .right-0 {
+            right: 0;
+        }
+        
+        .top-full {
+            top: 100%;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        /* Contenedor principal */
+        .main-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
         }
         
         .container {
             background: white;
             border-radius: 20px;
             padding: 25px;
-            max-width: 800px;
-            margin: 0 auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
@@ -313,61 +509,114 @@
 </head>
 <body>
     <!-- ============================================
-         HEADER CON NAVEGACIÓN ENTRE SISTEMAS
+         HEADER EXACTAMENTE COMO LO PEDISTE
          ============================================ -->
-    <div class="header">
-        <div class="header-logo">
-            <span class="material-symbols-outlined">local_shipping</span>
-            <h2>E.S.P - Capturas</h2>
-        </div>
-        <div class="header-nav">
-            <a href="https://anmagos.github.io/Anmago.track/edicion.html" class="nav-btn editor">
-                <span>✏️</span>
-                <span>Editor</span>
-            </a>
-            <a href="https://anmagos.github.io/Anmago.track/registro.html" class="nav-btn capturas">
-                <span>📝</span>
-                <span>Registro Manual</span>
-            </a>
-        </div>
-    </div>
+    <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
+        <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
+            <!-- Logo y título -->
+            <div class="flex items-center gap-4 text-[#0d121b] dark:text-white">
+                <div class="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
+                    <span class="material-symbols-outlined text-2xl">local_shipping</span>
+                </div>
+                <h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">E.S.P</h2>
+            </div>
 
-    <div class="container">
-        <h2>📸 Captura Múltiple de Rótulos</h2>
-        
-        <div class="form-group">
-            <label>📞 Teléfono del Remitente (10 dígitos)</label>
-            <input type="tel" id="telefonoRemitente" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric">
-            <small style="color: #666;">Solo 10 dígitos, sin 57 ni espacios</small>
-            <div id="telefonoGuardadoMsg" class="telefono-guardado"></div>
+            <!-- Sección derecha: navegación y usuario -->
+            <div class="flex items-center gap-2">
+                <!-- BOTONES DE NAVEGACIÓN -->
+                <a href="https://anmagos.github.io/Anmago.track/edicion.html" 
+                   class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group relative"
+                   title="Editor de Guías">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">edit</span>
+                    <span class="hidden md:inline text-sm font-medium text-blue-700 dark:text-blue-300">Editor</span>
+                    <!-- Tooltip para móviles -->
+                    <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
+                        Editor de Guías
+                    </div>
+                </a>
+                
+                <a href="https://anmagos.github.io/Anmago.track/capturas.html" 
+                   class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 transition-colors group relative"
+                   title="Captura de Fotos">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400">photo_camera</span>
+                    <span class="hidden md:inline text-sm font-medium text-green-700 dark:text-green-300">Capturas</span>
+                    <!-- Tooltip para móviles -->
+                    <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
+                        Captura de Fotos
+                    </div>
+                </a>
+                
+                <!-- Separador vertical -->
+                <div class="w-px h-8 bg-gray-300 dark:bg-gray-700 mx-2"></div>
+                
+                <!-- Información del usuario (solo desktop) -->
+                <div class="hidden md:flex flex-col items-end mr-2">
+                    <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Mensajero</span>
+                    <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Capturas</span>
+                </div>
+                
+                <!-- Avatar del usuario -->
+                <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
+                     data-alt="User profile avatar" 
+                     style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
+                </div>
+                
+                <!-- Botón de historial -->
+                <button id="historialButton" 
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        title="Ver mi historial de envíos">
+                    <span class="material-symbols-outlined text-[#4c669a]">history</span>
+                </button>
+                
+                <!-- Botón de logout -->
+                <button id="logoutButton" 
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        title="Cerrar sesión">
+                    <span class="material-symbols-outlined text-[#4c669a]">logout</span>
+                </button>
+            </div>
         </div>
-        
-        <div class="file-input" onclick="document.getElementById('fotos').click()">
-            <span>➕ Haz clic para agregar fotos (puedes seleccionar varias)</span>
-            <input type="file" id="fotos" accept="image/*" capture="environment" multiple style="display: none;">
+    </header>
+
+    <!-- Contenido principal -->
+    <div class="main-container">
+        <div class="container">
+            <h2>📸 Captura Múltiple de Rótulos</h2>
+            
+            <div class="form-group">
+                <label>📞 Teléfono del Remitente (10 dígitos)</label>
+                <input type="tel" id="telefonoRemitente" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric">
+                <small style="color: #666;">Solo 10 dígitos, sin 57 ni espacios</small>
+                <div id="telefonoGuardadoMsg" class="telefono-guardado"></div>
+            </div>
+            
+            <div class="file-input" onclick="document.getElementById('fotos').click()">
+                <span>➕ Haz clic para agregar fotos (puedes seleccionar varias)</span>
+                <input type="file" id="fotos" accept="image/*" capture="environment" multiple style="display: none;">
+            </div>
+            
+            <div class="stats">
+                <span>📸 Fotos: <span id="totalFotos">0</span></span>
+                <span>🆔 Último ID: <span id="ultimoID">-</span></span>
+            </div>
+            
+            <div id="previewContainer" class="preview-grid"></div>
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="finalizarEnvio()" class="btn-enviar" id="btnFinalizar">
+                    📲 FINALIZAR Y ENVIAR
+                </button>
+                <button onclick="limpiarTodo()" class="btn-limpiar" id="btnLimpiar">
+                    🗑️ LIMPIAR TODO
+                </button>
+            </div>
+            
+            <div id="estado" class="estado"></div>
         </div>
-        
-        <div class="stats">
-            <span>📸 Fotos: <span id="totalFotos">0</span></span>
-            <span>🆔 Último ID: <span id="ultimoID">-</span></span>
-        </div>
-        
-        <div id="previewContainer" class="preview-grid"></div>
-        
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        
-        <div class="button-group">
-            <button onclick="finalizarEnvio()" class="btn-enviar" id="btnFinalizar">
-                📲 FINALIZAR Y ENVIAR
-            </button>
-            <button onclick="limpiarTodo()" class="btn-limpiar" id="btnLimpiar">
-                🗑️ LIMPIAR TODO
-            </button>
-        </div>
-        
-        <div id="estado" class="estado"></div>
     </div>
 
     <script>
@@ -694,6 +943,14 @@
                 telefonoInput.value = telefonoGuardado;
                 telefonoGuardadoMsg.textContent = `📌 Usando teléfono: ${telefonoGuardado}`;
                 telefonoGuardadoMsg.style.display = 'block';
+            }
+        });
+
+        // Función para logout (ejemplo)
+        document.getElementById('logoutButton')?.addEventListener('click', function() {
+            if (confirm('¿Cerrar sesión?')) {
+                localStorage.clear();
+                location.reload();
             }
         });
     </script>
