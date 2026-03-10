@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>✏️ Editor de Guías - Completar Registros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <style>
         * {
             margin: 0;
@@ -14,12 +15,288 @@
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #f0f2f5;
-            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* Estilos del header (copiados exactamente) */
+        .sticky {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e7ebf3;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .dark .sticky {
+            background: #1a202c;
+            border-color: #2d3748;
+        }
+        
+        .max-w-7xl {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .text-\[ \] {
+            color: #0d121b;
+        }
+        
+        .dark .text-\[\#0d121b\] {
+            color: white;
+        }
+        
+        .size-10 {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .bg-primary\/10 {
+            background-color: rgba(19, 91, 236, 0.1);
+        }
+        
+        .text-primary {
+            color: #135bec;
+        }
+        
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .bg-blue-50 {
+            background-color: #eff6ff;
+        }
+        
+        .dark .bg-blue-900\/20 {
+            background-color: rgba(30, 58, 138, 0.2);
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .dark .text-blue-400 {
+            color: #60a5fa;
+        }
+        
+        .bg-green-50 {
+            background-color: #f0fdf4;
+        }
+        
+        .dark .bg-green-900\/20 {
+            background-color: rgba(20, 83, 45, 0.2);
+        }
+        
+        .text-green-600 {
+            color: #16a34a;
+        }
+        
+        .dark .text-green-400 {
+            color: #4ade80;
+        }
+        
+        .w-px {
+            width: 1px;
+        }
+        
+        .h-8 {
+            height: 2rem;
+        }
+        
+        .bg-gray-300 {
+            background-color: #d1d5db;
+        }
+        
+        .dark .bg-gray-700 {
+            background-color: #374151;
+        }
+        
+        .mx-2 {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .md\:flex {
+            display: flex;
+        }
+        
+        .md\:inline {
+            display: inline;
+        }
+        
+        @media (max-width: 768px) {
+            .md\:hidden {
+                display: block;
+            }
+            .md\:flex, .md\:inline {
+                display: none;
+            }
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-end {
+            align-items: flex-end;
+        }
+        
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .text-\[\#4c669a\] {
+            color: #4c669a;
+        }
+        
+        .dark .text-gray-400 {
+            color: #9ca3af;
+        }
+        
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        
+        .border-2 {
+            border-width: 2px;
+        }
+        
+        .border-primary {
+            border-color: #135bec;
+        }
+        
+        .bg-cover {
+            background-size: cover;
+        }
+        
+        .bg-center {
+            background-position: center;
+        }
+        
+        .bg-no-repeat {
+            background-repeat: no-repeat;
+        }
+        
+        .hover\:bg-gray-100:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .dark .hover\:bg-gray-800:hover {
+            background-color: #2d3748;
+        }
+        
+        .transition-colors {
+            transition: background-color 0.3s;
+        }
+        
+        .group {
+            position: relative;
+        }
+        
+        .group-hover\:opacity-100:hover {
+            opacity: 1;
+        }
+        
+        .opacity-0 {
+            opacity: 0;
+        }
+        
+        .pointer-events-none {
+            pointer-events: none;
+        }
+        
+        .whitespace-nowrap {
+            white-space: nowrap;
+        }
+        
+        .z-50 {
+            z-index: 50;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        .absolute {
+            position: absolute;
+        }
+        
+        .right-0 {
+            right: 0;
+        }
+        
+        .top-full {
+            top: 100%;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        /* Contenedor principal */
+        .main-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
         }
         
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
             background: white;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
@@ -293,157 +570,230 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>✏️ Editor y Completado de Guías</h1>
-            <p>Busque una guía existente (de mensajero) y complete los datos faltantes</p>
+    <!-- ============================================
+         HEADER EXACTAMENTE COMO LO PEDISTE
+         ============================================ -->
+    <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
+        <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
+            <!-- Logo y título -->
+            <div class="flex items-center gap-4 text-[#0d121b] dark:text-white">
+                <div class="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
+                    <span class="material-symbols-outlined text-2xl">local_shipping</span>
+                </div>
+                <h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">E.S.P</h2>
+            </div>
+
+            <!-- Sección derecha: navegación y usuario -->
+            <div class="flex items-center gap-2">
+                <!-- BOTONES DE NAVEGACIÓN -->
+                <a href="https://anmagos.github.io/Anmago.track/edicion.html" 
+                   class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group relative"
+                   title="Editor de Guías">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">edit</span>
+                    <span class="hidden md:inline text-sm font-medium text-blue-700 dark:text-blue-300">Editor</span>
+                    <!-- Tooltip para móviles -->
+                    <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
+                        Editor de Guías
+                    </div>
+                </a>
+                
+                <a href="https://anmagos.github.io/Anmago.track/capturas.html" 
+                   class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 transition-colors group relative"
+                   title="Captura de Fotos">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400">photo_camera</span>
+                    <span class="hidden md:inline text-sm font-medium text-green-700 dark:text-green-300">Capturas</span>
+                    <!-- Tooltip para móviles -->
+                    <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
+                        Captura de Fotos
+                    </div>
+                </a>
+                
+                <!-- Separador vertical -->
+                <div class="w-px h-8 bg-gray-300 dark:bg-gray-700 mx-2"></div>
+                
+                <!-- Información del usuario (solo desktop) -->
+                <div class="hidden md:flex flex-col items-end mr-2">
+                    <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Digitador</span>
+                    <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Editor</span>
+                </div>
+                
+                <!-- Avatar del usuario -->
+                <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
+                     data-alt="User profile avatar" 
+                     style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
+                </div>
+                
+                <!-- Botón de historial -->
+                <button id="historialButton" 
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        title="Ver mi historial de envíos">
+                    <span class="material-symbols-outlined text-[#4c669a]">history</span>
+                </button>
+                
+                <!-- Botón de logout -->
+                <button id="logoutButton" 
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        title="Cerrar sesión">
+                    <span class="material-symbols-outlined text-[#4c669a]">logout</span>
+                </button>
+            </div>
         </div>
-        
-        <div class="content">
-            <!-- BUSCADOR -->
-            <div class="buscador">
-                <h3>
-                    <span>🔍</span>
-                    Buscar Guía Existente
-                </h3>
-                <div class="input-group">
-                    <input type="text" id="buscadorGuia" placeholder="Ej: ENV2403120011523045678">
-                    <button onclick="buscarGuia()">
+    </header>
+
+    <!-- Contenido principal -->
+    <div class="main-container">
+        <div class="container">
+            <div class="header">
+                <h1>✏️ Editor y Completado de Guías</h1>
+                <p>Busque una guía existente (de mensajero) y complete los datos faltantes</p>
+            </div>
+            
+            <div class="content">
+                <!-- BUSCADOR -->
+                <div class="buscador">
+                    <h3>
                         <span>🔍</span>
-                        Buscar y Cargar
-                    </button>
-                </div>
-                <div style="margin-top: 10px; font-size: 13px; color: #666;">
-                    💡 Si la guía fue creada por el mensajero, se cargará automáticamente el teléfono del remitente
-                </div>
-            </div>
-            
-            <!-- INFORMACIÓN DE LA GUÍA ENCONTRADA -->
-            <div class="info-guia" id="infoGuia">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <span class="label">Guía:</span>
-                        <span class="valor" id="guiaEncontrada">-</span>
+                        Buscar Guía Existente
+                    </h3>
+                    <div class="input-group">
+                        <input type="text" id="buscadorGuia" placeholder="Ej: ENV2403120011523045678">
+                        <button onclick="buscarGuia()">
+                            <span>🔍</span>
+                            Buscar y Cargar
+                        </button>
                     </div>
-                    <div>
-                        <span class="label">Estado:</span>
-                        <span id="estadoGuia" class="badge badge-capturado">CAPTURADO</span>
-                    </div>
-                </div>
-                <div style="margin-top: 8px;">
-                    <span class="label">📞 Teléfono Remitente cargado:</span>
-                    <span class="valor" id="telefonoCargado">-</span>
-                </div>
-            </div>
-            
-            <!-- FORMULARIO DE EDICIÓN -->
-            <form class="formulario" id="formularioEdicion" onsubmit="return false;">
-                <h3>📝 Completar Datos de la Guía</h3>
-                
-                <div class="grid">
-                    <!-- ID (solo lectura) -->
-                    <div class="campo">
-                        <label>ID de Guía</label>
-                        <input type="text" id="envioId" readonly>
-                    </div>
-                    
-                    <!-- Fecha (solo lectura) -->
-                    <div class="campo">
-                        <label>Fecha de Creación</label>
-                        <input type="text" id="fechaCreacion" readonly>
-                    </div>
-                    
-                    <!-- Forma de Pago -->
-                    <div class="campo">
-                        <label>Forma de Pago *</label>
-                        <select id="formaPago" required>
-                            <option value="">Seleccione...</option>
-                            <option value="contado">Contado</option>
-                            <option value="contraentrega">Contraentrega</option>
-                            <option value="contraentrega_recaudo">Con Recaudo</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Teléfono Remitente (viene del mensajero) -->
-                    <div class="campo">
-                        <label>Teléfono Remitente</label>
-                        <input type="text" id="telefonoRemitente" readonly class="telefono-cargado">
-                    </div>
-                    
-                    <!-- Remitente -->
-                    <div class="campo">
-                        <label>Nombre Remitente *</label>
-                        <input type="text" id="remitente" placeholder="Ej: Distribuidora Central" required>
-                    </div>
-                    
-                    <!-- Dirección Remitente -->
-                    <div class="campo campo-full">
-                        <label>Dirección Remitente *</label>
-                        <input type="text" id="direccionRemitente" placeholder="Ej: Calle 123 #45-67" required>
-                    </div>
-                    
-                    <!-- Destinatario -->
-                    <div class="campo">
-                        <label>Nombre Destinatario *</label>
-                        <input type="text" id="destinatario" placeholder="Ej: Juan Pérez" required>
-                    </div>
-                    
-                    <!-- Teléfono Cliente (destinatario) -->
-                    <div class="campo">
-                        <label>Teléfono Destinatario *</label>
-                        <input type="text" id="telefonoCliente" placeholder="Ej: 3001234567" required>
-                    </div>
-                    
-                    <!-- Ciudad Destino -->
-                    <div class="campo">
-                        <label>Ciudad Destino *</label>
-                        <select id="ciudadDestino" required>
-                            <option value="">Seleccione...</option>
-                            <option value="Bogotá D.C.">Bogotá D.C.</option>
-                            <option value="Soacha">Soacha</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Barrio -->
-                    <div class="campo">
-                        <label>Barrio *</label>
-                        <input type="text" id="barrio" placeholder="Ej: Chapinero" required>
-                    </div>
-                    
-                    <!-- Dirección Destino -->
-                    <div class="campo campo-full">
-                        <label>Dirección Destino *</label>
-                        <input type="text" id="direccionDestino" placeholder="Ej: Carrera 80 #12-34" required>
-                    </div>
-                    
-                    <!-- Complemento -->
-                    <div class="campo">
-                        <label>Complemento</label>
-                        <input type="text" id="complemento" placeholder="Apto 501, Torre 2">
-                    </div>
-                    
-                    <!-- Valor a Recaudar -->
-                    <div class="campo">
-                        <label>Valor a Recaudar ($)</label>
-                        <input type="number" id="valorRecaudar" placeholder="0" min="0" step="100">
-                    </div>
-                    
-                    <!-- Observaciones -->
-                    <div class="campo campo-full">
-                        <label>Observaciones</label>
-                        <textarea id="observaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+                    <div style="margin-top: 10px; font-size: 13px; color: #666;">
+                        💡 Si la guía fue creada por el mensajero, se cargará automáticamente el teléfono del remitente
                     </div>
                 </div>
                 
-                <div class="acciones">
-                    <button type="button" class="btn-limpiar" onclick="limpiarFormulario()">
-                        🗑️ Limpiar
-                    </button>
-                    <button type="button" class="btn-guardar" onclick="guardarCambios()">
-                        💾 Guardar Cambios
-                    </button>
+                <!-- INFORMACIÓN DE LA GUÍA ENCONTRADA -->
+                <div class="info-guia" id="infoGuia">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span class="label">Guía:</span>
+                            <span class="valor" id="guiaEncontrada">-</span>
+                        </div>
+                        <div>
+                            <span class="label">Estado:</span>
+                            <span id="estadoGuia" class="badge badge-capturado">CAPTURADO</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <span class="label">📞 Teléfono Remitente cargado:</span>
+                        <span class="valor" id="telefonoCargado">-</span>
+                    </div>
                 </div>
-            </form>
+                
+                <!-- FORMULARIO DE EDICIÓN -->
+                <form class="formulario" id="formularioEdicion" onsubmit="return false;">
+                    <h3>📝 Completar Datos de la Guía</h3>
+                    
+                    <div class="grid">
+                        <!-- ID (solo lectura) -->
+                        <div class="campo">
+                            <label>ID de Guía</label>
+                            <input type="text" id="envioId" readonly>
+                        </div>
+                        
+                        <!-- Fecha (solo lectura) -->
+                        <div class="campo">
+                            <label>Fecha de Creación</label>
+                            <input type="text" id="fechaCreacion" readonly>
+                        </div>
+                        
+                        <!-- Forma de Pago -->
+                        <div class="campo">
+                            <label>Forma de Pago *</label>
+                            <select id="formaPago" required>
+                                <option value="">Seleccione...</option>
+                                <option value="contado">Contado</option>
+                                <option value="contraentrega">Contraentrega</option>
+                                <option value="contraentrega_recaudo">Con Recaudo</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Teléfono Remitente (viene del mensajero) -->
+                        <div class="campo">
+                            <label>Teléfono Remitente</label>
+                            <input type="text" id="telefonoRemitente" readonly class="telefono-cargado">
+                        </div>
+                        
+                        <!-- Remitente -->
+                        <div class="campo">
+                            <label>Nombre Remitente *</label>
+                            <input type="text" id="remitente" placeholder="Ej: Distribuidora Central" required>
+                        </div>
+                        
+                        <!-- Dirección Remitente -->
+                        <div class="campo campo-full">
+                            <label>Dirección Remitente *</label>
+                            <input type="text" id="direccionRemitente" placeholder="Ej: Calle 123 #45-67" required>
+                        </div>
+                        
+                        <!-- Destinatario -->
+                        <div class="campo">
+                            <label>Nombre Destinatario *</label>
+                            <input type="text" id="destinatario" placeholder="Ej: Juan Pérez" required>
+                        </div>
+                        
+                        <!-- Teléfono Cliente (destinatario) -->
+                        <div class="campo">
+                            <label>Teléfono Destinatario *</label>
+                            <input type="text" id="telefonoCliente" placeholder="Ej: 3001234567" required>
+                        </div>
+                        
+                        <!-- Ciudad Destino -->
+                        <div class="campo">
+                            <label>Ciudad Destino *</label>
+                            <select id="ciudadDestino" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Bogotá D.C.">Bogotá D.C.</option>
+                                <option value="Soacha">Soacha</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Barrio -->
+                        <div class="campo">
+                            <label>Barrio *</label>
+                            <input type="text" id="barrio" placeholder="Ej: Chapinero" required>
+                        </div>
+                        
+                        <!-- Dirección Destino -->
+                        <div class="campo campo-full">
+                            <label>Dirección Destino *</label>
+                            <input type="text" id="direccionDestino" placeholder="Ej: Carrera 80 #12-34" required>
+                        </div>
+                        
+                        <!-- Complemento -->
+                        <div class="campo">
+                            <label>Complemento</label>
+                            <input type="text" id="complemento" placeholder="Apto 501, Torre 2">
+                        </div>
+                        
+                        <!-- Valor a Recaudar -->
+                        <div class="campo">
+                            <label>Valor a Recaudar ($)</label>
+                            <input type="number" id="valorRecaudar" placeholder="0" min="0" step="100">
+                        </div>
+                        
+                        <!-- Observaciones -->
+                        <div class="campo campo-full">
+                            <label>Observaciones</label>
+                            <textarea id="observaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="acciones">
+                        <button type="button" class="btn-limpiar" onclick="limpiarFormulario()">
+                            🗑️ Limpiar
+                        </button>
+                        <button type="button" class="btn-guardar" onclick="guardarCambios()">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
@@ -639,6 +989,14 @@
         document.getElementById('buscadorGuia').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 buscarGuia();
+            }
+        });
+
+        // Función para logout (ejemplo)
+        document.getElementById('logoutButton')?.addEventListener('click', function() {
+            if (confirm('¿Cerrar sesión?')) {
+                localStorage.clear();
+                location.reload();
             }
         });
     </script>
