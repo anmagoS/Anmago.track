@@ -17,6 +17,86 @@
             min-height: 100vh;
             padding: 15px;
         }
+
+        /* Estilos para el header (agregados) */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 25px;
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-logo span {
+            font-size: 24px;
+            color: #0088cc;
+        }
+        
+        .header-logo h2 {
+            font-size: 20px;
+            margin: 0;
+            color: #333;
+        }
+        
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn.editor {
+            background: #e3f2fd;
+            color: #1976D2;
+        }
+        
+        .nav-btn.editor:hover {
+            background: #bbdefb;
+        }
+        
+        .nav-btn.capturas {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .nav-btn.capturas:hover {
+            background: #c8e6c9;
+        }
+        
+        .nav-btn span {
+            font-size: 18px;
+        }
+        
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-btn span:last-child {
+                display: none;
+            }
+        }
         
         .container {
             background: white;
@@ -232,6 +312,26 @@
     </style>
 </head>
 <body>
+    <!-- ============================================
+         HEADER CON NAVEGACIÓN ENTRE SISTEMAS
+         ============================================ -->
+    <div class="header">
+        <div class="header-logo">
+            <span class="material-symbols-outlined">local_shipping</span>
+            <h2>E.S.P - Capturas</h2>
+        </div>
+        <div class="header-nav">
+            <a href="https://anmagos.github.io/Anmago.track/edicion.html" class="nav-btn editor">
+                <span>✏️</span>
+                <span>Editor</span>
+            </a>
+            <a href="https://anmagos.github.io/Anmago.track/registro.html" class="nav-btn capturas">
+                <span>📝</span>
+                <span>Registro Manual</span>
+            </a>
+        </div>
+    </div>
+
     <div class="container">
         <h2>📸 Captura Múltiple de Rótulos</h2>
         
