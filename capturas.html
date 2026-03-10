@@ -200,30 +200,46 @@
             }
         });
         
-        // Generar ID único (formato: ENV + AÑO + MES + DÍA + HORA + MINUTOS + SEGUNDOS)
-        function generarID() {
-            const fecha = new Date();
-            
-            // Ajuste a hora Bogotá (UTC-5)
-            fecha.setHours(fecha.getHours() - 5);
-            
-            const año = fecha.getFullYear().toString().slice(-2);
-            const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-            const dia = fecha.getDate().toString().padStart(2, '0');
-            const hora = fecha.getHours().toString().padStart(2, '0');
-            const minutos = fecha.getMinutes().toString().padStart(2, '0');
-            const segundos = fecha.getSeconds().toString().padStart(2, '0');
-            
-            const id = `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minutos}${segundos}`;
-            
-            idGeneradoDiv.textContent = `🆔 ID: ${id}`;
-            return id;
-        }
+       // Generar ID único usando hora Colombia (SIN ajuste manual)
+function generarID() {
+    const fecha = new Date();
+    
+    // Obtener partes de la fecha en hora Colombia
+    const formatter = new Intl.DateTimeFormat('es-CO', {
+        timeZone: 'America/Bogota',
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    
+    const partes = formatter.formatToParts(fecha);
+    
+    // Extraer valores
+    let año, mes, dia, hora, minuto, segundo;
+    
+    partes.forEach(part => {
+        if (part.type === 'year') año = part.value;
+        if (part.type === 'month') mes = part.value;
+        if (part.type === 'day') dia = part.value;
+        if (part.type === 'hour') hora = part.value;
+        if (part.type === 'minute') minuto = part.value;
+        if (part.type === 'second') segundo = part.value;
+    });
+    
+    const id = `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}`;
+    
+    idGeneradoDiv.textContent = `🆔 ID: ${id}`;
+    return id;
+}
         
         // Obtener fecha y hora formateada para Colombia
         function obtenerFechaHoraColombia() {
             const fecha = new Date();
-            fecha.setHours(fecha.getHours() - 5); // Ajuste UTC-5
+            
             
             const opciones = {
                 year: 'numeric',
@@ -233,7 +249,7 @@
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: false,
-                timeZone: 'America/Bogota'
+               
             };
             
             return fecha.toLocaleString('es-CO', opciones).replace(',', '');
