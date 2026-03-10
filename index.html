@@ -456,58 +456,72 @@
     <!-- Contenido principal (oculto inicialmente) - TODO IGUAL, SOLO CAMBIA EL CSS -->
     <div id="mainContent" class="hidden">
         <!-- Top Navigation Bar -->
-        <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
-            <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
-                <!-- Logo y título -->
-                <div class="flex items-center gap-4 text-[#0d121b] dark:text-white">
-                    <div class="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
-                        <span class="material-symbols-outlined text-2xl">local_shipping</span>
-                    </div>
-                    <h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">E.S.P</h2>
-                </div>
-
-                <!-- Sección derecha: usuario y botones -->
-                <div class="flex items-center gap-4">
-                    <!-- Información del usuario (solo desktop) -->
-                    <div class="hidden md:flex flex-col items-end mr-2">
-                        <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Cargando...</span>
-                        <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Verificando...</span>
-                    </div>
-                    
-                    <!-- Avatar del usuario -->
-                    <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
-                         data-alt="User profile avatar" 
-                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
-                    </div>
-                    
-                    <!-- Botón de Planillas Mensajeros (solo visible para ADMIN) -->
-                    <button id="adminPlanillaButton" 
-                            class="hidden flex items-center justify-center size-10 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 transition-colors group relative"
-                            title="Planillas de mensajeros (Admin)">
-                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">assignment</span>
-                        <!-- Tooltip para móviles -->
-                        <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                            Planillas Mensajeros
-                        </div>
-                    </button>
-                    
-                    
-                    <!-- Botón de historial -->
-                    <button id="historialButton" 
-                            class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title="Ver mi historial de envíos">
-                        <span class="material-symbols-outlined text-[#4c669a]">history</span>
-                    </button>
-                    
-                    <!-- Botón de logout -->
-                    <button id="logoutButton" 
-                            class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title="Cerrar sesión">
-                        <span class="material-symbols-outlined text-[#4c669a]">logout</span>
-                    </button>
-                </div>
+       <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
+    <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
+        <!-- Logo y título -->
+        <div class="flex items-center gap-4 text-[#0d121b] dark:text-white">
+            <div class="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
+                <span class="material-symbols-outlined text-2xl">local_shipping</span>
             </div>
-        </header>
+            <h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">E.S.P</h2>
+        </div>
+
+        <!-- Sección derecha: navegación y usuario -->
+        <div class="flex items-center gap-2">
+            <!-- BOTONES DE NAVEGACIÓN (NUEVOS) -->
+            <a href="https://anmagos.github.io/Anmago.track/edicion.html" 
+               class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group relative"
+               title="Editor de Guías">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">edit</span>
+                <span class="hidden md:inline text-sm font-medium text-blue-700 dark:text-blue-300">Editor</span>
+                <!-- Tooltip para móviles -->
+                <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
+                    Editor de Guías
+                </div>
+            </a>
+            
+            <a href="https://anmagos.github.io/Anmago.track/capturas.html" 
+               class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 transition-colors group relative"
+               title="Captura de Fotos">
+                <span class="material-symbols-outlined text-green-600 dark:text-green-400">photo_camera</span>
+                <span class="hidden md:inline text-sm font-medium text-green-700 dark:text-green-300">Capturas</span>
+                <!-- Tooltip para móviles -->
+                <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
+                    Captura de Fotos
+                </div>
+            </a>
+            
+            <!-- Separador vertical -->
+            <div class="w-px h-8 bg-gray-300 dark:bg-gray-700 mx-2"></div>
+            
+            <!-- Información del usuario (solo desktop) -->
+            <div class="hidden md:flex flex-col items-end mr-2">
+                <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Cargando...</span>
+                <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Verificando...</span>
+            </div>
+            
+            <!-- Avatar del usuario -->
+            <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
+                 data-alt="User profile avatar" 
+                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
+            </div>
+            
+            <!-- Botón de historial -->
+            <button id="historialButton" 
+                    class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    title="Ver mi historial de envíos">
+                <span class="material-symbols-outlined text-[#4c669a]">history</span>
+            </button>
+            
+            <!-- Botón de logout -->
+            <button id="logoutButton" 
+                    class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    title="Cerrar sesión">
+                <span class="material-symbols-outlined text-[#4c669a]">logout</span>
+            </button>
+        </div>
+    </div>
+</header>
         
         <!-- Main Content Area -->
         <main class="flex-1 w-full px-4 py-8 md:px-8 lg:px-12 flex justify-center">
