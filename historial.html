@@ -71,7 +71,6 @@
         <!-- Header -->
         <header class="sticky top-0 z-40 w-full bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800 px-6 py-3 shadow-sm">
            <!-- Header de navegación profesional -->
-<!-- Header de navegación profesional -->
 <nav class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-lg no-print sticky top-0 z-50">
     <div class="container mx-auto px-4 py-3">
         <div class="flex flex-col md:flex-row justify-between items-center gap-3">
@@ -1901,5 +1900,14 @@ const estadoPagoColor = estadoInfo.texto === 'Pagado' ? 'text-green-600' :
             };
         }
     </script>
+    <script>
+    // Cerrar sesión
+    document.getElementById('logoutButton')?.addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+            localStorage.removeItem('usuarioLogueado');
+            window.location.href = 'login.html';
+        }
+    });
+</script>
 </body>
 </html>
