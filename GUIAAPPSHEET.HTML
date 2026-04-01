@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Envío - Expres Contraentrega</title>
+    <!-- Código de barras library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+    /* ===== RESET Y ESTILOS GENERALES ===== */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    html, body {
+        width: 100%;
+        height: 100%;
+        font-family: 'Arial', sans-serif;
+        font-size: 10px;
+    }
+    
+    body {
+        background: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+    
+    /* ===== CONTROLES EN PANTALLA ===== */
+    .screen-controls {
+        margin-bottom: 15px;
+        text-align: center;
+        width: 100%;
+        max-width: 800px;
+    }
+    
+    .btn-print, .btn-close, .btn-debug {
+        padding: 8px 15px;
+        margin: 0 5px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: bold;
+        transition: all 0.2s;
+    }
+    
+    .btn-print:hover, .btn-close:hover, .btn-debug:hover {
+        transform: translateY(-1px);
+    }
+    
+    .btn-print {
+        background: #135bec;
+        color: white;
+    }
+    
+    .btn-close {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-debug {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .print-instructions {
+        margin-top: 8px;
+        font-size: 9px;
+        color: #666;
+        background: #f8f9fa;
+        padding: 5px;
+        border-radius: 3px;
+        border: 1px solid #dee2e6;
+    }
+    
+    /* ===== CONTENEDOR MEDIA CARTA EN PANTALLA ===== */
+    .media-carta-screen {
+        width: 816px;
+        height: 528px;
+        background: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+    }
+    
+    /* ===== CONTENEDOR PARA IMPRESIÓN ===== */
+    .media-carta-print {
+        width: 21.59cm;
+        height: 13.97cm;
+        background: white;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        page-break-after: always;
+    }
+    
+    /* ===== GUÍA INDIVIDUAL ===== */
+    .guia-container {
+        width: 50%;
+        height: 100%;
+        padding: 0.4cm 0.5cm;
+        position: relative;
+        border-right: 1px dashed #999;
+        font-size: 9px;
+        overflow: hidden;
+    }
+    
+    .guia-container:last-child {
+        border-right: none;
+    }
+    
+    /* ===== ENCABEZADO GUÍA ===== */
+    .guia-header {
+        margin-bottom: 0.2cm;
+    }
+    
+    .logo-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.1cm;
+    }
+    
+    .logo {
+        font-size: 14px;
+        margin-right: 0.2cm;
+    }
+    
+    .empresa-info h1 {
+        font-size: 11px;
+        font-weight: bold;
+        margin: 0;
+        line-height: 1;
+        letter-spacing: 0.2px;
+    }
+    
+    .slogan {
+        font-size: 8px;
+        color: #666;
+        margin: 0;
+        font-style: italic;
+    }
+    
+    .guia-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 9px;
+        margin-top: 0.1cm;
+    }
+    
+    .info-row {
+        display: flex;
+        align-items: center;
+    }
+    
+    .label {
+        font-weight: bold;
+        margin-right: 0.1cm;
+        font-size: 9px;
+    }
+    
+    .value {
+        font-weight: bold;
+    }
+    
+    .guia-id {
+        font-size: 10px;
+        font-weight: bold;
+        color: #135bec;
+        letter-spacing: 0.5px;
+    }
+    
+    /* ===== DIVISORES ===== */
+    .divider {
+        height: 1px;
+        background: #000;
+        margin: 0.15cm 0;
+    }
+    
+    .divider.thin {
+        height: 0.5px;
+        background: #666;
+    }
+    
+    /* ===== CÓDIGO DE BARRAS ===== */
+    .codigo-barras-section {
+        text-align: center;
+        margin: 0.15cm 0;
+    }
+    
+    .codigo-barras {
+        width: 100%;
+        height: 0.6cm;
+    }
+    
+    .numero-guia-barras {
+        font-size: 8px;
+        letter-spacing: 0.5px;
+        margin-top: 0.05cm;
+        font-family: 'Courier New', monospace;
+        color: #333;
+    }
+    
+    /* ===== SECCIONES ===== */
+    .seccion {
+        margin: 0.15cm 0;
+    }
+    
+    .seccion-title {
+        font-size: 9px;
+        font-weight: bold;
+        margin-bottom: 0.1cm;
+        background: #f5f5f5;
+        padding: 0.05cm 0.1cm;
+        border-radius: 0.05cm;
+        border-left: 0.1cm solid #135bec;
+    }
+    
+    .datos {
+        font-size: 9px;
+        line-height: 1.2;
+    }
+    
+    .dato-line {
+        margin-bottom: 0.1cm;
+        min-height: 0.3cm;
+        display: flex;
+        align-items: center;
+    }
+    
+    .dato-line strong {
+        font-size: 10px;
+        color: #333;
+    }
+    
+    /* ===== INFORMACIÓN DE PAGO ===== */
+    .datos-pago {
+        text-align: center;
+        padding: 0.1cm 0;
+    }
+    
+    .pago-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 0.2cm;
+    }
+    
+    .valor {
+        font-size: 11px;
+        font-weight: bold;
+        color: #135bec;
+    }
+    
+    /* ===== OBSERVACIONES ===== */
+    .seccion.observaciones {
+        background-color: #f9f9f9;
+        border: 1px dashed #ccc;
+        padding: 0.1cm;
+        margin-top: 0.2cm;
+    }
+    
+    .observaciones-content {
+        min-height: 0.8cm;
+        font-size: 8px;
+        line-height: 1.1;
+        padding: 0.05cm;
+        color: #666;
+    }
+    
+    /* ===== PIE DE PÁGINA ===== */
+    .guia-footer {
+        position: absolute;
+        bottom: 0.2cm;
+        left: 0.5cm;
+        right: 0.5cm;
+        font-size: 7px;
+        text-align: center;
+        border-top: 0.5px solid #ccc;
+        padding-top: 0.1cm;
+        color: #666;
+    }
+    
+    .footer-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.05cm;
+    }
+    
+    .small {
+        font-size: 7px;
+    }
+    
+    /* ===== ETIQUETA REMITENTE/PAQUETE ===== */
+    .etiqueta-tipo {
+        position: absolute;
+        top: 0.3cm;
+        right: 0.3cm;
+        background: #135bec;
+        color: white;
+        font-size: 9px;
+        font-weight: bold;
+        padding: 0.05cm 0.2cm;
+        border-radius: 0.1cm;
+        z-index: 10;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .etiqueta-tipo.remitente {
+        background: #28a745;
+    }
+    
+    .etiqueta-tipo.paquete {
+        background: #ffc107;
+        color: #000;
+    }
+    
+    /* ===== LÍNEA DE CORTE VERTICAL ===== */
+    .corte-vertical {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 0;
+        height: 100%;
+        border-left: 1px dashed #999;
+        z-index: 5;
+    }
+    
+    /* ===== LÍNEA DE CORTE HORIZONTAL ===== */
+    .corte-horizontal {
+        position: absolute;
+        bottom: -0.5cm;
+        left: 0;
+        right: 0;
+        border-top: 1px dashed #999;
+        text-align: center;
+        padding-top: 0.1cm;
+        font-size: 8px;
+        color: #999;
+    }
+    
+    /* ===== PARA IMPRESIÓN ===== */
+    @media print {
+        body {
+            background: white;
+            padding: 0;
+            margin: 0;
+            width: 21.59cm;
+            height: 27.94cm;
+        }
+        
+        .screen-controls {
+            display: none;
+        }
+        
+        .media-carta-screen {
+            display: none;
+        }
+        
+        .media-carta-print {
+            display: flex;
+            width: 21.59cm;
+            height: 13.97cm;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        @page {
+            size: 21.59cm 27.94cm;
+            margin: 0;
+        }
+        
+        .guia-container {
+            width: 50%;
+            page-break-inside: avoid;
+            padding: 0.4cm 0.5cm;
+        }
+        
+        .corte-vertical {
+            border-left: 1px dashed #333;
+        }
+        
+        .corte-horizontal {
+            display: block;
+        }
+    }
+    
+    @media screen {
+        .media-carta-print {
+            display: none;
+        }
+        
+        .media-carta-screen {
+            display: flex;
+        }
+        
+        .corte-horizontal {
+            display: none;
+        }
+    }
+    
+    @media screen and (max-width: 900px) {
+        .media-carta-screen {
+            transform: scale(0.8);
+            transform-origin: center;
+        }
+        
+        .screen-controls {
+            transform: scale(0.9);
+            transform-origin: center;
+        }
+    }
+    
+    @media screen and (max-width: 700px) {
+        .media-carta-screen {
+            transform: scale(0.65);
+        }
+        
+        .screen-controls {
+            transform: scale(0.8);
+        }
+    }
+    
+    @media screen and (max-width: 500px) {
+        .media-carta-screen {
+            transform: scale(0.5);
+        }
+        
+        .screen-controls {
+            transform: scale(0.7);
+        }
+    }
+    
+    .texto-truncado {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    
+    .texto-dos-lineas {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-height: 1.2em;
+    }
+    
+    .linea-corte-texto {
+        position: absolute;
+        bottom: -0.7cm;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 8px;
+        color: #999;
+        background: white;
+        padding: 0 5px;
+    }
+    </style>
+    <script>
+        // ===== CONFIGURACIÓN =====
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
+        
+        // ===== OBTENER GUÍA DE LA URL =====
+        function obtenerGuiaDeURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('envio') || urlParams.get('guia');
+        }
+        
+        // ===== CARGAR DATOS DEL ENVÍO =====
+        async function cargarDatosGuia(envioId) {
+            try {
+                if (!envioId) {
+                    alert('No se especificó número de guía');
+                    return null;
+                }
+                
+                console.log('🔍 Cargando datos del envío:', envioId);
+                
+                const url = `${WEB_APP_URL}?action=obtenerGuia&id=${encodeURIComponent(envioId)}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.encontrado) {
+                    console.log('✅ Datos del envío cargados');
+                    return data;
+                } else {
+                    alert('No se encontró el envío: ' + envioId);
+                    return null;
+                }
+                
+            } catch (error) {
+                console.error('❌ Error cargando datos:', error);
+                alert('Error al cargar datos del envío');
+                return null;
+            }
+        }
+        
+        // ===== ACORTAR TEXTO =====
+        function acortarTexto(texto, maxLength = 35) {
+            if (!texto) return '';
+            if (texto.length <= maxLength) return texto;
+            return texto.substring(0, maxLength - 3) + '...';
+        }
+        
+        // ===== GENERAR UNA GUÍA INDIVIDUAL =====
+        function generarGuiaHTML(envio, tipo = 'remitente') {
+            const valorRecaudar = parseFloat(envio['VALOR A RECAUDAR'] || 0);
+            const valorFormateado = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(valorRecaudar);
+            
+            const fecha = new Date(envio['FECHA DE CREACION'] || new Date());
+            const fechaFormateada = fecha.toLocaleDateString('es-CO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            
+            const claseTipo = tipo === 'remitente' ? 'remitente' : 'paquete';
+            const textoEtiqueta = tipo === 'remitente' ? 'REMITENTE' : 'PAQUETE';
+            
+            const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 40);
+            const observaciones = acortarTexto(envio['OBS'] || '', 25);
+            const barrio = acortarTexto(envio['BARRIO'] || '', 20);
+            const remitente = acortarTexto(envio['REMITE'] || '', 30);
+            const destinatario = acortarTexto(envio['DESTINO'] || '', 30);
+            
+            return `
+                <div class="guia-container">
+                    <div class="etiqueta-tipo ${claseTipo}">${textoEtiqueta}</div>
+                    
+                    <header class="guia-header">
+                        <div class="logo-section">
+                            <div class="logo">🚚</div>
+                            <div class="empresa-info">
+                                <h1>ANMAGO TRACK</h1>
+                                <p class="slogan">Tu envío rápido y seguro</p>
+                            </div>
+                        </div>
+                        
+                        <div class="guia-info">
+                            <div class="info-row">
+                                <span class="label">GUÍA:</span>
+                                <span class="value guia-id">${envio['ENVIO ID'] || 'N/A'}</span>
+                            </div>
+                            
+                            <div class="info-row">
+                                <span class="label">PAGO:</span>
+                                <span class="value">${envio['FORMA DE PAGO'] || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="divider"></div>
+
+                    <div class="codigo-barras-section">
+                        <svg class="codigo-barras" data-guia-id="${envio['ENVIO ID'] || ''}"></svg>
+                        <div class="numero-guia-barras">${envio['ENVIO ID'] || 'N/A'}</div>
+                    </div>
+
+                    <div class="divider thin"></div>
+
+                    <section class="seccion remitente">
+                        <h2 class="seccion-title">📍 REMITENTE</h2>
+                        <div class="datos">
+                            <div class="dato-line">
+                                <strong class="texto-truncado">${remitente}</strong>
+                            </div>
+                            <div class="dato-line">
+                                <span class="label">Tel:</span>
+                                <span>${envio['TELEFONO'] || 'N/A'}</span>
+                            </div>
+                            <div class="dato-line">
+                                <span class="label">Dir:</span>
+                                <span>${envio['DIRECCION'] || 'N/A'}</span>
+                            </div>
+                            <div class="dato-line">
+                                <span class="label">Ciudad:</span>
+                                <span>${envio['CIUDAD'] || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="divider"></div>
+
+                    <section class="seccion destinatario">
+                        <h2 class="seccion-title">👤 DESTINATARIO</h2>
+                        <div class="datos">
+                            <div class="dato-line">
+                                <strong class="texto-truncado">${destinatario}</strong>
+                            </div>
+                            <div class="dato-line">
+                                <span class="label">Tel:</span>
+                                <span>${envio['TELEFONOCLIENTE'] || 'N/A'}</span>
+                            </div>
+                            <div class="dato-line">
+                                <span class="texto-dos-lineas">${direccion}</span>
+                            </div>
+                            <div class="dato-line">
+                                <span>${barrio}</span>
+                            </div>
+                            <div class="dato-line">
+                                <span class="label">Ciudad:</span>
+                                <span>${envio['CIUDAD DESTINO'] || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="divider"></div>
+
+                    <section class="seccion pago">
+                        <h2 class="seccion-title">💰 INFORMACIÓN DE PAGO</h2>
+                        <div class="datos-pago">
+                            <div class="pago-row">
+                                <span class="label">Valor a Recaudar:</span>
+                                <span class="value valor">${valorFormateado}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="divider"></div>
+
+                    <section class="seccion observaciones">
+                        <h2 class="seccion-title">📝 OBSERVACIONES</h2>
+                        <div class="observaciones-content">
+                            ${observaciones || '______________________________________'}
+                            <br><br>
+                            ______________________________________
+                        </div>
+                    </section>
+
+                    <footer class="guia-footer">
+                        <div class="footer-line">
+                            <span class="small">📞 Soporte: 3006498710</span>
+                            <span class="small">🌐 https://anmagos.github.io/Anmago.track/track</span>
+                            <span class="small">CARRERA 13 N° 9-39 OFC 1023 TORRE SUR CC VISTO</span>
+                        </div>
+                        <div class="footer-line">
+                            <span class="small">Fecha: ${fechaFormateada}</span>
+                        </div>
+                    </footer>
+                </div>
+            `;
+        }
+        
+        // ===== GENERAR CÓDIGO DE BARRAS =====
+        function generarCodigosBarras() {
+            document.querySelectorAll('.codigo-barras').forEach(svg => {
+                const guiaId = svg.getAttribute('data-guia-id');
+                if (guiaId && JsBarcode) {
+                    try {
+                        JsBarcode(svg, guiaId, {
+                            format: "CODE128",
+                            width: 1.2,
+                            height: 25,
+                            displayValue: false,
+                            margin: 5
+                        });
+                    } catch (error) {
+                        console.error('Error generando código de barras:', error);
+                    }
+                }
+            });
+        }
+        
+        // ===== INICIALIZAR =====
+        async function inicializarGuia() {
+            try {
+                const guiaId = obtenerGuiaDeURL();
+                
+                if (!guiaId) {
+                    alert('No se especificó número de guía. Use ?envio=XXXXX');
+                    return;
+                }
+                
+                const datos = await cargarDatosGuia(guiaId);
+                
+                if (!datos) return;
+                
+                const envio = datos;
+                const containerScreen = document.getElementById('mediaCartaScreen');
+                const containerPrint = document.getElementById('mediaCartaPrint');
+                
+                const guiaRemitente = generarGuiaHTML(envio, 'remitente');
+                const guiaPaquete = generarGuiaHTML(envio, 'paquete');
+                
+                containerScreen.insertAdjacentHTML('beforeend', guiaRemitente);
+                containerScreen.insertAdjacentHTML('beforeend', guiaPaquete);
+                
+                containerPrint.insertAdjacentHTML('beforeend', guiaRemitente);
+                containerPrint.insertAdjacentHTML('beforeend', guiaPaquete);
+                
+                setTimeout(generarCodigosBarras, 100);
+                
+                console.log('✅ Guías generadas para:', guiaId);
+                
+            } catch (error) {
+                console.error('❌ Error inicializando guía:', error);
+                alert('Error al generar la guía');
+            }
+        }
+        
+        // ===== FUNCIÓN DEBUG =====
+        function debugGuia() {
+            const container = document.querySelector('.media-carta-screen');
+            console.log('=== DEBUG TAMAÑO GUÍA ===');
+            console.log('En pantalla:', container.offsetWidth + 'x' + container.offsetHeight + 'px');
+            alert(`TAMAÑO DE IMPRESIÓN:\n• Hoja completa: 21.59 x 27.94 cm (CARTA)\n• Contenido: 21.59 x 13.97 cm (MITAD SUPERIOR)\n• Cortar por línea punteada`);
+        }
+        
+        // ===== EJECUTAR AL CARGAR =====
+        document.addEventListener('DOMContentLoaded', inicializarGuia);
+    </script>
+</head>
+<body>
+    <div class="screen-controls">
+        <button onclick="window.print()" class="btn-print">🖨️ Imprimir Media Carta</button>
+        <button onclick="window.close()" class="btn-close">✖️ Cerrar</button>
+        <button onclick="debugGuia()" class="btn-debug">🐛 Debug Tamaño</button>
+        <div class="print-instructions">
+            <strong>IMPRESIÓN:</strong> Hoja CARTA completa, contenido en MITAD SUPERIOR • Cortar por línea punteada
+        </div>
+    </div>
+
+    <div class="media-carta-screen" id="mediaCartaScreen">
+        <div class="corte-vertical"></div>
+    </div>
+
+    <div class="media-carta-print" id="mediaCartaPrint">
+        <div class="corte-vertical"></div>
+        <div class="corte-horizontal">
+            ✄ CORTAR POR ESTA LÍNEA ✄
+        </div>
+    </div>
+</body>
+</html>
