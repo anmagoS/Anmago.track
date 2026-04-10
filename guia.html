@@ -596,6 +596,7 @@
         
         // Acortar textos largos para que quepan
         const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 60);
+        const complemento = acortarTexto(envio['COMPLEMENTO DE DIR'] || '', 40);
         const observaciones = acortarTexto(envio['OBS'] || '', 45);
         const barrio = acortarTexto(envio['BARRIO'] || '', 40);
         const remitente = acortarTexto(envio['REMITE'] || '', 40);
@@ -681,6 +682,10 @@
                         <div class="dato-line">
                             <span class="texto-dos-lineas">${direccion}</span>
                         </div>
+                        <div class="dato-line">
+                            <span class="label">Comp:</span>
+                            <span class="texto-dos-lineas">${complemento}</span>
+                            </div>
                         <div class="dato-line">
                             <span>${barrio}</span>
                         </div>
