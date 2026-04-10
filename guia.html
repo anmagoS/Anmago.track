@@ -596,10 +596,10 @@
         
         // Acortar textos largos para que quepan
         const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 60);
-        const observaciones = acortarTexto(envio['OBS'] || '', 25);
-        const barrio = acortarTexto(envio['BARRIO'] || '', 20);
-        const remitente = acortarTexto(envio['REMITE'] || '', 30);
-        const destinatario = acortarTexto(envio['DESTINO'] || '', 30);
+        const observaciones = acortarTexto(envio['OBS'] || '', 45);
+        const barrio = acortarTexto(envio['BARRIO'] || '', 40);
+        const remitente = acortarTexto(envio['REMITE'] || '', 40);
+        const destinatario = acortarTexto(envio['DESTINO'] || '', 40);
         
         return `
             <div class="guia-container">
