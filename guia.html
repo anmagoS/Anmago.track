@@ -595,7 +595,7 @@
         const textoEtiqueta = tipo === 'remitente' ? 'REMITENTE' : 'PAQUETE';
         
         // Acortar textos largos para que quepan
-        const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 40);
+        const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 60);
         const observaciones = acortarTexto(envio['OBS'] || '', 25);
         const barrio = acortarTexto(envio['BARRIO'] || '', 20);
         const remitente = acortarTexto(envio['REMITE'] || '', 30);
