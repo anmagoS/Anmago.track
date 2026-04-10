@@ -79,9 +79,10 @@
     }
     
     /* ===== CONTENEDOR MEDIA CARTA EN PANTALLA ===== */
+    /* Solo para visualización en pantalla */
     .media-carta-screen {
-        width: 816px;
-        height: 528px;
+        width: 816px;  /* 21.59cm * 37.8 = 816px */
+        height: 528px; /* 13.97cm * 37.8 = 528px */
         background: white;
         border: 1px solid #ccc;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -91,9 +92,10 @@
     }
     
     /* ===== CONTENEDOR PARA IMPRESIÓN ===== */
+    /* Este es el que se imprime */
     .media-carta-print {
         width: 21.59cm;
-        height: 13.97cm;
+        height: 13.97cm; /* SOLO MEDIA CARTA */
         background: white;
         position: relative;
         overflow: hidden;
@@ -103,7 +105,7 @@
     
     /* ===== GUÍA INDIVIDUAL ===== */
     .guia-container {
-        width: 50%;
+        width: 50%; /* Cada guía ocupa la mitad */
         height: 100%;
         padding: 0.4cm 0.5cm;
         position: relative;
@@ -332,7 +334,7 @@
         z-index: 5;
     }
     
-    /* ===== LÍNEA DE CORTE HORIZONTAL ===== */
+    /* ===== LÍNEA DE CORTE HORIZONTAL (para cortar la hoja) ===== */
     .corte-horizontal {
         position: absolute;
         bottom: -0.5cm;
@@ -351,14 +353,15 @@
             background: white;
             padding: 0;
             margin: 0;
-            width: 21.59cm;
-            height: 27.94cm;
+            width: 21.59cm; /* ANCHO CARTA */
+            height: 27.94cm; /* ALTO CARTA COMPLETA */
         }
         
         .screen-controls {
             display: none;
         }
         
+        /* Mostrar SOLO el contenedor de impresión */
         .media-carta-screen {
             display: none;
         }
@@ -366,32 +369,37 @@
         .media-carta-print {
             display: flex;
             width: 21.59cm;
-            height: 13.97cm;
+            height: 13.97cm; /* SOLO LA MITAD SUPERIOR */
             position: absolute;
             top: 0;
             left: 0;
         }
         
+        /* Configuración para hoja CARTA completa */
         @page {
-            size: 21.59cm 27.94cm;
+            size: 21.59cm 27.94cm; /* CARTA COMPLETA */
             margin: 0;
         }
         
+        /* Cada guía exactamente la mitad */
         .guia-container {
             width: 50%;
             page-break-inside: avoid;
             padding: 0.4cm 0.5cm;
         }
         
+        /* Línea de corte más visible para impresión */
         .corte-vertical {
             border-left: 1px dashed #333;
         }
         
+        /* Mostrar línea de corte horizontal */
         .corte-horizontal {
             display: block;
         }
     }
     
+    /* ===== PARA PANTALLA ===== */
     @media screen {
         .media-carta-print {
             display: none;
@@ -406,6 +414,7 @@
         }
     }
     
+    /* ===== AJUSTES PARA PANTALLA PEQUEÑA ===== */
     @media screen and (max-width: 900px) {
         .media-carta-screen {
             transform: scale(0.8);
@@ -438,6 +447,7 @@
         }
     }
     
+    /* ===== ESTILOS PARA TEXTO ===== */
     .texto-truncado {
         white-space: nowrap;
         overflow: hidden;
@@ -453,6 +463,7 @@
         max-height: 1.2em;
     }
     
+    /* ===== LÍNEA DE CORTE EN IMPRESIÓN ===== */
     .linea-corte-texto {
         position: absolute;
         bottom: -0.7cm;
@@ -465,269 +476,22 @@
     }
     </style>
     <script>
-        // ===== CONFIGURACIÓN =====
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
-        
-        // ===== OBTENER GUÍA DE LA URL =====
-        function obtenerGuiaDeURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('envio') || urlParams.get('guia');
-        }
-        
-        // ===== CARGAR DATOS DEL ENVÍO =====
-        async function cargarDatosGuia(envioId) {
-            try {
-                if (!envioId) {
-                    alert('No se especificó número de guía');
-                    return null;
-                }
-                
-                console.log('🔍 Cargando datos del envío:', envioId);
-                
-                const url = `${WEB_APP_URL}?action=obtenerGuia&id=${encodeURIComponent(envioId)}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`Error HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.success && data.encontrado) {
-                    console.log('✅ Datos del envío cargados');
-                    return data;
-                } else {
-                    alert('No se encontró el envío: ' + envioId);
-                    return null;
-                }
-                
-            } catch (error) {
-                console.error('❌ Error cargando datos:', error);
-                alert('Error al cargar datos del envío');
-                return null;
+        // VERIFICACIÓN DE AUTENTICACIÓN
+        (function() {
+            const usuario = JSON.parse(localStorage.getItem("usuarioLogueado"));
+            
+            if (!usuario) {
+                console.log("❌ No autorizado para ver guías");
+                window.location.replace("login.html");
+                return;
             }
-        }
-        
-        // ===== ACORTAR TEXTO =====
-        function acortarTexto(texto, maxLength = 35) {
-            if (!texto) return '';
-            if (texto.length <= maxLength) return texto;
-            return texto.substring(0, maxLength - 3) + '...';
-        }
-        
-        // ===== GENERAR UNA GUÍA INDIVIDUAL =====
-        function generarGuiaHTML(envio, tipo = 'remitente') {
-            const valorRecaudar = parseFloat(envio['VALOR A RECAUDAR'] || 0);
-            const valorFormateado = new Intl.NumberFormat('es-CO', {
-                style: 'currency',
-                currency: 'COP',
-                minimumFractionDigits: 0
-            }).format(valorRecaudar);
             
-            const fecha = new Date(envio['FECHA DE CREACION'] || new Date());
-            const fechaFormateada = fecha.toLocaleDateString('es-CO', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-            
-            const claseTipo = tipo === 'remitente' ? 'remitente' : 'paquete';
-            const textoEtiqueta = tipo === 'remitente' ? 'REMITENTE' : 'PAQUETE';
-            
-            const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 40);
-            const observaciones = acortarTexto(envio['OBS'] || '', 25);
-            const barrio = acortarTexto(envio['BARRIO'] || '', 20);
-            const remitente = acortarTexto(envio['REMITE'] || '', 30);
-            const destinatario = acortarTexto(envio['DESTINO'] || '', 30);
-            
-            return `
-                <div class="guia-container">
-                    <div class="etiqueta-tipo ${claseTipo}">${textoEtiqueta}</div>
-                    
-                    <header class="guia-header">
-                        <div class="logo-section">
-                            <div class="logo">🚚</div>
-                            <div class="empresa-info">
-                                <h1>ANMAGO TRACK</h1>
-                                <p class="slogan">Tu envío rápido y seguro</p>
-                            </div>
-                        </div>
-                        
-                        <div class="guia-info">
-                            <div class="info-row">
-                                <span class="label">GUÍA:</span>
-                                <span class="value guia-id">${envio['ENVIO ID'] || 'N/A'}</span>
-                            </div>
-                            
-                            <div class="info-row">
-                                <span class="label">PAGO:</span>
-                                <span class="value">${envio['FORMA DE PAGO'] || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </header>
-
-                    <div class="divider"></div>
-
-                    <div class="codigo-barras-section">
-                        <svg class="codigo-barras" data-guia-id="${envio['ENVIO ID'] || ''}"></svg>
-                        <div class="numero-guia-barras">${envio['ENVIO ID'] || 'N/A'}</div>
-                    </div>
-
-                    <div class="divider thin"></div>
-
-                    <section class="seccion remitente">
-                        <h2 class="seccion-title">📍 REMITENTE</h2>
-                        <div class="datos">
-                            <div class="dato-line">
-                                <strong class="texto-truncado">${remitente}</strong>
-                            </div>
-                            <div class="dato-line">
-                                <span class="label">Tel:</span>
-                                <span>${envio['TELEFONO'] || 'N/A'}</span>
-                            </div>
-                            <div class="dato-line">
-                                <span class="label">Dir:</span>
-                                <span>${envio['DIRECCION'] || 'N/A'}</span>
-                            </div>
-                            <div class="dato-line">
-                                <span class="label">Ciudad:</span>
-                                <span>${envio['CIUDAD'] || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div class="divider"></div>
-
-                    <section class="seccion destinatario">
-                        <h2 class="seccion-title">👤 DESTINATARIO</h2>
-                        <div class="datos">
-                            <div class="dato-line">
-                                <strong class="texto-truncado">${destinatario}</strong>
-                            </div>
-                            <div class="dato-line">
-                                <span class="label">Tel:</span>
-                                <span>${envio['TELEFONOCLIENTE'] || 'N/A'}</span>
-                            </div>
-                            <div class="dato-line">
-                                <span class="texto-dos-lineas">${direccion}</span>
-                            </div>
-                            <div class="dato-line">
-                                <span>${barrio}</span>
-                            </div>
-                            <div class="dato-line">
-                                <span class="label">Ciudad:</span>
-                                <span>${envio['CIUDAD DESTINO'] || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div class="divider"></div>
-
-                    <section class="seccion pago">
-                        <h2 class="seccion-title">💰 INFORMACIÓN DE PAGO</h2>
-                        <div class="datos-pago">
-                            <div class="pago-row">
-                                <span class="label">Valor a Recaudar:</span>
-                                <span class="value valor">${valorFormateado}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div class="divider"></div>
-
-                    <section class="seccion observaciones">
-                        <h2 class="seccion-title">📝 OBSERVACIONES</h2>
-                        <div class="observaciones-content">
-                            ${observaciones || '______________________________________'}
-                            <br><br>
-                            ______________________________________
-                        </div>
-                    </section>
-
-                    <footer class="guia-footer">
-                        <div class="footer-line">
-                            <span class="small">📞 Soporte: 3006498710</span>
-                            <span class="small">🌐 https://anmagos.github.io/Anmago.track/track</span>
-                            <span class="small">CARRERA 13 N° 9-39 OFC 1023 TORRE SUR CC VISTO</span>
-                        </div>
-                        <div class="footer-line">
-                            <span class="small">Fecha: ${fechaFormateada}</span>
-                        </div>
-                    </footer>
-                </div>
-            `;
-        }
-        
-        // ===== GENERAR CÓDIGO DE BARRAS =====
-        function generarCodigosBarras() {
-            document.querySelectorAll('.codigo-barras').forEach(svg => {
-                const guiaId = svg.getAttribute('data-guia-id');
-                if (guiaId && JsBarcode) {
-                    try {
-                        JsBarcode(svg, guiaId, {
-                            format: "CODE128",
-                            width: 1.2,
-                            height: 25,
-                            displayValue: false,
-                            margin: 5
-                        });
-                    } catch (error) {
-                        console.error('Error generando código de barras:', error);
-                    }
-                }
-            });
-        }
-        
-        // ===== INICIALIZAR =====
-        async function inicializarGuia() {
-            try {
-                const guiaId = obtenerGuiaDeURL();
-                
-                if (!guiaId) {
-                    alert('No se especificó número de guía. Use ?envio=XXXXX');
-                    return;
-                }
-                
-                const datos = await cargarDatosGuia(guiaId);
-                
-                if (!datos) return;
-                
-                const envio = datos;
-                const containerScreen = document.getElementById('mediaCartaScreen');
-                const containerPrint = document.getElementById('mediaCartaPrint');
-                
-                const guiaRemitente = generarGuiaHTML(envio, 'remitente');
-                const guiaPaquete = generarGuiaHTML(envio, 'paquete');
-                
-                containerScreen.insertAdjacentHTML('beforeend', guiaRemitente);
-                containerScreen.insertAdjacentHTML('beforeend', guiaPaquete);
-                
-                containerPrint.insertAdjacentHTML('beforeend', guiaRemitente);
-                containerPrint.insertAdjacentHTML('beforeend', guiaPaquete);
-                
-                setTimeout(generarCodigosBarras, 100);
-                
-                console.log('✅ Guías generadas para:', guiaId);
-                
-            } catch (error) {
-                console.error('❌ Error inicializando guía:', error);
-                alert('Error al generar la guía');
-            }
-        }
-        
-        // ===== FUNCIÓN DEBUG =====
-        function debugGuia() {
-            const container = document.querySelector('.media-carta-screen');
-            console.log('=== DEBUG TAMAÑO GUÍA ===');
-            console.log('En pantalla:', container.offsetWidth + 'x' + container.offsetHeight + 'px');
-            alert(`TAMAÑO DE IMPRESIÓN:\n• Hoja completa: 21.59 x 27.94 cm (CARTA)\n• Contenido: 21.59 x 13.97 cm (MITAD SUPERIOR)\n• Cortar por línea punteada`);
-        }
-        
-        // ===== EJECUTAR AL CARGAR =====
-        document.addEventListener('DOMContentLoaded', inicializarGuia);
+            console.log("✅ Usuario autorizado para guías:", usuario.USUARIO);
+        })();
     </script>
 </head>
 <body>
+    <!-- Controles solo para pantalla -->
     <div class="screen-controls">
         <button onclick="window.print()" class="btn-print">🖨️ Imprimir Media Carta</button>
         <button onclick="window.close()" class="btn-close">✖️ Cerrar</button>
@@ -737,15 +501,314 @@
         </div>
     </div>
 
+    <!-- CONTENEDOR PARA PANTALLA (solo visualización) -->
     <div class="media-carta-screen" id="mediaCartaScreen">
+        <!-- LÍNEA DE CORTE VERTICAL -->
         <div class="corte-vertical"></div>
+        
+        <!-- LAS DOS GUÍAS SE GENERARÁN AQUÍ DINÁMICAMENTE -->
     </div>
 
+    <!-- CONTENEDOR PARA IMPRESIÓN (oculto en pantalla) -->
     <div class="media-carta-print" id="mediaCartaPrint">
+        <!-- LÍNEA DE CORTE VERTICAL -->
         <div class="corte-vertical"></div>
+        
+        <!-- LÍNEA DE CORTE HORIZONTAL (para cortar la hoja) -->
         <div class="corte-horizontal">
             ✄ CORTAR POR ESTA LÍNEA ✄
         </div>
+        
+        <!-- LAS DOS GUÍAS SE GENERARÁN AQUÍ DINÁMICAMENTE -->
     </div>
+
+    <!-- SCRIPT PRINCIPAL -->
+    <script>
+    // ===== CONFIGURACIÓN =====
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
+    
+    // ===== CARGAR DATOS DEL ENVÍO =====
+    async function cargarDatosGuia() {
+        try {
+            const envioId = localStorage.getItem('envioParaGuia');
+            
+            if (!envioId) {
+                alert('No hay envío seleccionado para generar guía');
+                window.close();
+                return null;
+            }
+            
+            console.log('🔍 Cargando datos del envío:', envioId);
+            
+            const url = `${WEB_APP_URL}?action=obtenerGuia&id=${encodeURIComponent(envioId)}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.encontrado) {
+                console.log('✅ Datos del envío cargados');
+                return data;
+            } else {
+                alert('No se encontró el envío');
+                window.close();
+                return null;
+            }
+            
+        } catch (error) {
+            console.error('❌ Error cargando datos:', error);
+            alert('Error al cargar datos del envío');
+            window.close();
+            return null;
+        }
+    }
+    
+    // ===== ACORTAR TEXTO PARA CABER =====
+    function acortarTexto(texto, maxLength = 50) {
+        if (!texto) return '';
+        if (texto.length <= maxLength) return texto;
+        return texto.substring(0, maxLength - 3) + '...';
+    }
+    
+    // ===== GENERAR UNA GUÍA INDIVIDUAL =====
+    function generarGuiaHTML(envio, tipo = 'remitente') {
+        // Formatear valores
+        const valorRecaudar = parseFloat(envio['VALOR A RECAUDAR'] || 0);
+        const valorFormateado = new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0
+        }).format(valorRecaudar);
+        
+        const fecha = new Date(envio['FECHA DE CREACION'] || new Date());
+        const fechaFormateada = fecha.toLocaleDateString('es-CO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+        
+        // Clase para el tipo de guía
+        const claseTipo = tipo === 'remitente' ? 'remitente' : 'paquete';
+        const textoEtiqueta = tipo === 'remitente' ? 'REMITENTE' : 'PAQUETE';
+        
+        // Acortar textos largos para que quepan
+        const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 60);
+        const complemento = acortarTexto(envio['COMPLEMENTO DE DIR'] || '', 40);
+        const observaciones = acortarTexto(envio['OBS'] || '', 45);
+        const barrio = acortarTexto(envio['BARRIO'] || '', 40);
+        const remitente = acortarTexto(envio['REMITE'] || '', 40);
+        const destinatario = acortarTexto(envio['DESTINO'] || '', 40);
+        
+        return `
+            <div class="guia-container">
+                <!-- Etiqueta de tipo -->
+                <div class="etiqueta-tipo ${claseTipo}">${textoEtiqueta}</div>
+                
+                <!-- ENCABEZADO -->
+                <header class="guia-header">
+                    <div class="logo-section">
+                        <div class="logo">🚚</div>
+                        <div class="empresa-info">
+                            <h1>ANMAGO TRACK</h1>
+                            <p class="slogan">Tu envío rápido y seguro</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guia-info">
+                        <div class="info-row">
+                            <span class="label">GUÍA:</span>
+                            <span class="value guia-id">${envio['ENVIO ID'] || 'N/A'}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="label">PAGO:</span>
+                            <span class="value">${envio['FORMA DE PAGO'] || 'N/A'}</span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- LÍNEA DIVISORIA -->
+                <div class="divider"></div>
+
+                <!-- CÓDIGO DE BARRAS -->
+                <div class="codigo-barras-section">
+                    <svg class="codigo-barras" data-guia-id="${envio['ENVIO ID'] || ''}"></svg>
+                    <div class="numero-guia-barras">${envio['ENVIO ID'] || 'N/A'}</div>
+                </div>
+
+                <!-- LÍNEA DIVISORIA -->
+                <div class="divider thin"></div>
+
+                <!-- SECCIÓN REMITENTE -->
+                <section class="seccion remitente">
+                    <h2 class="seccion-title">📍 REMITENTE</h2>
+                    <div class="datos">
+                        <div class="dato-line">
+                            <strong class="texto-truncado">${remitente}</strong>
+                        </div>
+                        <div class="dato-line">
+                            <span class="label">Tel:</span>
+                            <span>${envio['TELEFONO'] || 'N/A'}</span>
+                        </div>
+                        <div class="dato-line">
+                            <span class="label">Dir:</span>
+                            <span>${envio['DIRECCION'] || 'N/A'}</span>
+                        </div>
+                        
+                        <div class="dato-line">
+                            <span class="label">Ciudad:</span>
+                            <span>${envio['CIUDAD'] || 'N/A'}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LÍNEA DIVISORIA -->
+                <div class="divider"></div>
+
+                <!-- SECCIÓN DESTINATARIO -->
+                <section class="seccion destinatario">
+                    <h2 class="seccion-title">👤 DESTINATARIO</h2>
+                    <div class="datos">
+                        <div class="dato-line">
+                            <strong class="texto-truncado">${destinatario}</strong>
+                        </div>
+                        <div class="dato-line">
+                            <span class="label">Tel:</span>
+                            <span>${envio['TELEFONOCLIENTE'] || 'N/A'}</span>
+                        </div>
+                        <div class="dato-line">
+                            <span class="texto-dos-lineas">${direccion}</span>
+                        </div>
+                        <div class="dato-line">
+                            <span class="label">Comp:</span>
+                            <span class="texto-dos-lineas">${complemento}</span>
+                            </div>
+                        <div class="dato-line">
+                            <span>${barrio}</span>
+                        </div>
+                        <div class="dato-line">
+                            <span class="label">Ciudad:</span>
+                            <span>${envio['CIUDAD DESTINO'] || 'N/A'}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LÍNEA DIVISORIA -->
+                <div class="divider"></div>
+
+                <!-- SECCIÓN INFORMACIÓN DE PAGO -->
+                <section class="seccion pago">
+                    <h2 class="seccion-title">💰 INFORMACIÓN DE PAGO</h2>
+                    <div class="datos-pago">
+                        <div class="pago-row">
+                            <span class="label">Valor a Recaudar:</span>
+                            <span class="value valor">${valorFormateado}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LÍNEA DIVISORIA -->
+                <div class="divider"></div>
+
+                <!-- SECCIÓN OBSERVACIONES -->
+                <section class="seccion observaciones">
+                    <h2 class="seccion-title">📝 OBSERVACIONES</h2>
+                    <div class="observaciones-content">
+                        ${observaciones || '______________________________________'}
+                        <br><br>
+                        ______________________________________
+                    </div>
+                </section>
+
+                <!-- PIE DE PÁGINA -->
+                <footer class="guia-footer">
+                    <div class="footer-line">
+                        <span class="small">📞 Soporte: 3006498710</span>
+                        <span class="small">🌐 https://anmagos.github.io/Anmago.track/track</span>
+                         <span class="small">CARRERA 13 N° 9-39 OFC 1023 TORRE SUR CC VISTO</span>
+                    </div>
+                    <div class="footer-line">
+                        <span class="small">Fecha: ${fechaFormateada}</span>
+                    </div>
+                </footer>
+            </div>
+        `;
+    }
+    
+    // ===== GENERAR CÓDIGO DE BARRAS =====
+    function generarCodigosBarras() {
+        document.querySelectorAll('.codigo-barras').forEach(svg => {
+            const guiaId = svg.getAttribute('data-guia-id');
+            if (guiaId && JsBarcode) {
+                try {
+                    JsBarcode(svg, guiaId, {
+                        format: "CODE128",
+                        width: 1.2,
+                        height: 25,
+                        displayValue: false,
+                        margin: 5
+                    });
+                } catch (error) {
+                    console.error('Error generando código de barras:', error);
+                }
+            }
+        });
+    }
+    
+    // ===== INICIALIZAR =====
+    async function inicializarGuia() {
+        try {
+            const datos = await cargarDatosGuia();
+            
+            if (!datos) return;
+            
+            const envio = datos;
+            const containerScreen = document.getElementById('mediaCartaScreen');
+            const containerPrint = document.getElementById('mediaCartaPrint');
+            
+            // Generar las DOS guías (Remitente y Paquete)
+            const guiaRemitente = generarGuiaHTML(envio, 'remitente');
+            const guiaPaquete = generarGuiaHTML(envio, 'paquete');
+            
+            // Insertar ambas guías en ambos contenedores
+            containerScreen.insertAdjacentHTML('beforeend', guiaRemitente);
+            containerScreen.insertAdjacentHTML('beforeend', guiaPaquete);
+            
+            containerPrint.insertAdjacentHTML('beforeend', guiaRemitente);
+            containerPrint.insertAdjacentHTML('beforeend', guiaPaquete);
+            
+            // Generar códigos de barras
+            setTimeout(generarCodigosBarras, 100);
+            
+            console.log('✅ Guías generadas. En pantalla:', 
+                containerScreen.offsetWidth + 'x' + containerScreen.offsetHeight + 'px');
+            
+        } catch (error) {
+            console.error('❌ Error inicializando guía:', error);
+            alert('Error al generar la guía');
+        }
+    }
+    
+    // ===== FUNCIÓN DEBUG =====
+    function debugGuia() {
+        const container = document.querySelector('.media-carta-screen');
+        console.log('=== DEBUG TAMAÑO GUÍA ===');
+        console.log('En pantalla:', container.offsetWidth + 'x' + container.offsetHeight + 'px');
+        console.log('Esperado: 816x528px (21.59x13.97cm)');
+        console.log('IMPORTANTE: Se imprime en MITAD SUPERIOR de hoja CARTA');
+        
+        // Mostrar cómo se verá impreso
+        alert(`TAMAÑO DE IMPRESIÓN:
+        • Hoja completa: 21.59 x 27.94 cm (CARTA)
+        • Contenido: 21.59 x 13.97 cm (MITAD SUPERIOR)
+        • Cortar por línea punteada`);
+    }
+    
+    // ===== EJECUTAR AL CARGAR =====
+    document.addEventListener('DOMContentLoaded', inicializarGuia);
+    </script>
 </body>
 </html>
