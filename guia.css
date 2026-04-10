@@ -197,11 +197,21 @@ body {
 
 .dato-line {
   margin-bottom: 0.7mm;
-  line-height: 1.1;
+  line-height: 1.2;
   font-size: 8pt;
   word-break: break-word;
   overflow-wrap: break-word;
-  hyphens: auto;
+  white-space: normal;  /* ← Cambiar de nowrap a normal */
+  overflow: visible;     /* ← Cambiar de hidden a visible */
+  text-overflow: clip;   /* ← Quitar ellipsis */
+}
+
+/* Para el barrio específicamente */
+#destinatarioBarrio,
+.dato-line span:contains("Barrio") {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
 }
 
 .dato-line:last-child {
