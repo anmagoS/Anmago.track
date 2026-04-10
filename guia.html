@@ -6,475 +6,7 @@
     <title>Guía de Envío - Expres Contraentrega</title>
     <!-- Código de barras library -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <style>
-    /* ===== RESET Y ESTILOS GENERALES ===== */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    
-    html, body {
-        width: 100%;
-        height: 100%;
-        font-family: 'Arial', sans-serif;
-        font-size: 10px;
-    }
-    
-    body {
-        background: #f0f0f0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 10px;
-    }
-    
-    /* ===== CONTROLES EN PANTALLA ===== */
-    .screen-controls {
-        margin-bottom: 15px;
-        text-align: center;
-        width: 100%;
-        max-width: 800px;
-    }
-    
-    .btn-print, .btn-close, .btn-debug {
-        padding: 8px 15px;
-        margin: 0 5px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 11px;
-        font-weight: bold;
-        transition: all 0.2s;
-    }
-    
-    .btn-print:hover, .btn-close:hover, .btn-debug:hover {
-        transform: translateY(-1px);
-    }
-    
-    .btn-print {
-        background: #135bec;
-        color: white;
-    }
-    
-    .btn-close {
-        background: #dc3545;
-        color: white;
-    }
-    
-    .btn-debug {
-        background: #ffc107;
-        color: #212529;
-    }
-    
-    .print-instructions {
-        margin-top: 8px;
-        font-size: 9px;
-        color: #666;
-        background: #f8f9fa;
-        padding: 5px;
-        border-radius: 3px;
-        border: 1px solid #dee2e6;
-    }
-    
-    /* ===== CONTENEDOR MEDIA CARTA EN PANTALLA ===== */
-    /* Solo para visualización en pantalla */
-    .media-carta-screen {
-        width: 816px;  /* 21.59cm * 37.8 = 816px */
-        height: 528px; /* 13.97cm * 37.8 = 528px */
-        background: white;
-        border: 1px solid #ccc;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        position: relative;
-        overflow: hidden;
-        display: flex;
-    }
-    
-    /* ===== CONTENEDOR PARA IMPRESIÓN ===== */
-    /* Este es el que se imprime */
-    .media-carta-print {
-        width: 21.59cm;
-        height: 13.97cm; /* SOLO MEDIA CARTA */
-        background: white;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        page-break-after: always;
-    }
-    
-    /* ===== GUÍA INDIVIDUAL ===== */
-    .guia-container {
-        width: 50%; /* Cada guía ocupa la mitad */
-        height: 100%;
-        padding: 0.4cm 0.5cm;
-        position: relative;
-        border-right: 1px dashed #999;
-        font-size: 9px;
-        overflow: hidden;
-    }
-    
-    .guia-container:last-child {
-        border-right: none;
-    }
-    
-    /* ===== ENCABEZADO GUÍA ===== */
-    .guia-header {
-        margin-bottom: 0.2cm;
-    }
-    
-    .logo-section {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.1cm;
-    }
-    
-    .logo {
-        font-size: 14px;
-        margin-right: 0.2cm;
-    }
-    
-    .empresa-info h1 {
-        font-size: 11px;
-        font-weight: bold;
-        margin: 0;
-        line-height: 1;
-        letter-spacing: 0.2px;
-    }
-    
-    .slogan {
-        font-size: 8px;
-        color: #666;
-        margin: 0;
-        font-style: italic;
-    }
-    
-    .guia-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 9px;
-        margin-top: 0.1cm;
-    }
-    
-    .info-row {
-        display: flex;
-        align-items: center;
-    }
-    
-    .label {
-        font-weight: bold;
-        margin-right: 0.1cm;
-        font-size: 9px;
-    }
-    
-    .value {
-        font-weight: bold;
-    }
-    
-    .guia-id {
-        font-size: 10px;
-        font-weight: bold;
-        color: #135bec;
-        letter-spacing: 0.5px;
-    }
-    
-    /* ===== DIVISORES ===== */
-    .divider {
-        height: 1px;
-        background: #000;
-        margin: 0.15cm 0;
-    }
-    
-    .divider.thin {
-        height: 0.5px;
-        background: #666;
-    }
-    
-    /* ===== CÓDIGO DE BARRAS ===== */
-    .codigo-barras-section {
-        text-align: center;
-        margin: 0.15cm 0;
-    }
-    
-    .codigo-barras {
-        width: 100%;
-        height: 0.6cm;
-    }
-    
-    .numero-guia-barras {
-        font-size: 8px;
-        letter-spacing: 0.5px;
-        margin-top: 0.05cm;
-        font-family: 'Courier New', monospace;
-        color: #333;
-    }
-    
-    /* ===== SECCIONES ===== */
-    .seccion {
-        margin: 0.15cm 0;
-    }
-    
-    .seccion-title {
-        font-size: 9px;
-        font-weight: bold;
-        margin-bottom: 0.1cm;
-        background: #f5f5f5;
-        padding: 0.05cm 0.1cm;
-        border-radius: 0.05cm;
-        border-left: 0.1cm solid #135bec;
-    }
-    
-    .datos {
-        font-size: 9px;
-        line-height: 1.2;
-    }
-    
-    .dato-line {
-        margin-bottom: 0.1cm;
-        min-height: 0.3cm;
-        display: flex;
-        align-items: center;
-    }
-    
-    .dato-line strong {
-        font-size: 10px;
-        color: #333;
-    }
-    
-    /* ===== INFORMACIÓN DE PAGO ===== */
-    .datos-pago {
-        text-align: center;
-        padding: 0.1cm 0;
-    }
-    
-    .pago-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 0.2cm;
-    }
-    
-    .valor {
-        font-size: 11px;
-        font-weight: bold;
-        color: #135bec;
-    }
-    
-    /* ===== OBSERVACIONES ===== */
-    .seccion.observaciones {
-        background-color: #f9f9f9;
-        border: 1px dashed #ccc;
-        padding: 0.1cm;
-        margin-top: 0.2cm;
-    }
-    
-    .observaciones-content {
-        min-height: 0.8cm;
-        font-size: 8px;
-        line-height: 1.1;
-        padding: 0.05cm;
-        color: #666;
-    }
-    
-    /* ===== PIE DE PÁGINA ===== */
-    .guia-footer {
-        position: absolute;
-        bottom: 0.2cm;
-        left: 0.5cm;
-        right: 0.5cm;
-        font-size: 7px;
-        text-align: center;
-        border-top: 0.5px solid #ccc;
-        padding-top: 0.1cm;
-        color: #666;
-    }
-    
-    .footer-line {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.05cm;
-    }
-    
-    .small {
-        font-size: 7px;
-    }
-    
-    /* ===== ETIQUETA REMITENTE/PAQUETE ===== */
-    .etiqueta-tipo {
-        position: absolute;
-        top: 0.3cm;
-        right: 0.3cm;
-        background: #135bec;
-        color: white;
-        font-size: 9px;
-        font-weight: bold;
-        padding: 0.05cm 0.2cm;
-        border-radius: 0.1cm;
-        z-index: 10;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    
-    .etiqueta-tipo.remitente {
-        background: #28a745;
-    }
-    
-    .etiqueta-tipo.paquete {
-        background: #ffc107;
-        color: #000;
-    }
-    
-    /* ===== LÍNEA DE CORTE VERTICAL ===== */
-    .corte-vertical {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        width: 0;
-        height: 100%;
-        border-left: 1px dashed #999;
-        z-index: 5;
-    }
-    
-    /* ===== LÍNEA DE CORTE HORIZONTAL (para cortar la hoja) ===== */
-    .corte-horizontal {
-        position: absolute;
-        bottom: -0.5cm;
-        left: 0;
-        right: 0;
-        border-top: 1px dashed #999;
-        text-align: center;
-        padding-top: 0.1cm;
-        font-size: 8px;
-        color: #999;
-    }
-    
-    /* ===== PARA IMPRESIÓN ===== */
-    @media print {
-        body {
-            background: white;
-            padding: 0;
-            margin: 0;
-            width: 21.59cm; /* ANCHO CARTA */
-            height: 27.94cm; /* ALTO CARTA COMPLETA */
-        }
-        
-        .screen-controls {
-            display: none;
-        }
-        
-        /* Mostrar SOLO el contenedor de impresión */
-        .media-carta-screen {
-            display: none;
-        }
-        
-        .media-carta-print {
-            display: flex;
-            width: 21.59cm;
-            height: 13.97cm; /* SOLO LA MITAD SUPERIOR */
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        
-        /* Configuración para hoja CARTA completa */
-        @page {
-            size: 21.59cm 27.94cm; /* CARTA COMPLETA */
-            margin: 0;
-        }
-        
-        /* Cada guía exactamente la mitad */
-        .guia-container {
-            width: 50%;
-            page-break-inside: avoid;
-            padding: 0.4cm 0.5cm;
-        }
-        
-        /* Línea de corte más visible para impresión */
-        .corte-vertical {
-            border-left: 1px dashed #333;
-        }
-        
-        /* Mostrar línea de corte horizontal */
-        .corte-horizontal {
-            display: block;
-        }
-    }
-    
-    /* ===== PARA PANTALLA ===== */
-    @media screen {
-        .media-carta-print {
-            display: none;
-        }
-        
-        .media-carta-screen {
-            display: flex;
-        }
-        
-        .corte-horizontal {
-            display: none;
-        }
-    }
-    
-    /* ===== AJUSTES PARA PANTALLA PEQUEÑA ===== */
-    @media screen and (max-width: 900px) {
-        .media-carta-screen {
-            transform: scale(0.8);
-            transform-origin: center;
-        }
-        
-        .screen-controls {
-            transform: scale(0.9);
-            transform-origin: center;
-        }
-    }
-    
-    @media screen and (max-width: 700px) {
-        .media-carta-screen {
-            transform: scale(0.65);
-        }
-        
-        .screen-controls {
-            transform: scale(0.8);
-        }
-    }
-    
-    @media screen and (max-width: 500px) {
-        .media-carta-screen {
-            transform: scale(0.5);
-        }
-        
-        .screen-controls {
-            transform: scale(0.7);
-        }
-    }
-    
-    /* ===== ESTILOS PARA TEXTO ===== */
-    .texto-truncado {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-    
-    .texto-dos-lineas {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        max-height: 1.2em;
-    }
-    
-    /* ===== LÍNEA DE CORTE EN IMPRESIÓN ===== */
-    .linea-corte-texto {
-        position: absolute;
-        bottom: -0.7cm;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 8px;
-        color: #999;
-        background: white;
-        padding: 0 5px;
-    }
-    </style>
+    <link rel="stylesheet" href="guia.css">
     <script>
         // VERIFICACIÓN DE AUTENTICACIÓN
         (function() {
@@ -495,7 +27,7 @@
     <div class="screen-controls">
         <button onclick="window.print()" class="btn-print">🖨️ Imprimir Media Carta</button>
         <button onclick="window.close()" class="btn-close">✖️ Cerrar</button>
-        <button onclick="debugGuia()" class="btn-debug">🐛 Debug Tamaño</button>
+        <button onclick="debugGuia()" class="btn-debug">🐛 Debug</button>
         <div class="print-instructions">
             <strong>IMPRESIÓN:</strong> Hoja CARTA completa, contenido en MITAD SUPERIOR • Cortar por línea punteada
         </div>
@@ -503,26 +35,15 @@
 
     <!-- CONTENEDOR PARA PANTALLA (solo visualización) -->
     <div class="media-carta-screen" id="mediaCartaScreen">
-        <!-- LÍNEA DE CORTE VERTICAL -->
         <div class="corte-vertical"></div>
-        
-        <!-- LAS DOS GUÍAS SE GENERARÁN AQUÍ DINÁMICAMENTE -->
     </div>
 
     <!-- CONTENEDOR PARA IMPRESIÓN (oculto en pantalla) -->
     <div class="media-carta-print" id="mediaCartaPrint">
-        <!-- LÍNEA DE CORTE VERTICAL -->
         <div class="corte-vertical"></div>
-        
-        <!-- LÍNEA DE CORTE HORIZONTAL (para cortar la hoja) -->
-        <div class="corte-horizontal">
-            ✄ CORTAR POR ESTA LÍNEA ✄
-        </div>
-        
-        <!-- LAS DOS GUÍAS SE GENERARÁN AQUÍ DINÁMICAMENTE -->
+        <div class="corte-horizontal">✄ CORTAR POR ESTA LÍNEA ✄</div>
     </div>
 
-    <!-- SCRIPT PRINCIPAL -->
     <script>
     // ===== CONFIGURACIÓN =====
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIipuPmVAvaTt7_oUQzMLNtXIah19dcq2CWkaoglQvFivqY-wBYEw64tvUmL4-1k62/exec";
@@ -567,8 +88,9 @@
     }
     
     // ===== ACORTAR TEXTO PARA CABER =====
-    function acortarTexto(texto, maxLength = 50) {
+    function acortarTexto(texto, maxLength = 60) {
         if (!texto) return '';
+        if (texto === 'Ninguno' || texto === 'N/A') return '';
         if (texto.length <= maxLength) return texto;
         return texto.substring(0, maxLength - 3) + '...';
     }
@@ -590,24 +112,22 @@
             year: 'numeric'
         });
         
-        // Clase para el tipo de guía
         const claseTipo = tipo === 'remitente' ? 'remitente' : 'paquete';
         const textoEtiqueta = tipo === 'remitente' ? 'REMITENTE' : 'PAQUETE';
         
-        // Acortar textos largos para que quepan
-        const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 60);
-        const complemento = acortarTexto(envio['COMPLEMENTO DE DIR'] || '', 40);
-        const observaciones = acortarTexto(envio['OBS'] || '', 45);
-        const barrio = acortarTexto(envio['BARRIO'] || '', 40);
-        const remitente = acortarTexto(envio['REMITE'] || '', 40);
-        const destinatario = acortarTexto(envio['DESTINO'] || '', 40);
+        // Acortar textos (límites más generosos)
+        const direccion = acortarTexto(envio['DIRECCION DESTINO'] || '', 70);
+        const complemento = acortarTexto(envio['COMPLEMENTO DE DIR'] || '', 50);
+        const observaciones = acortarTexto(envio['OBS'] || '', 60);
+        const barrio = acortarTexto(envio['BARRIO'] || '', 55);
+        const remitente = acortarTexto(envio['REMITE'] || '', 45);
+        const destinatario = acortarTexto(envio['DESTINO'] || '', 45);
+        const direccionRemitente = acortarTexto(envio['DIRECCION'] || envio['DIRECCION REMITENTE'] || '', 50);
         
         return `
             <div class="guia-container">
-                <!-- Etiqueta de tipo -->
                 <div class="etiqueta-tipo ${claseTipo}">${textoEtiqueta}</div>
                 
-                <!-- ENCABEZADO -->
                 <header class="guia-header">
                     <div class="logo-section">
                         <div class="logo">🚚</div>
@@ -622,7 +142,6 @@
                             <span class="label">GUÍA:</span>
                             <span class="value guia-id">${envio['ENVIO ID'] || 'N/A'}</span>
                         </div>
-                        
                         <div class="info-row">
                             <span class="label">PAGO:</span>
                             <span class="value">${envio['FORMA DE PAGO'] || 'N/A'}</span>
@@ -630,16 +149,13 @@
                     </div>
                 </header>
 
-                <!-- LÍNEA DIVISORIA -->
                 <div class="divider"></div>
 
-                <!-- CÓDIGO DE BARRAS -->
                 <div class="codigo-barras-section">
                     <svg class="codigo-barras" data-guia-id="${envio['ENVIO ID'] || ''}"></svg>
                     <div class="numero-guia-barras">${envio['ENVIO ID'] || 'N/A'}</div>
                 </div>
 
-                <!-- LÍNEA DIVISORIA -->
                 <div class="divider thin"></div>
 
                 <!-- SECCIÓN REMITENTE -->
@@ -647,25 +163,23 @@
                     <h2 class="seccion-title">📍 REMITENTE</h2>
                     <div class="datos">
                         <div class="dato-line">
-                            <strong class="texto-truncado">${remitente}</strong>
+                            <strong class="texto-wrap">${remitente}</strong>
                         </div>
                         <div class="dato-line">
                             <span class="label">Tel:</span>
-                            <span>${envio['TELEFONO'] || 'N/A'}</span>
+                            <span class="texto-wrap">${envio['TELEFONO'] || 'N/A'}</span>
                         </div>
                         <div class="dato-line">
                             <span class="label">Dir:</span>
-                            <span>${envio['DIRECCION'] || 'N/A'}</span>
+                            <span class="texto-wrap">${direccionRemitente}</span>
                         </div>
-                        
                         <div class="dato-line">
                             <span class="label">Ciudad:</span>
-                            <span>${envio['CIUDAD'] || 'N/A'}</span>
+                            <span class="texto-wrap">${envio['CIUDAD'] || 'Bogotá D.C.'}</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- LÍNEA DIVISORIA -->
                 <div class="divider"></div>
 
                 <!-- SECCIÓN DESTINATARIO -->
@@ -673,33 +187,36 @@
                     <h2 class="seccion-title">👤 DESTINATARIO</h2>
                     <div class="datos">
                         <div class="dato-line">
-                            <strong class="texto-truncado">${destinatario}</strong>
+                            <strong class="texto-wrap">${destinatario}</strong>
                         </div>
                         <div class="dato-line">
                             <span class="label">Tel:</span>
-                            <span>${envio['TELEFONOCLIENTE'] || 'N/A'}</span>
+                            <span class="texto-wrap">${envio['TELEFONOCLIENTE'] || 'N/A'}</span>
                         </div>
                         <div class="dato-line">
-                            <span class="texto-dos-lineas">${direccion}</span>
+                            <span class="label">Dir:</span>
+                            <span class="texto-wrap">${direccion}</span>
                         </div>
+                        ${complemento ? `
                         <div class="dato-line">
                             <span class="label">Comp:</span>
-                            <span class="texto-dos-lineas">${complemento}</span>
-                            </div>
+                            <span class="texto-wrap complemento-texto">${complemento}</span>
+                        </div>
+                        ` : ''}
                         <div class="dato-line">
-                            <span>${barrio}</span>
+                            <span class="label">Barrio:</span>
+                            <span class="texto-wrap barrio-texto">${barrio}</span>
                         </div>
                         <div class="dato-line">
                             <span class="label">Ciudad:</span>
-                            <span>${envio['CIUDAD DESTINO'] || 'N/A'}</span>
+                            <span class="texto-wrap">${envio['CIUDAD DESTINO'] || 'Bogotá D.C.'}</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- LÍNEA DIVISORIA -->
                 <div class="divider"></div>
 
-                <!-- SECCIÓN INFORMACIÓN DE PAGO -->
+                <!-- SECCIÓN PAGO -->
                 <section class="seccion pago">
                     <h2 class="seccion-title">💰 INFORMACIÓN DE PAGO</h2>
                     <div class="datos-pago">
@@ -710,27 +227,23 @@
                     </div>
                 </section>
 
-                <!-- LÍNEA DIVISORIA -->
                 <div class="divider"></div>
 
                 <!-- SECCIÓN OBSERVACIONES -->
                 <section class="seccion observaciones">
                     <h2 class="seccion-title">📝 OBSERVACIONES</h2>
-                    <div class="observaciones-content">
-                        ${observaciones || '______________________________________'}
-                        <br><br>
-                        ______________________________________
+                    <div class="observaciones-content texto-wrap">
+                        ${observaciones || 'Sin observaciones'}
                     </div>
                 </section>
 
-                <!-- PIE DE PÁGINA -->
                 <footer class="guia-footer">
                     <div class="footer-line">
                         <span class="small">📞 Soporte: 3006498710</span>
-                        <span class="small">🌐 https://anmagos.github.io/Anmago.track/track</span>
-                         <span class="small">CARRERA 13 N° 9-39 OFC 1023 TORRE SUR CC VISTO</span>
+                        <span class="small">🌐 anmagos.github.io/Anmago.track</span>
                     </div>
                     <div class="footer-line">
+                        <span class="small">CARRERA 13 N° 9-39 OFC 1023</span>
                         <span class="small">Fecha: ${fechaFormateada}</span>
                     </div>
                 </footer>
@@ -769,50 +282,41 @@
             const containerScreen = document.getElementById('mediaCartaScreen');
             const containerPrint = document.getElementById('mediaCartaPrint');
             
-            // Generar las DOS guías (Remitente y Paquete)
             const guiaRemitente = generarGuiaHTML(envio, 'remitente');
             const guiaPaquete = generarGuiaHTML(envio, 'paquete');
             
-            // Insertar ambas guías en ambos contenedores
             containerScreen.insertAdjacentHTML('beforeend', guiaRemitente);
             containerScreen.insertAdjacentHTML('beforeend', guiaPaquete);
             
             containerPrint.insertAdjacentHTML('beforeend', guiaRemitente);
             containerPrint.insertAdjacentHTML('beforeend', guiaPaquete);
             
-            // Generar códigos de barras
             setTimeout(generarCodigosBarras, 100);
             
-            console.log('✅ Guías generadas. En pantalla:', 
-                containerScreen.offsetWidth + 'x' + containerScreen.offsetHeight + 'px');
+            console.log('✅ Guías generadas correctamente');
             
         } catch (error) {
-            console.error('❌ Error inicializando guía:', error);
+            console.error('❌ Error:', error);
             alert('Error al generar la guía');
         }
     }
     
-    // ===== FUNCIÓN DEBUG =====
+    // ===== DEBUG =====
     function debugGuia() {
         const container = document.querySelector('.media-carta-screen');
-        console.log('=== DEBUG TAMAÑO GUÍA ===');
-        console.log('En pantalla:', container.offsetWidth + 'x' + container.offsetHeight + 'px');
-        console.log('Esperado: 816x528px (21.59x13.97cm)');
-        console.log('IMPORTANTE: Se imprime en MITAD SUPERIOR de hoja CARTA');
+        console.log('=== DEBUG ===');
+        console.log('Tamaño:', container.offsetWidth + 'x' + container.offsetHeight + 'px');
         
-        // Mostrar cómo se verá impreso
-        alert(`TAMAÑO DE IMPRESIÓN:
-        • Hoja completa: 21.59 x 27.94 cm (CARTA)
-        • Contenido: 21.59 x 13.97 cm (MITAD SUPERIOR)
-        • Cortar por línea punteada`);
+        const barrioElem = document.querySelector('#mediaCartaScreen .destinatario .dato-line:nth-child(6) span:last-child');
+        if (barrioElem) {
+            console.log('Barrio mostrado:', barrioElem.textContent);
+            console.log('Estilo white-space:', getComputedStyle(barrioElem).whiteSpace);
+        }
+        
+        alert('Ver consola para información detallada');
     }
     
-    // ===== EJECUTAR AL CARGAR =====
     document.addEventListener('DOMContentLoaded', inicializarGuia);
     </script>
 </body>
 </html>
-
-
-
-
