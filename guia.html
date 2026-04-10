@@ -567,7 +567,7 @@
     }
     
     // ===== ACORTAR TEXTO PARA CABER =====
-    function acortarTexto(texto, maxLength = 35) {
+    function acortarTexto(texto, maxLength = 50) {
         if (!texto) return '';
         if (texto.length <= maxLength) return texto;
         return texto.substring(0, maxLength - 3) + '...';
