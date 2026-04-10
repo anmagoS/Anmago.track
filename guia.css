@@ -588,3 +588,77 @@ body {
     height: 1px;
     margin: 1px 0;
 }
+/* ============================================
+   CORRECCIÓN DEFINITIVA PARA TEXTO LARGO
+   ============================================ */
+
+/* Forzar que TODO el texto en datos pueda hacer wrap */
+.datos .dato-line,
+.destinatario .dato-line,
+.remitente .dato-line,
+#destinatarioBarrio,
+#destinatarioDireccion,
+#complemento,
+#observaciones {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+/* Asegurar que el barrio se muestre completo */
+#destinatarioBarrio {
+  font-size: 7.5pt;
+  line-height: 1.2;
+  margin-bottom: 0.5mm;
+  min-height: auto;
+}
+
+/* Para el complemento */
+#complemento {
+  background: #fffacd;
+  padding: 0.5mm 1mm;
+  border-radius: 0.5mm;
+  border-left: 0.4mm solid #f39c12;
+  margin-top: 0.5mm;
+  font-size: 7.5pt;
+}
+
+/* Eliminar la clase truncate si se está usando accidentalmente */
+.datos .truncate,
+.destinatario .truncate,
+.remitente .truncate {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Ajustar altura del contenedor para texto largo */
+.guia-container {
+  height: auto;
+  min-height: 145mm;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* En impresión, permitir altura variable */
+@media print {
+  .guia-container {
+    height: auto !important;
+    min-height: 145mm;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* Asegurar que el texto no se corte en impresión */
+  .datos .dato-line,
+  .destinatario .dato-line {
+    white-space: normal !important;
+    page-break-inside: avoid;
+  }
+}
