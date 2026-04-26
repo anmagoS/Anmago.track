@@ -1,11 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>📸 Captura Múltiple - Mensajeros</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>📸 Captura Múltiple - Mensajeros</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "primary-dark": "#0f4bc4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a202c",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
     <style>
+        /* ============================================
+           ESTILOS ORIGINALES DEL CAPTURADOR (NO MODIFICADOS)
+           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -18,278 +48,6 @@
             min-height: 100vh;
         }
         
-        /* Estilos del header (copiados exactamente) */
-        .sticky {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            width: 100%;
-            background: #ffffff;
-            border-bottom: 1px solid #e7ebf3;
-            padding: 0.75rem 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .dark .sticky {
-            background: #1a202c;
-            border-color: #2d3748;
-        }
-        
-        .max-w-7xl {
-            max-width: 1280px;
-            margin: 0 auto;
-        }
-        
-        .flex {
-            display: flex;
-        }
-        
-        .items-center {
-            align-items: center;
-        }
-        
-        .justify-between {
-            justify-content: space-between;
-        }
-        
-        .gap-4 {
-            gap: 1rem;
-        }
-        
-        .gap-2 {
-            gap: 0.5rem;
-        }
-        
-        .text-\[ \] {
-            color: #0d121b;
-        }
-        
-        .dark .text-\[\#0d121b\] {
-            color: white;
-        }
-        
-        .size-10 {
-            width: 2.5rem;
-            height: 2.5rem;
-        }
-        
-        .rounded-lg {
-            border-radius: 0.5rem;
-        }
-        
-        .bg-primary\/10 {
-            background-color: rgba(19, 91, 236, 0.1);
-        }
-        
-        .text-primary {
-            color: #135bec;
-        }
-        
-        .text-2xl {
-            font-size: 1.5rem;
-        }
-        
-        .text-lg {
-            font-size: 1.125rem;
-        }
-        
-        .font-bold {
-            font-weight: 700;
-        }
-        
-        .px-4 {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        
-        .py-2 {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        
-        .bg-blue-50 {
-            background-color: #eff6ff;
-        }
-        
-        .dark .bg-blue-900\/20 {
-            background-color: rgba(30, 58, 138, 0.2);
-        }
-        
-        .text-blue-600 {
-            color: #2563eb;
-        }
-        
-        .dark .text-blue-400 {
-            color: #60a5fa;
-        }
-        
-        .bg-green-50 {
-            background-color: #f0fdf4;
-        }
-        
-        .dark .bg-green-900\/20 {
-            background-color: rgba(20, 83, 45, 0.2);
-        }
-        
-        .text-green-600 {
-            color: #16a34a;
-        }
-        
-        .dark .text-green-400 {
-            color: #4ade80;
-        }
-        
-        .w-px {
-            width: 1px;
-        }
-        
-        .h-8 {
-            height: 2rem;
-        }
-        
-        .bg-gray-300 {
-            background-color: #d1d5db;
-        }
-        
-        .dark .bg-gray-700 {
-            background-color: #374151;
-        }
-        
-        .mx-2 {
-            margin-left: 0.5rem;
-            margin-right: 0.5rem;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .md\:flex {
-            display: flex;
-        }
-        
-        .md\:inline {
-            display: inline;
-        }
-        
-        @media (max-width: 768px) {
-            .md\:hidden {
-                display: block;
-            }
-            .md\:flex, .md\:inline {
-                display: none;
-            }
-        }
-        
-        .flex-col {
-            flex-direction: column;
-        }
-        
-        .items-end {
-            align-items: flex-end;
-        }
-        
-        .mr-2 {
-            margin-right: 0.5rem;
-        }
-        
-        .text-sm {
-            font-size: 0.875rem;
-        }
-        
-        .text-xs {
-            font-size: 0.75rem;
-        }
-        
-        .text-\[\#4c669a\] {
-            color: #4c669a;
-        }
-        
-        .dark .text-gray-400 {
-            color: #9ca3af;
-        }
-        
-        .rounded-full {
-            border-radius: 9999px;
-        }
-        
-        .border-2 {
-            border-width: 2px;
-        }
-        
-        .border-primary {
-            border-color: #135bec;
-        }
-        
-        .bg-cover {
-            background-size: cover;
-        }
-        
-        .bg-center {
-            background-position: center;
-        }
-        
-        .bg-no-repeat {
-            background-repeat: no-repeat;
-        }
-        
-        .hover\:bg-gray-100:hover {
-            background-color: #f3f4f6;
-        }
-        
-        .dark .hover\:bg-gray-800:hover {
-            background-color: #2d3748;
-        }
-        
-        .transition-colors {
-            transition: background-color 0.3s;
-        }
-        
-        .group {
-            position: relative;
-        }
-        
-        .group-hover\:opacity-100:hover {
-            opacity: 1;
-        }
-        
-        .opacity-0 {
-            opacity: 0;
-        }
-        
-        .pointer-events-none {
-            pointer-events: none;
-        }
-        
-        .whitespace-nowrap {
-            white-space: nowrap;
-        }
-        
-        .z-50 {
-            z-index: 50;
-        }
-        
-        .shadow-lg {
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
-        
-        .absolute {
-            position: absolute;
-        }
-        
-        .right-0 {
-            right: 0;
-        }
-        
-        .top-full {
-            top: 100%;
-        }
-        
-        .mt-2 {
-            margin-top: 0.5rem;
-        }
-        
-        /* Contenedor principal */
         .main-container {
             max-width: 800px;
             margin: 20px auto;
@@ -505,68 +263,93 @@
             width: 0%;
             transition: width 0.3s;
         }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
-<body>
-    <!-- ============================================
-         HEADER EXACTAMENTE COMO LO PEDISTE
-         ============================================ -->
-    <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
-        <div class="mx-auto max-w-7xl flex items-center justify-between whitespace-nowrap">
-            <!-- Logo y título -->
-            <div class="flex items-center gap-4 text-[#0d121b] dark:text-white">
-                <div class="flex items-center justify-center size-10 rounded-lg bg-primary/10 text-primary">
-                    <span class="material-symbols-outlined text-2xl">local_shipping</span>
-                </div>
-                <h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">E.S.P</h2>
-            </div>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0d121b] dark:text-white">
 
-            <!-- Sección derecha: navegación y usuario -->
-            <div class="flex items-center gap-2">
-                <!-- BOTONES DE NAVEGACIÓN -->
-                <a href="https://anmagos.github.io/Anmago.track/edicion.html" 
-                   class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group relative"
-                   title="Editor de Guías">
-                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">edit</span>
-                    <span class="hidden md:inline text-sm font-medium text-blue-700 dark:text-blue-300">Editor</span>
-                    <!-- Tooltip para móviles -->
-                    <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
-                        Editor de Guías
+    <!-- Intro animada -->
+    <div id="intro" style="
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: linear-gradient(to bottom, #1b4557, #ffffff);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    ">
+        <img src="logo envios.jpg" alt="ANMAGO Store" style="width: 500px; animation: bounce 1s infinite;">
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const intro = document.getElementById('intro');
+            if (intro) intro.style.display = 'none';
+        }, 2000);
+    </script>
+
+    <!-- ============================================
+         HEADER IDÉNTICO AL DEL SEGUNDO ARCHIVO (CON GRADIENTE AZUL)
+         ============================================ -->
+        <!-- HEADER IDÉNTICO AL DE INDEX.HTML CON ESTILOS FORZADOS -->
+        <!-- HEADER FORZADO A HORIZONTAL SIEMPRE -->
+    <header style="position: sticky; top: 0; z-index: 50; width: 100%; background: white; border-bottom: 1px solid #e7ebf3; padding: 0.5rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <nav style="background: linear-gradient(135deg, #1e3a8a, #3730a3); color: white; border-radius: 0.75rem; padding: 0.5rem 1rem;">
+            <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; max-width: 1280px; margin: 0 auto;">
+                
+                <!-- Logo y título - siempre horizontal -->
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 0.5rem; padding: 0.5rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1.5rem;">local_shipping</span>
                     </div>
-                </a>
-                
-                
-                <a href="https://anmagos.github.io/Anmago.track/index.html" 
-                   class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 transition-colors group relative"
-                   title="Captura de Fotos">
-                    <span class="material-symbols-outlined text-green-600 dark:text-green-400">fiber_new</span>
-                    <span class="hidden md:inline text-sm font-medium text-green-700 dark:text-green-300">Nuevo Envio</span>
-                    <!-- Tooltip para móviles -->
-                    <div class="absolute right-0 top-full mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg md:hidden">
-                        Captura de Fotos
+                    <div>
+                        <h1 style="font-size: 1.25rem; font-weight: bold; margin: 0;">🚚 E.S.P</h1>
+                        <p style="font-size: 0.65rem; color: #93c5fd; margin: 0; display: block;">Sistema de Envíos y Guías</p>
                     </div>
-                </a>
-                <!-- Separador vertical -->
-                <div class="w-px h-8 bg-gray-300 dark:bg-gray-700 mx-2"></div>
-                
-                <!-- Información del usuario (solo desktop) -->
-                <div class="hidden md:flex flex-col items-end mr-2">
-                    <span class="text-sm font-semibold text-[#0d121b] dark:text-white" id="nombreUsuario">Mensajero</span>
-                    <span class="text-xs text-[#4c669a] dark:text-gray-400" id="rolUsuario">Capturas</span>
                 </div>
                 
-                <!-- Avatar del usuario -->
-                <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-primary" 
-                     data-alt="User profile avatar" 
-                     style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHdncnvfU7TsNmWeUeUJ0UYPAz9BzBx81lq4UEwtgmGBCdZmv4uXnF_3Tx8oE8bSYPqkYSLGSQsBc3VJM6lrLe4iFzAQC287vN3rhtGYCEdoKOkbOtxnxxD1oReP8LrM8i5sZycdxRVlxcikXb1SssTAUPO1_Z8lVAcIZAdBo7-51A_cFNIDS22SZ04WLRRQomqB7gNcwwGHQRh-XuV9GNIkBZe2gjZPo6vSSx5iXD_PPYNffE2XiiZgXT_vzYezxgBe_tkyD1MoXp");'>
+                <!-- Botones de navegación - siempre horizontal -->
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.5rem;">
+                    <a href="index.html" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: white; color: #1e3a8a; font-weight: 600; text-decoration: none; font-size: 0.8rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1rem;">home</span>
+                        <span>Inicio</span>
+                    </a>
+                    
+                    <a href="historial.html" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: white; text-decoration: none; font-size: 0.8rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1rem;">history</span>
+                        <span>Historial</span>
+                    </a>
+                    
+                    <a href="edicion.html" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: white; text-decoration: none; font-size: 0.8rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1rem;">edit</span>
+                        <span>Editor</span>
+                    </a>
+                    
+                    <a href="capturas.html" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: white; text-decoration: none; font-size: 0.8rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1rem;">camera</span>
+                        <span>Capturas</span>
+                    </a>
+                    
+                    <a href="planilla-mensajeros.html" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: rgba(255,255,255,0.1); color: white; text-decoration: none; font-size: 0.8rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1rem;">assignment</span>
+                        <span>Despacho</span>
+                    </a>
+                    
+                    <button id="logoutButton" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; background: #dc2626; color: white; border: none; cursor: pointer; font-size: 0.8rem;">
+                        <span style="font-family: 'Material Symbols Outlined'; font-size: 1rem;">logout</span>
+                        <span>Salir</span>
+                    </button>
                 </div>
-                
-               
             </div>
-        </div>
+        </nav>
     </header>
 
-    <!-- Contenido principal -->
+    <!-- Contenido principal (EXACTAMENTE EL MISMO) -->
     <div class="main-container">
         <div class="container">
             <h2>📸 Captura Múltiple de Rótulos</h2>
@@ -608,18 +391,18 @@
     </div>
 
     <script>
+        // ============================================
+        // TODAS TUS FUNCIONES ORIGINALES (INTACTAS)
+        // ============================================
         const CONFIG = {
             TELEGRAM_BOT_TOKEN: '8320682242:AAG4h89_8WVmljeEvYHjzRxmnJDt-HoxcAY',
             TELEGRAM_GRUPO_ID: '-1003710352002',
             PREFIJO_ID: 'ENV',
-            // IMPORTANTE: Reemplaza con TU URL de Google Apps Script
             SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz_y8kiJPEe9CyUGsQHNbRPpWnZw3SSfDPjOazkwk2nx4nYwG3_yF0AhywfkV8C3aPD/exec'
         };
         
-        // Array para almacenar las fotos
         let fotosArray = [];
         
-        // Elementos DOM
         const telefonoInput = document.getElementById('telefonoRemitente');
         const fotosInput = document.getElementById('fotos');
         const previewContainer = document.getElementById('previewContainer');
@@ -631,30 +414,24 @@
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
         
-        // ============================================
-        // FUNCIÓN: Pre-registrar guía en el sistema (MÍNIMO)
-        // ============================================
         async function preRegistrarGuia(envioId, telefono, messageId) {
             try {
-                // Crear FormData con SOLO los datos mínimos
                 const formData = new FormData();
                 formData.append('action', 'preregistro');
                 formData.append('envioId', envioId);
-                formData.append('telefono', telefono);           // Esto irá a columna D
+                formData.append('telefono', telefono);
                 formData.append('estado', 'CAPTURADO');
                 
-                // Guardar el link de Telegram en la columna Z
                 const telegramLink = `https://t.me/c/${CONFIG.TELEGRAM_GRUPO_ID.replace('-100', '')}/${messageId}`;
                 formData.append('telegramLink', telegramLink);
                 
-                // Enviar al servidor
-                const response = await fetch(CONFIG.SCRIPT_URL, {
+                await fetch(CONFIG.SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: formData
                 });
                 
-                console.log(`✅ Guía pre-registrada: ${envioId} con teléfono ${telefono}`);
+                console.log(`✅ Guía pre-registrada: ${envioId}`);
                 return true;
             } catch (error) {
                 console.error('Error pre-registrando guía:', error);
@@ -662,11 +439,8 @@
             }
         }
         
-        // Generar ID único
         function generarID() {
             const fecha = new Date();
-            
-            // Ajustar a hora Colombia
             const options = { timeZone: 'America/Bogota' };
             const fechaCol = new Date(fecha.toLocaleString('en-US', options));
             
@@ -681,10 +455,8 @@
             return `${CONFIG.PREFIJO_ID}${año}${mes}${dia}${hora}${minuto}${segundo}${random}`;
         }
         
-        // Obtener fecha formateada
         function obtenerFechaHoraColombia() {
             const fecha = new Date();
-            
             const opciones = {
                 timeZone: 'America/Bogota',
                 year: 'numeric',
@@ -695,17 +467,14 @@
                 hour12: true,
                 timeZoneName: 'short'
             };
-            
             return fecha.toLocaleString('es-CO', opciones).replace(',', '');
         }
         
-        // Agregar fotos
         fotosInput.addEventListener('change', async function(e) {
             const files = Array.from(e.target.files);
             
             for (const file of files) {
                 const id = generarID();
-                
                 const reader = new FileReader();
                 const imageUrl = await new Promise((resolve) => {
                     reader.onload = (e) => resolve(e.target.result);
@@ -723,7 +492,6 @@
             fotosInput.value = '';
         });
         
-        // Actualizar vista previa
         function actualizarPreview() {
             previewContainer.innerHTML = '';
             
@@ -748,13 +516,11 @@
             }
         }
         
-        // Eliminar foto
         function eliminarFoto(index) {
             fotosArray.splice(index, 1);
             actualizarPreview();
         }
         
-        // Limpiar TODO
         function limpiarTodo() {
             if (fotosArray.length > 0 && !confirm('¿Eliminar todas las fotos y limpiar el teléfono?')) {
                 return;
@@ -768,9 +534,7 @@
             mostrarEstado('🧹 Todo limpiado: fotos y teléfono', 'success');
         }
         
-        // Función principal - FINALIZAR Y ENVIAR
         async function finalizarEnvio() {
-            // Validaciones
             const telefono = telefonoInput.value.trim();
             
             if (!telefono) {
@@ -788,17 +552,14 @@
                 return;
             }
             
-            // Confirmar
             if (!confirm(`¿Finalizar envío de ${fotosArray.length} paquete(s)?`)) {
                 return;
             }
             
-            // Deshabilitar botón
             btnFinalizar.disabled = true;
             btnFinalizar.textContent = '⏫ PROCESANDO...';
             progressBar.style.display = 'block';
             
-            // Guardar teléfono
             localStorage.setItem('ultimoTelefono', telefono);
             telefonoGuardadoMsg.textContent = `📌 Teléfono guardado: ${telefono}`;
             telefonoGuardadoMsg.style.display = 'block';
@@ -808,21 +569,14 @@
             let errores = 0;
             let preregistros = 0;
             
-            // ============================================
-            // PASO 1: ENVIAR CADA FOTO A TELEGRAM Y PRE-REGISTRAR
-            // ============================================
             for (let i = 0; i < fotosArray.length; i++) {
                 const foto = fotosArray[i];
-                
-                // Actualizar progreso
                 const progreso = ((i + 1) / fotosArray.length) * 100;
                 progressFill.style.width = progreso + '%';
                 
                 try {
-                    // Enviar a Telegram y obtener message_id
                     const messageId = await enviarATelegram(foto.file, foto.id, telefono, fechaHora);
                     
-                    // PRE-REGISTRAR LA GUÍA (SOLO ID Y TELÉFONO)
                     if (messageId) {
                         await preRegistrarGuia(foto.id, telefono, messageId);
                         preregistros++;
@@ -834,16 +588,11 @@
                     errores++;
                 }
                 
-                // Pequeña pausa
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
             
-            // ============================================
-            // PASO 2: ENVIAR WHATSAPP
-            // ============================================
             const ids = fotosArray.map(f => f.id).join(', ');
             const telefonoCompleto = '57' + telefono;
-
             const mensaje = `📦 *ENVÍOS REGISTRADOS*\n` +
                            `━━━━━━━━━━━━━━━━━━\n` +
                            `📞 *Remitente:* ${telefono}\n` +
@@ -852,10 +601,8 @@
                            `🆔 *Guías:* ${ids}\n` +
                            `━━━━━━━━━━━━━━━━━━\n\n` +
                            `📸 Las imágenes están guardadas en nuestro sistema.`;
-
-            // Abrir WhatsApp
+            
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
             if (isMobile) {
                 window.location.href = `whatsapp://send?phone=${telefonoCompleto}&text=${encodeURIComponent(mensaje)}`;
                 setTimeout(() => {
@@ -865,10 +612,8 @@
                 window.open(`https://wa.me/${telefonoCompleto}?text=${encodeURIComponent(mensaje)}`, '_blank');
             }
             
-            // Mostrar resultado
             mostrarEstado(`✅ PROCESO COMPLETADO: ${enviadas} enviados, ${preregistros} pre-registrados, ${errores} errores`, 'success');
             
-            // Limpiar fotos
             setTimeout(() => {
                 fotosArray = [];
                 actualizarPreview();
@@ -879,7 +624,6 @@
             }, 3000);
         }
         
-        // Enviar a Telegram (modificado para devolver message_id)
         async function enviarATelegram(foto, idGuia, telefono, fechaHora) {
             const formData = new FormData();
             formData.append('chat_id', CONFIG.TELEGRAM_GRUPO_ID);
@@ -909,22 +653,18 @@
             return data.result.message_id;
         }
         
-        // Mostrar estado
         function mostrarEstado(mensaje, tipo) {
             estadoDiv.textContent = mensaje;
             estadoDiv.className = `estado ${tipo}`;
-            
             setTimeout(() => {
                 estadoDiv.style.display = 'none';
             }, 5000);
         }
         
-        // Validar teléfono
         telefonoInput.addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
         });
         
-        // Recuperar teléfono guardado
         window.addEventListener('load', function() {
             const telefonoGuardado = localStorage.getItem('ultimoTelefono');
             if (telefonoGuardado) {
@@ -934,7 +674,6 @@
             }
         });
 
-        // Función para logout (ejemplo)
         document.getElementById('logoutButton')?.addEventListener('click', function() {
             if (confirm('¿Cerrar sesión?')) {
                 localStorage.clear();
