@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Sistema de Envíos - Contraentrega</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTsiYHoiF33tViQHkKxBUL2ZTAcgS-HO8&libraries=places&language=es&region=CO"></script>
+    <!-- ELIMINADA la API de Google Maps -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚚</text></svg>">
@@ -37,80 +37,6 @@
     </script>
     <style>
         /* ============================================
-           ESTILOS PARA GOOGLE PLACES AUTOCOMPLETE
-           ============================================ */
-        .pac-container {
-            z-index: 10002 !important;
-            border-radius: 8px !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-            border: 1px solid #e5e7eb !important;
-            margin-top: 4px !important;
-            font-family: 'Inter', sans-serif !important;
-        }
-        .pac-item {
-            padding: 10px 12px !important;
-            cursor: pointer !important;
-            border-bottom: 1px solid #f3f4f6 !important;
-            font-size: 14px !important;
-            transition: background-color 0.2s !important;
-        }
-
-        .pac-item:hover {
-            background-color: #f9fafb !important;
-        }
-
-        .pac-item-selected {
-            background-color: #eff6ff !important;
-        }
-
-        .pac-icon {
-            margin-right: 8px !important;
-        }
-
-        .pac-item-query {
-            font-size: 14px !important;
-            color: #1f2937 !important;
-        }
-
-        /* Para móvil */
-        @media (max-width: 767px) {
-            .pac-container {
-                position: fixed !important;
-                top: auto !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                width: 100vw !important;
-                max-height: 50vh !important;
-                border-radius: 12px 12px 0 0 !important;
-            }
-        }
-
-        /* Modo oscuro */
-        .dark .pac-container {
-            background-color: #1e293b !important;
-            border-color: #475569 !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-        }
-
-        .dark .pac-item {
-            border-bottom-color: #334155 !important;
-            color: #f1f5f9 !important;
-        }
-
-        .dark .pac-item:hover {
-            background-color: #334155 !important;
-        }
-
-        .dark .pac-item-selected {
-            background-color: #2563eb !important;
-        }
-
-        .dark .pac-item-query {
-            color: #f1f5f9 !important;
-        }
-
-        /* ============================================
            ANIMACIONES
            ============================================ */
         @keyframes bounce {
@@ -139,7 +65,7 @@
         }
 
         /* ============================================
-           AUTOCOMPLETE PARA BARRAS - MEJORADO RESPONSIVE
+           AUTOCOMPLETE PARA BARRAS (mantenido)
            ============================================ */
         #autocompleteDropdown {
             position: fixed !important;
@@ -219,7 +145,7 @@
         }
 
         /* ============================================
-           AUTOCOMPLETE PARA REMITENTES
+           AUTOCOMPLETE PARA REMITENTES (mantenido)
            ============================================ */
         #remitenteAutocomplete {
             position: fixed !important;
@@ -274,10 +200,9 @@
         }
 
         /* ============================================
-           ESTILOS COMPACTOS - SOLO ESPACIOS (NO TOCA IDs)
+           ESTILOS COMPACTOS
            ============================================ */
         
-        /* Reducir padding del header */
         header.sticky {
             padding-top: 0.5rem !important;
             padding-bottom: 0.5rem !important;
@@ -285,12 +210,10 @@
             padding-right: 1rem !important;
         }
 
-        /* Reducir padding del main */
         main.px-4.py-8 {
             padding: 0.75rem !important;
         }
 
-        /* Reducir padding de la tarjeta */
         .p-6 {
             padding: 1rem !important;
         }
@@ -299,7 +222,6 @@
             padding: 1.25rem !important;
         }
 
-        /* Reducir gaps */
         .gap-6 {
             gap: 0.75rem !important;
         }
@@ -316,7 +238,6 @@
             gap: 0.5rem !important;
         }
 
-        /* Reducir márgenes */
         .mb-6 {
             margin-bottom: 0.75rem !important;
         }
@@ -333,19 +254,16 @@
             padding-bottom: 0.35rem !important;
         }
 
-        /* Inputs más compactos */
         input, select, textarea, .h-12 {
             height: 42px !important;
             min-height: 42px !important;
         }
 
-        /* Labels más pequeños */
         label, .text-sm.font-medium {
             font-size: 0.8rem !important;
             margin-bottom: 0.1rem !important;
         }
 
-        /* Botones de pago más compactos */
         .payment-option {
             height: 40px !important;
             min-height: 40px !important;
@@ -356,7 +274,6 @@
             font-size: 1.1rem !important;
         }
 
-        /* Botones principales más compactos */
         #submitButton, #cancelButton {
             height: 40px !important;
             min-height: 40px !important;
@@ -364,12 +281,10 @@
             font-size: 0.9rem !important;
         }
 
-        /* Título de página más pequeño */
         .text-3xl {
             font-size: 1.75rem !important;
         }
 
-        /* Reducir espacio del heading */
         .flex-col.gap-1 {
             gap: 0.15rem !important;
         }
@@ -378,7 +293,7 @@
            MEJORAS PARA AUTOCOMPLETE EN MÓVIL
            ============================================ */
         @media (max-width: 767px) {
-            #remitenteAutocomplete, #autocompleteDropdown, .pac-container {
+            #remitenteAutocomplete, #autocompleteDropdown {
                 max-height: 40vh !important;
                 border-radius: 16px 16px 0 0 !important;
             }
@@ -453,7 +368,7 @@
         </div>
     </div>
 
-    <!-- Contenido principal (oculto inicialmente) - TODO IGUAL, SOLO CAMBIA EL CSS -->
+    <!-- Contenido principal (oculto inicialmente) -->
     <div id="mainContent" class="hidden">
         <!-- Top Navigation Bar -->
        <header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-solid border-[#e7ebf3] dark:border-gray-800 px-6 py-3 shadow-sm">
@@ -654,36 +569,40 @@
                                     <option value="">Seleccione ciudad</option>
                                     <option value="Bogotá D.C.">Bogotá D.C.</option>
                                     <option value="Soacha">Soacha</option>
+                                    <option value="Medellín">Medellín</option>
+                                    <option value="Cali">Cali</option>
+                                    <option value="Barranquilla">Barranquilla</option>
                                 </select>
                             </label>
                             
+                            <!-- CAMPO DE DIRECCIÓN MANUAL (sin Google Autocomplete) -->
                             <label class="flex flex-col gap-2 md:col-span-2">
                                 <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">
-                                    Dirección de Entrega 
-                                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(Google Autocomplete)</span>
+                                    Dirección de Entrega
+                                    <span class="text-xs text-gray-500 ml-1">(Ingreso manual)</span>
                                 </span>
                                 <div class="relative">
                                     <input id="direccionDestino" name="direccionDestino" 
                                            class="w-full h-12 pl-12 pr-10 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" 
-                                           placeholder="Escriba dirección (Carrera 80 # 12 - 34)" 
+                                           placeholder="Ej. Carrera 80 # 12 - 34, Casa 5" 
                                            type="text" 
                                            autocomplete="off"
                                            required/>
                                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#4c669a]">location_on</span>
-                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-sm" title="Autocompletado con Google">pin_drop</span>
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">edit</span>
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-xs">info</span>
-                                    Comience a escribir para ver sugerencias de Google Maps
+                                    Ingrese la dirección completa del destinatario (calle, número, barrio, etc.)
                                 </p>
                             </label>
                             
                             <label class="flex flex-col gap-2">
                                 <span class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Complemento de Dirección</span>
-                                <input id="complementoDireccion" name="complementoDireccion" class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="Apto 501, Torre 2" type="text"/>
+                                <input id="complementoDireccion" name="complementoDireccion" class="w-full h-12 px-4 bg-input-light dark:bg-input-dark border border-[#e7ebf3] dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg text-[#0d121b] dark:text-white placeholder-[#4c669a] transition-all" placeholder="Apto 501, Torre 2, Oficina" type="text"/>
                             </label>
                             
-                            <!-- Barrio y Localidad con Autocomplete -->
+                            <!-- Barrio y Localidad con Autocomplete (mantenido) -->
                             <div class="flex flex-col gap-2 relative">
                                 <label class="text-[#0d121b] dark:text-gray-300 text-sm font-medium">Barrio y Localidad</label>
                                 <div class="relative">
@@ -804,7 +723,7 @@
         </main>
     </div>
 
-    <!-- Script principal unificado - TU MISMO SCRIPT.JS -->
+    <!-- Script principal -->
     <script src="script.js"></script>
     
     <script>
