@@ -1453,7 +1453,7 @@
             // Generar filas de la tabla
             let html = '';
             enviosPagina.forEach((envio) => {
-                const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"]) || new Date();
+                const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"] || envio.fechaCreacion) || new Date(0);
                 const fechaFormateada = fecha.toLocaleDateString('es-CO', {
                     day: '2-digit',
                     month: '2-digit',
@@ -1595,7 +1595,7 @@
                 return;
             }
             
-            const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"]) || new Date();
+            const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"] || envio.fechaCreacion) || new Date(0);
             const fechaFormateada = fecha.toLocaleString('es-CO', {
                 day: '2-digit',
                 month: '2-digit',
@@ -1784,7 +1784,7 @@
             let csv = 'ID,Fecha,Usuario,Destinatario,Barrio,Forma Pago,Valor a Recaudar,Total a Pagar,Me Deben,Estado,Mensajero,Ciudad Destino,Estado Envío\n';
             
             enviosFiltrados.forEach(envio => {
-                const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"]) || new Date();
+                const fecha = parsearFechaEnvio(envio["FECHA DE CREACION"] || envio.fechaCreacion) || new Date(0);
                 const fechaFormateada = fecha.toLocaleDateString('es-CO');
                 const estadoInfo = determinarEstadoPago(envio);
                 const meDeben = parseFloat(envio.meDeben) || 0;
