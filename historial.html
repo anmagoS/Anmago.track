@@ -1331,27 +1331,44 @@
         }
         
         function parsearFechaEnvio(fechaStr) {
-            if (!fechaStr) return null;
+    if (!fechaStr) return null;
+    
+    try {
+        // 1. Formato de Google Sheets: "12/06/2026, 12:03 p. m."
+        const matchGoogle = fechaStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,\s*(\d{1,2}):(\d{2})\s*([ap])\.\s*m\.)?/i);
+        if (matchGoogle) {
+            const [, dia, mes, año, hora, minuto, ampm] = matchGoogle;
+            let h = hora ? parseInt(hora) : 12;
+            let m = minuto ? parseInt(minuto) : 0;
             
-            try {
-                // Formato DD/MM/YYYY HH:MM:SS
-                const match = fechaStr.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/);
-                if (match) {
-                    const [, dia, mes, año, hora, minuto, segundo] = match;
-                    return new Date(`${año}-${mes}-${dia}T${hora}:${minuto}:${segundo}`);
-                }
-                
-                const fecha = new Date(fechaStr);
-                if (!isNaN(fecha.getTime())) {
-                    return fecha;
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Error parseando fecha:', fechaStr, error);
-                return null;
+            // Convertir a formato 24 horas
+            if (ampm && ampm.toLowerCase() === 'p' && h < 12) h += 12;
+            if (ampm && ampm.toLowerCase() === 'a' && h === 12) h = 0;
+            
+            return new Date(año, mes - 1, dia, h, m, 0);
+        }
+
+        // 2. Formato ISO: "2026-06-12T17:03:45.000Z"
+        if (fechaStr.includes('T')) {
+            const matchISO = fechaStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (matchISO) {
+                const [, año, mes, dia] = matchISO;
+                return new Date(año, mes - 1, dia, 12, 0, 0); 
             }
         }
+
+        // 3. Cualquier otro formato
+        const fecha = new Date(fechaStr);
+        if (!isNaN(fecha.getTime())) {
+            return fecha;
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error parseando fecha:', fechaStr, error);
+        return null;
+    }
+}
         
         function ordenarEnvios() {
             const orden = document.getElementById('ordenarPor').value;
